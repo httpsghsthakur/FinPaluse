@@ -55,10 +55,9 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
-    # ── LLM ──────────────────────────────────────────────────────
-    llm_provider: Literal["gemini", "openai"] = "gemini"
-    gemini_api_key: str = ""
-    openai_api_key: str = ""
+    # ── Custom In-House AI Engine ────────────────────────────────
+    ai_engine: Literal["custom_engine", "self_hosted"] = "custom_engine"
+    llm_provider: str = "custom_engine"
 
     # ── Embeddings ───────────────────────────────────────────────
     embedding_model: str = "all-MiniLM-L6-v2"

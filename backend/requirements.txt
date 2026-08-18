@@ -27,10 +27,6 @@ lightgbm>=4.3.0
 xgboost>=2.0.3
 joblib>=1.4.0
 
-# AI / LLM Providers
-google-genai>=1.0.0
-openai>=1.30.0
-
 # Security, Auth & JWT
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4

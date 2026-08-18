@@ -24,11 +24,11 @@ class Settings(BaseSettings):
     )
 
     # ── Application ──────────────────────────────────────────────
-    app_env: Literal["development", "staging", "production"] = "development"
-    app_debug: bool = True
-    app_host: str = "0.0.0.0"
-    app_port: int = 8000
-    secret_key: str = "change-me-to-a-random-64-char-string"
+    PROJECT_NAME: str = "FinPaluse — AI Financial Copilot"
+    API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = True
+    SECRET_KEY: str = "finpaluse-dev-secret-key-change-in-production-min-32-chars-long"
 
     # ── Database ─────────────────────────────────────────────────
     database_url: str = "sqlite+aiosqlite:///./finpilot.db"

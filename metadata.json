@@ -1,5 +1,5 @@
 {
-  "name": "FinPilot - AI Financial Copilot",
+  "name": "FinPaluse - AI Financial Copilot",
   "description": "AI-powered personal finance copilot with cash-flow forecasting, intelligent spending categorization, what-if simulator, savings goals tracking, and grounded conversational money insights.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

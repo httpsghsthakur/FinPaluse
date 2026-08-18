@@ -265,7 +265,7 @@ export const ForecastPage: React.FC = () => {
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            FinPilot’s predictive engine evaluates 180 days of historical cash-flow data. It factors in:
+            FinPaluse’s predictive engine evaluates 180 days of historical cash-flow data. It factors in:
           </p>
 
           <ul className="text-xs text-slate-400 space-y-2 leading-relaxed">

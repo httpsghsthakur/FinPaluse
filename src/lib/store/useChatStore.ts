@@ -5,15 +5,9 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'welcome-msg-1',
     role: 'assistant',
-    content: `👋 **Hi Alex! I'm FinPilot, your AI Financial Copilot.**
+    content: `👋 **Hi Alex! I'm FinPaluse, your AI Financial Copilot.**
 
-I have indexed your **3 connected accounts**, latest cash-flow runway, and 6 months of transaction history.
-
-Here is what you can ask me:
-- *"Can I afford a $650 weekend trip?"*
-- *"How does my dining spend compare to last month?"*
-- *"When will I hit my Emergency Fund target?"*
-- *"What are my top 3 recurring subscriptions?"*`,
+I have real-time visibility into your accounts, cash burn, and goal trajectories. How can I help you optimize your money today?`,
     timestamp: new Date().toISOString(),
     confidence: 'High',
     quickActions: [

@@ -47,16 +47,16 @@ async def lifespan(app: FastAPI):
                     await session.rollback()
                     logger.error(f"Failed to seed demo data: {e}")
 
-    logger.info(f"FinPilot backend ready — env={settings.app_env}")
+    logger.info(f"FinPaluse backend ready — env={settings.app_env}")
     yield
 
     # Shutdown
     await engine.dispose()
-    logger.info("FinPilot backend shut down.")
+    logger.info("FinPaluse backend shut down.")
 
 
 app = FastAPI(
-    title="FinPilot — AI Financial Copilot API",
+    title="FinPaluse — AI Financial Copilot API",
     description=(
         "Complete financial intelligence backend for FinPilot.\n\n"
         "Provides transaction management, ML-powered categorization, "

@@ -84,7 +84,7 @@ export const PlaidModal: React.FC<{ onAccountAdded?: () => void }> = ({ onAccoun
         <div className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-xs text-slate-300">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>FinPilot uses end-to-end read-only tokens. Your credentials are never stored.</span>
+            <span>FinPaluse uses end-to-end read-only tokens. Your credentials are never stored.</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">

@@ -431,9 +431,9 @@ export const SettingsPage: React.FC = () => {
           {/* ABOUT TAB */}
           {activeTab === 'about' && (
             <div className="space-y-4 text-xs leading-relaxed text-slate-300">
-              <h2 className="text-sm font-bold text-white">FinPilot Architecture</h2>
+              <h2 className="text-sm font-bold text-white">FinPaluse Architecture</h2>
               <p>
-                FinPilot is built with clean layer separation. All visual pages and widgets interact with the domain
+                FinPaluse is built with clean layer separation. All visual pages and widgets interact with the domain
                 model exclusively via the <code className="font-mono text-emerald-400">src/lib/api/</code> unified abstraction.
               </p>
 

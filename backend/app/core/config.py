@@ -66,8 +66,13 @@ class Settings(BaseSettings):
     # ── MLflow ───────────────────────────────────────────────────
     mlflow_tracking_uri: str = "http://localhost:5000"
 
-    # ── Auth ─────────────────────────────────────────────────────
-    auth_mode: Literal["none", "api_key", "jwt"] = "none"
+    # ── Supabase & Auth ──────────────────────────────────────────
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
+    supabase_jwt_secret: str = ""
+
+    auth_mode: Literal["none", "api_key", "jwt", "supabase"] = "none"
     api_key: str = "dev-api-key-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24  # 24 hours

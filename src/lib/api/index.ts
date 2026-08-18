@@ -28,6 +28,19 @@ import {
 import { runWhatIfSimulation } from './mock/simulator';
 import { addDays, format, isAfter, isBefore, parseISO, subDays } from 'date-fns';
 
+import { supabaseAuth } from '../supabase';
+
+// Helper to execute authenticated backend requests
+async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+  const url = `${API_CONFIG.BASE_URL}${path}`;
+  const authHeaders = supabaseAuth.getHeaders();
+  const headers = {
+    ...authHeaders,
+    ...(options.headers || {}),
+  };
+  return fetch(url, { ...options, headers });
+}
+
 // Helper to simulate realistic network latency for mock mode
 async function delay(ms?: number): Promise<void> {
   const duration =
@@ -66,7 +79,7 @@ class ApiClient {
   // ── Accounts ──────────────────────────────────────────────────
   async getAccounts(): Promise<Account[]> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/accounts`);
+      const res = await apiFetch(`/accounts`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch accounts`);
       return res.json();
     }
@@ -77,7 +90,7 @@ class ApiClient {
 
   async syncAccount(accountId: string): Promise<Account> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/accounts/${accountId}/sync`, { method: 'POST' });
+      const res = await apiFetch(`/accounts/${accountId}/sync`, { method: 'POST' });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to sync account`);
       return res.json();
     }
@@ -92,7 +105,7 @@ class ApiClient {
 
   async connectAccount(newAccount: Omit<Account, 'id' | 'lastSynced' | 'isActive'>): Promise<Account> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/accounts`, {
+      const res = await apiFetch(`/accounts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAccount),
@@ -115,7 +128,7 @@ class ApiClient {
 
   async disconnectAccount(accountId: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/accounts/${accountId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/accounts/${accountId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to disconnect account`);
       return;
     }
@@ -143,7 +156,7 @@ class ApiClient {
       if (filters?.page) params.append('page', String(filters.page));
       if (filters?.limit) params.append('limit', String(filters.limit));
 
-      const res = await fetch(`${API_CONFIG.BASE_URL}/transactions?${params.toString()}`);
+      const res = await apiFetch(`/transactions?${params.toString()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch transactions`);
       return res.json();
     }
@@ -222,7 +235,7 @@ class ApiClient {
 
   async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/transactions/${id}`, {
+      const res = await apiFetch(`/transactions/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -242,7 +255,7 @@ class ApiClient {
 
   async addTransaction(tx: Omit<Transaction, 'id'>): Promise<Transaction> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/transactions`, {
+      const res = await apiFetch(`/transactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tx),
@@ -264,7 +277,7 @@ class ApiClient {
 
   async importTransactionsCSV(csvText: string): Promise<{ importedCount: number }> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/transactions/import`, {
+      const res = await apiFetch(`/transactions/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ csvText }),
@@ -305,7 +318,7 @@ class ApiClient {
 
   async exportTransactionsCSV(): Promise<string> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/transactions/export`);
+      const res = await apiFetch(`/transactions/export`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to export CSV`);
       return res.text();
     }
@@ -327,7 +340,7 @@ class ApiClient {
   // ── Categories ────────────────────────────────────────────────
   async getCategories(): Promise<Category[]> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/categories`);
+      const res = await apiFetch(`/categories`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch categories`);
       return res.json();
     }
@@ -338,7 +351,7 @@ class ApiClient {
 
   async addCategory(cat: Omit<Category, 'id'>): Promise<Category> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/categories`, {
+      const res = await apiFetch(`/categories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cat),
@@ -359,7 +372,7 @@ class ApiClient {
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/categories/${id}`, {
+      const res = await apiFetch(`/categories/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -378,7 +391,7 @@ class ApiClient {
 
   async deleteCategory(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/categories/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/categories/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to delete category`);
       return;
     }
@@ -426,7 +439,7 @@ class ApiClient {
 
   async updateBudget(categoryId: string, monthlyLimit: number): Promise<Category> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/budgets/${categoryId}`, {
+      const res = await apiFetch(`/budgets/${categoryId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ monthlyLimit }),
@@ -441,7 +454,7 @@ class ApiClient {
   // ── Goals ─────────────────────────────────────────────────────
   async getGoals(): Promise<Goal[]> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/goals`);
+      const res = await apiFetch(`/goals`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch goals`);
       return res.json();
     }
@@ -452,7 +465,7 @@ class ApiClient {
 
   async addGoal(goal: Omit<Goal, 'id' | 'isCompleted'>): Promise<Goal> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/goals`, {
+      const res = await apiFetch(`/goals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(goal),
@@ -474,7 +487,7 @@ class ApiClient {
 
   async updateGoal(id: string, updates: Partial<Goal>): Promise<Goal> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/goals/${id}`, {
+      const res = await apiFetch(`/goals/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -496,7 +509,7 @@ class ApiClient {
 
   async deleteGoal(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/goals/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/goals/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to delete goal`);
       return;
     }
@@ -508,7 +521,7 @@ class ApiClient {
 
   async contributeToGoal(id: string, amount: number): Promise<Goal> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/goals/${id}/contribute`, {
+      const res = await apiFetch(`/goals/${id}/contribute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount }),
@@ -545,7 +558,7 @@ class ApiClient {
   // ── Forecast ──────────────────────────────────────────────────
   async getForecast(days: 30 | 60 | 90 = 90): Promise<{ points: ForecastPoint[]; events: ForecastEvent[] }> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/forecast?days=${days}`);
+      const res = await apiFetch(`/forecast?days=${days}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch forecast`);
       return res.json();
     }
@@ -647,7 +660,7 @@ class ApiClient {
   // ── Insights ──────────────────────────────────────────────────
   async getInsights(): Promise<Insight[]> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/insights`);
+      const res = await apiFetch(`/insights`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch insights`);
       return res.json();
     }
@@ -658,7 +671,7 @@ class ApiClient {
 
   async dismissInsight(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      await fetch(`${API_CONFIG.BASE_URL}/insights/${id}/dismiss`, { method: 'POST' });
+      await apiFetch(`/insights/${id}/dismiss`, { method: 'POST' });
       return;
     }
     await delay(150);
@@ -672,7 +685,7 @@ class ApiClient {
 
   async likeInsight(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      await fetch(`${API_CONFIG.BASE_URL}/insights/${id}/like`, { method: 'POST' });
+      await apiFetch(`/insights/${id}/like`, { method: 'POST' });
       return;
     }
     await delay(150);
@@ -686,7 +699,7 @@ class ApiClient {
 
   async getWeeklyDigest(): Promise<WeeklyDigest> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/insights/digest/weekly`);
+      const res = await apiFetch(`/insights/digest/weekly`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch weekly digest`);
       return res.json();
     }
@@ -714,7 +727,7 @@ class ApiClient {
   // ── Dashboard Summary ─────────────────────────────────────────
   async getDashboardSummary(): Promise<DashboardSummary> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/dashboard/summary`);
+      const res = await apiFetch(`/dashboard/summary`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch dashboard summary`);
       return res.json();
     }
@@ -830,7 +843,7 @@ class ApiClient {
   // ── Simulator ─────────────────────────────────────────────────
   async runSimulation(scenario: Scenario): Promise<ScenarioResult> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/simulator/run`, {
+      const res = await apiFetch(`/simulator/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(scenario),
@@ -856,7 +869,7 @@ class ApiClient {
     onComplete?: (message: ChatMessage) => void
   ): Promise<ChatMessage> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/copilot/chat`, {
+      const res = await apiFetch(`/copilot/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage, personality }),
@@ -921,7 +934,7 @@ class ApiClient {
   // ── Admin & Data Management ───────────────────────────────────
   async resetAllData(): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      await fetch(`${API_CONFIG.BASE_URL}/admin/reset`, { method: 'POST' });
+      await apiFetch(`/admin/reset`, { method: 'POST' });
       return;
     }
     await delay(300);
@@ -937,7 +950,7 @@ class ApiClient {
 
   async exportAllData(): Promise<StorageData> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await fetch(`${API_CONFIG.BASE_URL}/admin/export`);
+      const res = await apiFetch(`/admin/export`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to export all data`);
       return res.json();
     }

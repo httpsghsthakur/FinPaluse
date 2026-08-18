@@ -79,3 +79,51 @@ def sanitize_for_llm(text: str) -> str:
         elif pii_type == "aadhaar":
             result = pattern.sub("[AADHAAR REDACTED]", result)
     return result
+
+
+# ── Supabase & JWT Authentication ─────────────────────────────────────────────
+from fastapi import Header, HTTPException, status
+from app.core.config import get_settings
+
+DEMO_USER_ID = "00000000-0000-4000-a000-000000000001"
+
+
+def decode_supabase_jwt(token: str) -> dict | None:
+    """Decode and validate a Supabase Auth JWT token."""
+    settings = get_settings()
+    try:
+        from jose import jwt
+        # If secret is provided, verify signature
+        if settings.supabase_jwt_secret:
+            payload = jwt.decode(
+                token,
+                settings.supabase_jwt_secret,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
+            return payload
+        else:
+            # Fallback to unverified claims inspection for local testing
+            payload = jwt.get_unverified_claims(token)
+            return payload
+    except Exception:
+        return None
+
+
+async def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
+    """
+    FastAPI dependency to extract the current user ID from Supabase Auth.
+    Falls back gracefully to DEMO_USER_ID if no token is passed or in demo mode.
+    """
+    if not authorization:
+        return DEMO_USER_ID
+
+    token = authorization.replace("Bearer ", "").strip()
+    if not token:
+        return DEMO_USER_ID
+
+    payload = decode_supabase_jwt(token)
+    if payload and "sub" in payload:
+        return str(payload["sub"])
+
+    return DEMO_USER_ID

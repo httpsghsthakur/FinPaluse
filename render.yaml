@@ -1,0 +1,55 @@
+# ==============================================================================
+# FinPaluse — Render Blueprint Specification
+# ==============================================================================
+# Deploy both the FastAPI Backend Web Service and React Static Site with 1 click.
+# Reference: https://render.com/docs/blueprint-spec
+
+services:
+  # ── 1. Backend Web Service (FastAPI + ML Intelligence Engine) ───────────────
+  - type: web
+    name: finpaluse-backend
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: SEED_DEMO_DATA
+        value: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./finpilot.db
+      - key: DATABASE_URL_SYNC
+        value: sqlite:///./finpilot.db
+      - key: SECRET_KEY
+        generateValue: true
+
+  # ── 2. Frontend Static Site (React 19 + TypeScript + Tailwind) ──────────────
+  - type: web
+    name: finpaluse-frontend
+    runtime: static
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: finpaluse-backend
+          property: host

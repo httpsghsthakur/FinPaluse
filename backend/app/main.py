@@ -27,25 +27,24 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     """Application startup/shutdown lifecycle."""
     setup_logging()
-    logger.info("FinPilot backend starting up...")
+    logger.info("FinPaluse backend starting up...")
 
-    # Create tables (dev mode) — production uses Alembic migrations
-    if settings.app_env == "development":
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("Database tables created/verified")
+    # Create tables & verify schema
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables created/verified")
 
-        # Seed demo data if configured
-        if settings.seed_demo_data:
-            from app.api.v1.admin import seed_database
-            async with async_session_factory() as session:
-                try:
-                    await seed_database(session)
-                    await session.commit()
-                    logger.info("Demo data seeded successfully")
-                except Exception as e:
-                    await session.rollback()
-                    logger.error(f"Failed to seed demo data: {e}")
+    # Seed demo data if configured
+    if settings.seed_demo_data:
+        from app.api.v1.admin import seed_database
+        async with async_session_factory() as session:
+            try:
+                await seed_database(session)
+                await session.commit()
+                logger.info("Demo data seeded successfully")
+            except Exception as e:
+                await session.rollback()
+                logger.error(f"Failed to seed demo data: {e}")
 
     logger.info(f"FinPaluse backend ready — env={settings.app_env}")
     yield
@@ -58,7 +57,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="FinPaluse — AI Financial Copilot API",
     description=(
-        "Complete financial intelligence backend for FinPilot.\n\n"
+        "Complete financial intelligence backend for FinPaluse.\n\n"
         "Provides transaction management, ML-powered categorization, "
         "cash-flow forecasting, anomaly detection, what-if simulation, "
         "goal tracking, and an AI copilot with grounded financial reasoning."
@@ -69,10 +68,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS
+# CORS — Support local dev, Render, and custom domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

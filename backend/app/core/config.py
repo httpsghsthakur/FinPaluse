@@ -29,6 +29,17 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     SECRET_KEY: str = "finpaluse-dev-secret-key-change-in-production-min-32-chars-long"
+    app_host: str = "0.0.0.0"
+    app_port: int = 8000
+    seed_demo_data: bool = True
+
+    @property
+    def app_env(self) -> str:
+        return self.ENVIRONMENT
+
+    @property
+    def app_debug(self) -> bool:
+        return self.DEBUG
 
     # ── Database ─────────────────────────────────────────────────
     database_url: str = "sqlite+aiosqlite:///./finpilot.db"

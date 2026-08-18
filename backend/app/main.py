@@ -77,20 +77,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 # Mount API v1
 app.include_router(api_router, prefix="/api/v1")
-
-
-@app.get("/", tags=["Health"])
-async def root():
-    return {
-        "app": "FinPilot AI Financial Copilot",
-        "version": "1.0.0",
-        "status": "running",
-        "docs": "/docs",
-    }
 
 
 @app.get("/health", tags=["Health"])
 async def health():
     return {"status": "healthy"}
+
+
+# ── Static SPA Hosting (Unified Frontend + Backend) ──────────────────────────
+# Check for built frontend in root 'dist' or 'backend/dist'
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+DIST_DIR = ROOT_DIR / "dist"
+if not DIST_DIR.exists():
+    DIST_DIR = Path(__file__).resolve().parent.parent / "dist"
+
+if DIST_DIR.exists() and (DIST_DIR / "index.html").exists():
+    # Mount /assets directory
+    assets_dir = DIST_DIR / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    # Serve SPA index.html for all client-side routes
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        file_path = DIST_DIR / full_path
+        if full_path and file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(DIST_DIR / "index.html"))
+else:
+    @app.get("/", tags=["Health"])
+    async def root():
+        return {
+            "app": "FinPaluse AI Financial Copilot",
+            "version": "1.0.0",
+            "status": "running",
+            "docs": "/docs",
+            "message": "To serve frontend from this server, run 'npm run build' in project root",
+        }

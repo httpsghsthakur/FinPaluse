@@ -1,95 +1,64 @@
-# Deploying FinPaluse to Render.com
+# Deploying FinPaluse as a Single Unified Service on Render
 
-This guide provides step-by-step instructions to deploy the entire **FinPaluse** stack (FastAPI Backend + React Frontend) to **[Render.com](https://render.com)**.
+Both the **React 19 Frontend** and **FastAPI Python Backend** run together on the **same Render Web Service instance** under a single URL and port.
 
 ---
 
-## Method 1: Automated Deployment via Render Blueprint (Recommended)
+## Why Single-Service Deployment?
+- ✅ **1 Service Instead of 2**: Saves free-tier quota on Render.
+- ✅ **Zero CORS Configuration**: Frontend and API share the exact same domain (`https://your-app.onrender.com`).
+- ✅ **Fast Cold Starts**: Only 1 service spins up instead of 2 separate instances.
+- ✅ **Built-in SPA Routing**: FastAPI serves the React Single Page App for all client URLs (`/dashboard`, `/copilot`, `/simulator`, etc.) and handles REST API routes on `/api/v1/*`.
 
-Render Blueprints let you deploy the backend and frontend together automatically using the included `render.yaml` configuration.
+---
 
-### Steps:
+## 1-Click Deployment with Render Blueprint
+
 1. Go to **[dashboard.render.com](https://dashboard.render.com)**.
-2. Click **New +** → Select **Blueprint**.
-3. Connect your GitHub repository: `https://github.com/httpsghsthakur/FinPaluse`.
-4. Render will automatically detect `render.yaml` and create two services:
-   - **`finpaluse-backend`** (Python Web Service)
-   - **`finpaluse-frontend`** (Static Site)
+2. Click **New +** (top right) → Select **Blueprint**.
+3. Connect your GitHub repository: **[https://github.com/httpsghsthakur/FinPaluse](https://github.com/httpsghsthakur/FinPaluse)**.
+4. Render automatically reads `render.yaml` and prepares the unified `finpaluse` service.
 5. Click **Apply**.
-6. Render will automatically build the backend, install Python ML dependencies, start the FastAPI server, build the React SPA, and configure routing.
 
 ---
 
-## Method 2: Manual Dashboard Setup
+## Manual Setup on Render (Web Service)
 
-If you prefer to configure each service manually in the Render dashboard:
+If configuring manually without Blueprints:
 
-### Step A: Deploy the Backend (Web Service)
-
-1. Go to **Render Dashboard** → Click **New +** → Select **Web Service**.
-2. Connect your repo: `https://github.com/httpsghsthakur/FinPaluse`.
-3. Configure settings:
-   - **Name**: `finpaluse-backend`
-   - **Region**: Select closest to you (e.g., `Oregon (US West)`)
-   - **Root Directory**: `backend`
+1. Click **New +** → **Web Service** → Connect `https://github.com/httpsghsthakur/FinPaluse`.
+2. Configure settings:
+   - **Name**: `finpaluse`
+   - **Region**: Any (e.g. `Oregon (US West)`)
+   - **Root Directory**: *(Leave blank)*
    - **Runtime**: `Python 3`
-   - **Build Command**: `pip install --upgrade pip && pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - **Instance Type**: `Free`
-4. Add **Environment Variables**:
+   - **Build Command**:
+     ```bash
+     npm install && npm run build && cd backend && pip install --upgrade pip && pip install -r requirements.txt
+     ```
+   - **Start Command**:
+     ```bash
+     cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+     ```
+3. Add **Environment Variables**:
    | Key | Value |
    | :--- | :--- |
    | `PYTHON_VERSION` | `3.11.9` |
+   | `NODE_VERSION` | `20.14.0` |
    | `ENVIRONMENT` | `production` |
    | `DEBUG` | `false` |
    | `SEED_DEMO_DATA` | `true` |
-   | `CORS_ORIGINS` | `*` |
    | `DATABASE_URL` | `sqlite+aiosqlite:///./finpilot.db` |
-   | `DATABASE_URL_SYNC` | `sqlite:///./finpilot.db` |
-   | `SECRET_KEY` | *(Generate a random 32+ char secret)* |
-5. Click **Create Web Service**.
-6. Copy your backend URL once live (e.g., `https://finpaluse-backend.onrender.com`).
+   | `SECRET_KEY` | *(Click "Generate" or enter random string)* |
+4. Click **Create Web Service**.
 
 ---
 
-### Step B: Deploy the Frontend (Static Site)
+## Accessing Your App
 
-1. Go to **Render Dashboard** → Click **New +** → Select **Static Site**.
-2. Connect the same repo: `https://github.com/httpsghsthakur/FinPaluse`.
-3. Configure settings:
-   - **Name**: `finpaluse-frontend`
-   - **Root Directory**: Leave blank (root of repo)
-   - **Build Command**: `npm install && npm run build`
-   - **Publish Directory**: `dist`
-4. Add **Redirect / Rewrite Rules** (Under Settings → Redirects/Rewrites):
-   - **Type**: `Rewrite`
-   - **Source**: `/*`
-   - **Destination**: `/index.html`
-5. Add **Environment Variable**:
-   | Key | Value |
-   | :--- | :--- |
-   | `VITE_API_BASE_URL` | `https://finpaluse-backend.onrender.com/api/v1` *(replace with your backend URL)* |
-6. Click **Create Static Site**.
-
----
-
-## Verifying the Deployment
-
-1. Open your backend health URL:
-   ```
-   https://finpaluse-backend.onrender.com/health
-   # Returns: {"status": "healthy"}
-   ```
-2. Open interactive Swagger API documentation:
-   ```
-   https://finpaluse-backend.onrender.com/docs
-   ```
-3. Open the frontend URL in your browser:
-   ```
-   https://finpaluse-frontend.onrender.com
-   ```
-
----
-
-## Free-Tier Note: Spin-Down Behavior
-On Render's Free tier, web services spin down after 15 minutes of inactivity. When a new request arrives, it may take 30–50 seconds for the backend instance to spin back up.
+Once Render finishes building:
+- 🌐 **Web App & Dashboard**: `https://<your-app-name>.onrender.com/`
+- 💬 **AI Copilot**: `https://<your-app-name>.onrender.com/copilot`
+- 📊 **Simulator**: `https://<your-app-name>.onrender.com/simulator`
+- 📚 **Swagger API Docs**: `https://<your-app-name>.onrender.com/docs`
+- 🩺 **Health Check**: `https://<your-app-name>.onrender.com/health`

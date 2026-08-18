@@ -18,7 +18,7 @@ from app.core.config import get_settings
 settings = get_settings()
 
 engine_kwargs = {
-    "echo": settings.app_debug,
+    "echo": getattr(settings, "DEBUG", getattr(settings, "app_debug", False)),
 }
 if "sqlite" not in settings.database_url:
     engine_kwargs.update({

@@ -37,12 +37,8 @@ build/
 develop-eggs/
 downloads/
 eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
+# .eggs/
+# .installed.cfg
 wheels/
 share/python-wheels/
 *.egg-info/

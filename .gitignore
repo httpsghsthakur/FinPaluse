@@ -1,0 +1,35 @@
+# Node
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+ENV/
+*.egg-info/
+
+# Databases & Cache
+*.db
+*.sqlite
+*.sqlite3
+
+# Large generated data files
+backend/data/raw/*.csv
+backend/data/processed/*.parquet
+!backend/data/**/.gitkeep

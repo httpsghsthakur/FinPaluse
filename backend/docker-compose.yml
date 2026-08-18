@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: finpilot-db
+    environment:
+      POSTGRES_USER: finpilot
+      POSTGRES_PASSWORD: finpilot
+      POSTGRES_DB: finpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: finpilot-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # FinPilot Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finpilot-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://finpilot:finpilot@postgres:5432/finpilot
+      DATABASE_URL_SYNC: postgresql://finpilot:finpilot@postgres:5432/finpilot
+      REDIS_URL: redis://redis:6379/0
+      APP_ENV: development
+      APP_DEBUG: "true"
+      SEED_DEMO_DATA: "true"
+      CORS_ORIGINS: "http://localhost:3000,http://localhost:5173"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./data:/app/data
+      - ./models:/app/models
+
+volumes:
+  postgres_data:

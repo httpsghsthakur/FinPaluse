@@ -29,22 +29,28 @@ async def lifespan(app: FastAPI):
     setup_logging()
     logger.info("FinPaluse backend starting up...")
 
-    # Create tables & verify schema
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database tables created/verified")
+    # Create tables & verify schema with graceful fallback
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created/verified")
+    except Exception as e:
+        logger.warning(f"Database table verification note: {e}")
 
     # Seed demo data if configured
     if settings.seed_demo_data:
-        from app.api.v1.admin import seed_database
-        async with async_session_factory() as session:
-            try:
-                await seed_database(session)
-                await session.commit()
-                logger.info("Demo data seeded successfully")
-            except Exception as e:
-                await session.rollback()
-                logger.error(f"Failed to seed demo data: {e}")
+        try:
+            from app.api.v1.admin import seed_database
+            async with async_session_factory() as session:
+                try:
+                    await seed_database(session)
+                    await session.commit()
+                    logger.info("Demo data seeded successfully")
+                except Exception as e:
+                    await session.rollback()
+                    logger.warning(f"Demo seed note: {e}")
+        except Exception as e:
+            logger.warning(f"Seed skipped: {e}")
 
     logger.info(f"FinPaluse backend ready — env={settings.app_env}")
     yield

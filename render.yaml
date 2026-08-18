@@ -28,9 +28,9 @@ services:
       - key: CORS_ORIGINS
         value: "*"
       - key: DATABASE_URL
-        value: postgresql+asyncpg://postgres:Ghsthakur%40123@db.ikilxctcgqsilkaeilww.supabase.co:5432/postgres?ssl=require
+        value: postgresql+asyncpg://postgres.ikilxctcgqsilkaeilww:Ghsthakur%40123@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?ssl=require
       - key: DATABASE_URL_SYNC
-        value: postgresql://postgres:Ghsthakur%40123@db.ikilxctcgqsilkaeilww.supabase.co:5432/postgres?sslmode=require
+        value: postgresql://postgres.ikilxctcgqsilkaeilww:Ghsthakur%40123@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require
       - key: SUPABASE_URL
         value: https://ikilxctcgqsilkaeilww.supabase.co
       - key: SECRET_KEY

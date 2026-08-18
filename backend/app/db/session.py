@@ -17,17 +17,28 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
+import ssl
+
 engine_kwargs: dict = {
     "echo": getattr(settings, "DEBUG", getattr(settings, "app_debug", False)),
 }
 
-if "sqlite" not in settings.database_url:
+db_url = settings.database_url
+
+if "sqlite" not in db_url:
     connect_args: dict = {}
     
     # If connecting to Supabase or cloud PostgreSQL
-    if "supabase.co" in settings.database_url or "supabase.com" in settings.database_url or "pooler.supabase.com" in settings.database_url:
+    if "supabase" in db_url or "pooler" in db_url:
         connect_args["statement_cache_size"] = 0
-        connect_args["ssl"] = "require"
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+        connect_args["ssl"] = ssl_ctx
+        
+        # Clean query parameters for asyncpg
+        if "asyncpg" in db_url and "?" in db_url:
+            db_url = db_url.split("?")[0]
 
     engine_kwargs.update({
         "pool_size": 20,
@@ -38,7 +49,7 @@ if "sqlite" not in settings.database_url:
         engine_kwargs["connect_args"] = connect_args
 
 engine = create_async_engine(
-    settings.database_url,
+    db_url,
     **engine_kwargs
 )
 

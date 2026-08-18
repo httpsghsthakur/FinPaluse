@@ -28,8 +28,10 @@ services:
       - key: CORS_ORIGINS
         value: "*"
       - key: DATABASE_URL
-        value: sqlite+aiosqlite:///./finpilot.db
+        value: postgresql+asyncpg://postgres:Ghsthakur%40123@db.ikilxctcgqsilkaeilww.supabase.co:5432/postgres?ssl=require
       - key: DATABASE_URL_SYNC
-        value: sqlite:///./finpilot.db
+        value: postgresql://postgres:Ghsthakur%40123@db.ikilxctcgqsilkaeilww.supabase.co:5432/postgres?sslmode=require
+      - key: SUPABASE_URL
+        value: https://ikilxctcgqsilkaeilww.supabase.co
       - key: SECRET_KEY
         generateValue: true

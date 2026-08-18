@@ -109,7 +109,7 @@ export const InsightsPage: React.FC = () => {
                     {digest.weekLabel}
                   </span>
                 </h2>
-                <p className="text-xs text-slate-400">Generated automatically from {digest.bulletPoints.length} detected events</p>
+                <p className="text-xs text-slate-400">Generated automatically from {(digest.bullets || []).length} detected events</p>
               </div>
             </div>
 
@@ -117,19 +117,19 @@ export const InsightsPage: React.FC = () => {
               <span className="text-xs text-slate-400 font-mono">Week Net Cash Flow</span>
               <div
                 className={`text-lg font-bold font-mono ${
-                  digest.netCashFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  digest.netSavings >= 0 ? 'text-emerald-400' : 'text-rose-400'
                 }`}
               >
-                {digest.netCashFlow >= 0
-                  ? `+${formatCurrency(digest.netCashFlow)}`
-                  : formatCurrency(digest.netCashFlow)}
+                {digest.netSavings >= 0
+                  ? `+${formatCurrency(digest.netSavings)}`
+                  : formatCurrency(digest.netSavings)}
               </div>
             </div>
           </div>
 
           {/* Bullet Points */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-            {digest.bulletPoints.map((pt, i) => (
+            {(digest.bullets || []).map((pt, i) => (
               <div
                 key={i}
                 className="p-3.5 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 text-xs text-slate-300 leading-relaxed flex items-start gap-2.5"

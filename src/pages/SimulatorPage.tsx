@@ -288,7 +288,11 @@ export const SimulatorPage: React.FC = () => {
 
         {/* Results and Comparison Chart */}
         <div className="lg:col-span-2 space-y-6">
-          {results && (
+          {results && (() => {
+            const finalPoint = results.monthlyPoints[11] || results.monthlyPoints[results.monthlyPoints.length - 1] || { baseline: 0, scenario: 0 };
+            const netWorthDelta = finalPoint.scenario - finalPoint.baseline;
+            const runwayDeltaMonths = results.scenarioRunwayMonths - results.baselineRunwayMonths;
+            return (
             <>
               {/* Impact KPI Summary Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -296,12 +300,12 @@ export const SimulatorPage: React.FC = () => {
                   <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">12-Month Net Difference</span>
                   <div
                     className={`text-2xl lg:text-3xl font-bold font-mono ${
-                      results.netWorthDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                      netWorthDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'
                     }`}
                   >
-                    {results.netWorthDelta >= 0
-                      ? `+${formatCurrency(results.netWorthDelta)}`
-                      : formatCurrency(results.netWorthDelta)}
+                    {netWorthDelta >= 0
+                      ? `+${formatCurrency(netWorthDelta)}`
+                      : formatCurrency(netWorthDelta)}
                   </div>
                   <p className="text-xs text-slate-400">compared to current status quo</p>
                 </div>
@@ -310,12 +314,12 @@ export const SimulatorPage: React.FC = () => {
                   <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Runway Shift</span>
                   <div
                     className={`text-2xl lg:text-3xl font-bold font-mono ${
-                      results.runwayDeltaMonths >= 0 ? 'text-emerald-400' : 'text-amber-400'
+                      runwayDeltaMonths >= 0 ? 'text-emerald-400' : 'text-amber-400'
                     }`}
                   >
-                    {results.runwayDeltaMonths >= 0
-                      ? `+${results.runwayDeltaMonths} Mo`
-                      : `${results.runwayDeltaMonths} Mo`}
+                    {runwayDeltaMonths >= 0
+                      ? `+${runwayDeltaMonths.toFixed(1)} Mo`
+                      : `${runwayDeltaMonths.toFixed(1)} Mo`}
                   </div>
                   <p className="text-xs text-slate-400">Survival cash buffer adjustment</p>
                 </div>
@@ -323,10 +327,10 @@ export const SimulatorPage: React.FC = () => {
                 <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
                   <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Simulated 1-Yr Net Worth</span>
                   <div className="text-2xl lg:text-3xl font-bold font-mono text-white">
-                    {formatCurrency(results.monthlyProjections[11]?.simulatedNetWorth || 0)}
+                    {formatCurrency(finalPoint.scenario || 0)}
                   </div>
                   <p className="text-xs text-slate-400">
-                    Baseline: {formatCurrency(results.monthlyProjections[11]?.baselineNetWorth || 0)}
+                    Baseline: {formatCurrency(finalPoint.baseline || 0)}
                   </p>
                 </div>
               </div>
@@ -348,7 +352,7 @@ export const SimulatorPage: React.FC = () => {
               >
                 <div className="h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={results.monthlyProjections} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+                    <LineChart data={results.monthlyPoints} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
                       <XAxis dataKey="month" stroke="#64748B" fontSize={11} tickLine={false} />
                       <YAxis
                         stroke="#64748B"
@@ -360,12 +364,12 @@ export const SimulatorPage: React.FC = () => {
                         contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
                         formatter={(val: any, name: any) => [
                           `$${Number(val).toLocaleString()}`,
-                          name === 'baselineNetWorth' ? 'Baseline Path' : 'Simulated Path',
+                          name === 'baseline' ? 'Baseline Path' : 'Simulated Path',
                         ]}
                       />
                       <Line
                         type="monotone"
-                        dataKey="baselineNetWorth"
+                        dataKey="baseline"
                         stroke="#64748B"
                         strokeWidth={2}
                         strokeDasharray="3 3"
@@ -373,7 +377,7 @@ export const SimulatorPage: React.FC = () => {
                       />
                       <Line
                         type="monotone"
-                        dataKey="simulatedNetWorth"
+                        dataKey="scenario"
                         stroke="#10B981"
                         strokeWidth={3}
                         dot={{ r: 3, fill: '#10B981' }}
@@ -423,7 +427,8 @@ export const SimulatorPage: React.FC = () => {
                 </div>
               </div>
             </>
-          )}
+            );
+          })()}
         </div>
       </div>
     </div>

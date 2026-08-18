@@ -21,13 +21,11 @@ import { cn } from '../../lib/utils/cn';
 
 export const Topbar: React.FC = () => {
   const navigate = useNavigate();
-  const { profile, currency, setCurrency, theme, toggleTheme } = useUserStore((s) => ({
-    profile: s.profile,
-    currency: s.profile.currency,
-    setCurrency: s.setCurrency,
-    theme: s.profile.theme,
-    toggleTheme: s.toggleTheme,
-  }));
+  const profile = useUserStore((s) => s.profile);
+  const currency = useUserStore((s) => s.profile.currency);
+  const setCurrency = useUserStore((s) => s.setCurrency);
+  const theme = useUserStore((s) => s.profile.theme);
+  const toggleTheme = useUserStore((s) => s.toggleTheme);
 
   const { isMobileNavOpen, toggleMobileNav, openAddTxModal, openPlaidModal, showToast } = useUIStore();
   const [isSyncing, setIsSyncing] = useState(false);

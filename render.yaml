@@ -10,7 +10,7 @@ services:
     runtime: python
     plan: free
     region: oregon
-    buildCommand: npm install && npm run build && cd backend && pip install --upgrade pip && pip install -r requirements.txt
+    buildCommand: npm install && npm run build && cd backend && pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     autoDeploy: true

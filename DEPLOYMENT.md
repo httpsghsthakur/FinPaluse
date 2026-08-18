@@ -34,7 +34,7 @@ If configuring manually without Blueprints:
    - **Runtime**: `Python 3`
    - **Build Command**:
      ```bash
-     npm install && npm run build && cd backend && pip install --upgrade pip && pip install -r requirements.txt
+     npm install && npm run build && cd backend && pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
      ```
    - **Start Command**:
      ```bash

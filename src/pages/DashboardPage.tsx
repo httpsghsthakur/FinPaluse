@@ -25,7 +25,8 @@ import { CitationChip } from '../components/ui/CitationChip';
 import { DashboardSummary, Insight } from '../types';
 import { api } from '../lib/api';
 import { useUIStore } from '../lib/store/useUIStore';
-import { formatDate } from '../lib/utils/formatters';
+import { formatDate, formatCurrency } from '../lib/utils/formatters';
+import { useUserStore } from '../lib/store/useUserStore';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -40,6 +41,7 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const { openTxDetail, openAddTxModal } = useUIStore();
+  const { profile } = useUserStore();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
@@ -252,7 +254,7 @@ export const DashboardPage: React.FC = () => {
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
                         <span className="truncate">{cat.categoryName}</span>
                       </span>
-                      <span className="font-mono font-medium">{formatCurrency(cat.amount, user.currency)}</span>
+                      <span className="font-mono font-medium">{formatCurrency(cat.amount, profile.currency)}</span>
                     </div>
                     <ProgressBar
                       value={cat.amount}

@@ -94,13 +94,17 @@ app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/health", tags=["Health"])
 async def health():
+    from app.db.session import engine
+    db_url_str = str(engine.url)
+    sanitized_url = db_url_str.replace("Ghsthakur%40123", "****")
     try:
         from sqlalchemy import text
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
-        return {"status": "healthy", "db": "connected"}
+        return {"status": "healthy", "db": "connected", "url": sanitized_url}
     except Exception as e:
-        return {"status": "degraded", "db_error": str(e)}
+        import traceback
+        return {"status": "degraded", "db_error": str(e), "url": sanitized_url, "traceback": traceback.format_exc()}
 
 
 # ── Static SPA Hosting (Unified Frontend + Backend) ──────────────────────────

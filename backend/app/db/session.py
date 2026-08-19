@@ -18,6 +18,16 @@ from app.core.config import get_settings
 settings = get_settings()
 
 import ssl
+import socket
+
+# Force IPv4 resolution to prevent 'Network is unreachable' on Render
+# when uvloop/asyncpg attempts to use IPv6 addresses.
+orig_getaddrinfo = socket.getaddrinfo
+def getaddrinfo_ipv4(*args, **kwargs):
+    if "family" not in kwargs or kwargs["family"] == 0:
+        kwargs["family"] = socket.AF_INET
+    return orig_getaddrinfo(*args, **kwargs)
+socket.getaddrinfo = getaddrinfo_ipv4
 
 engine_kwargs: dict = {
     "echo": getattr(settings, "DEBUG", getattr(settings, "app_debug", False)),
@@ -39,6 +49,21 @@ if "sqlite" not in db_url:
         # Clean query parameters for asyncpg
         if "asyncpg" in db_url and "?" in db_url:
             db_url = db_url.split("?")[0]
+            
+        # Render + uvloop IPv6 resolution bug workaround
+        # Manually resolve the pooler host to an IPv4 address and replace it in the URL
+        import urllib.parse
+        parsed = urllib.parse.urlparse(db_url)
+        if parsed.hostname and not parsed.hostname.replace('.', '').isnumeric():
+            try:
+                # getaddrinfo with AF_INET forces IPv4 resolution
+                ipv4_host = socket.getaddrinfo(parsed.hostname, parsed.port, socket.AF_INET)[0][4][0]
+                # Reconstruct the URL with the IPv4 address
+                netloc = parsed.netloc.replace(parsed.hostname, ipv4_host)
+                db_url = parsed._replace(netloc=netloc).geturl()
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Failed to resolve IPv4 for {parsed.hostname}: {e}")
 
     engine_kwargs.update({
         "pool_size": 20,

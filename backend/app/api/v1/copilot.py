@@ -19,6 +19,7 @@ from app.db.models.category import Category
 from app.db.models.goal import Goal
 from app.schemas.copilot import CopilotRequest, ChatMessageResponse
 from app.services.seed_service import DEMO_USER_ID
+from app.ml.classifiers.intent_classifier import intent_classifier
 
 router = APIRouter()
 
@@ -102,8 +103,9 @@ async def _compute_financials(db: AsyncSession) -> dict:
 def _generate_response(query: str, data: dict, personality: str) -> dict:
     """Generate a grounded AI response based on computed financial data."""
     q = query.lower()
+    intent = intent_classifier.predict(query)
 
-    if any(kw in q for kw in ("afford", "buy", "purchase")):
+    if intent == "AFFORD":
         import re
         match = re.search(r"₹?([\d,]+)", q)
         amount = float(match.group(1).replace(",", "")) if match else 6500
@@ -128,7 +130,7 @@ def _generate_response(query: str, data: dict, personality: str) -> dict:
             ],
         }
 
-    if any(kw in q for kw in ("spending", "spent", "dining", "groceries", "breakdown")):
+    if intent == "SPENDING":
         over = data["dining_spend"] > data["dining_budget"]
         return {
             "content": f"### Monthly Spending & Category Health\n\n"
@@ -150,7 +152,7 @@ def _generate_response(query: str, data: dict, personality: str) -> dict:
             ],
         }
 
-    if any(kw in q for kw in ("runway", "net worth", "cash flow", "balance")):
+    if intent == "NET_WORTH":
         return {
             "content": f"### Net Worth & Runway Diagnostics\n\n"
                        f"- **Net Worth**: **{_format_currency(data['net_worth'])}** (+4.2% MoM)\n"
@@ -169,7 +171,7 @@ def _generate_response(query: str, data: dict, personality: str) -> dict:
             ],
         }
 
-    if any(kw in q for kw in ("goal", "emergency fund", "save", "trip", "house")):
+    if intent == "GOALS":
         lines = []
         for g in data["goals"]:
             pct = round((g.current_amount / g.target_amount) * 100)

@@ -54,7 +54,7 @@ export const Sidebar: React.FC = () => {
             {!isSidebarCollapsed && (
               <div className="flex flex-col">
                 <span className="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
-                  FinPaluse
+                  Finpluse
                 </span>
                 <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
                   AI

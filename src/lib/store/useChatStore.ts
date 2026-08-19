@@ -5,7 +5,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'welcome-msg-1',
     role: 'assistant',
-    content: `👋 **Hi Alex! I'm FinPaluse, your AI Financial Copilot.**
+    content: `👋 **Hi Alex! I'm Finpluse, your AI Financial Copilot.**
 
 I have real-time visibility into your accounts, cash burn, and goal trajectories. How can I help you optimize your money today?`,
     timestamp: new Date().toISOString(),

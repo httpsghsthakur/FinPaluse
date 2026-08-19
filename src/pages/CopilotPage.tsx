@@ -105,7 +105,7 @@ export const CopilotPage: React.FC = () => {
           </div>
           <div>
             <div className="text-sm font-bold text-white flex items-center gap-2">
-              FinPaluse Copilot
+              Finpluse Copilot
               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
                 LIVE AI
               </span>
@@ -154,7 +154,7 @@ export const CopilotPage: React.FC = () => {
             <div className="space-y-2">
               <h2 className="text-xl font-bold text-white tracking-tight">Ask your money anything</h2>
               <p className="text-xs text-slate-400 leading-relaxed">
-                FinPaluse uses deterministic financial calculations paired with contextual AI to provide
+                Finpluse uses deterministic financial calculations paired with contextual AI to provide
                 actionable answers grounded in your real balances, runway, and goals.
               </p>
             </div>

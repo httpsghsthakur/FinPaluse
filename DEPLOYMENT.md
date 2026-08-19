@@ -1,4 +1,4 @@
-# Deploying FinPaluse as a Single Unified Service on Render
+# Deploying Finpluse as a Single Unified Service on Render
 
 Both the **React 19 Frontend** and **FastAPI Python Backend** run together on the **same Render Web Service instance** under a single URL and port.
 
@@ -16,8 +16,8 @@ Both the **React 19 Frontend** and **FastAPI Python Backend** run together on th
 
 1. Go to **[dashboard.render.com](https://dashboard.render.com)**.
 2. Click **New +** (top right) → Select **Blueprint**.
-3. Connect your GitHub repository: **[https://github.com/httpsghsthakur/FinPaluse](https://github.com/httpsghsthakur/FinPaluse)**.
-4. Render automatically reads `render.yaml` and prepares the unified `finpaluse` service.
+3. Connect your GitHub repository: **[https://github.com/httpsghsthakur/Finpluse](https://github.com/httpsghsthakur/Finpluse)**.
+4. Render automatically reads `render.yaml` and prepares the unified `finpluse` service.
 5. Click **Apply**.
 
 ---
@@ -26,9 +26,9 @@ Both the **React 19 Frontend** and **FastAPI Python Backend** run together on th
 
 If configuring manually without Blueprints:
 
-1. Click **New +** → **Web Service** → Connect `https://github.com/httpsghsthakur/FinPaluse`.
+1. Click **New +** → **Web Service** → Connect `https://github.com/httpsghsthakur/Finpluse`.
 2. Configure settings:
-   - **Name**: `finpaluse`
+   - **Name**: `finpluse`
    - **Region**: Any (e.g. `Oregon (US West)`)
    - **Root Directory**: *(Leave blank)*
    - **Runtime**: `Python 3`

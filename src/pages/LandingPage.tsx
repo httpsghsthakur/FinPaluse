@@ -42,7 +42,7 @@ export const LandingPage: React.FC = () => {
             <Zap className="w-5 h-5 fill-slate-950" />
           </div>
           <span className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            FinPaluse
+            Finpluse
             <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               AI Copilot
             </span>
@@ -236,7 +236,7 @@ export const LandingPage: React.FC = () => {
       {/* 3-Step "How it Works" */}
       <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/60 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-extrabold text-white">How FinPaluse Works</h2>
+          <h2 className="text-3xl font-extrabold text-white">How Finpluse Works</h2>
           <p className="text-sm text-slate-400 mt-3">From raw transactions to intelligent financial decisions.</p>
         </div>
 
@@ -271,7 +271,7 @@ export const LandingPage: React.FC = () => {
       <footer className="max-w-7xl mx-auto px-6 py-10 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 relative z-10">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-emerald-400" />
-          <span className="font-semibold text-slate-300">FinPaluse AI Systems</span>
+          <span className="font-semibold text-slate-300">Finpluse AI Systems</span>
           <span>© 2026. All rights reserved.</span>
         </div>
         <div className="flex items-center gap-6">

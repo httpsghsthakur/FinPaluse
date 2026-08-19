@@ -1,4 +1,4 @@
-# FinPaluse Backend Production Dependencies
+# Finpluse Backend Production Dependencies
 # ==========================================
 
 # Web Framework & Server

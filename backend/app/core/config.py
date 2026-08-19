@@ -24,11 +24,11 @@ class Settings(BaseSettings):
     )
 
     # ── Application ──────────────────────────────────────────────
-    PROJECT_NAME: str = "FinPaluse — AI Financial Copilot"
+    PROJECT_NAME: str = "Finpluse — AI Financial Copilot"
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
-    SECRET_KEY: str = "finpaluse-dev-secret-key-change-in-production-min-32-chars-long"
+    SECRET_KEY: str = "finpluse-dev-secret-key-change-in-production-min-32-chars-long"
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     seed_demo_data: bool = True

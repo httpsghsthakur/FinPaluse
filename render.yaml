@@ -1,12 +1,12 @@
 # ==============================================================================
-# FinPaluse — Render Unified Service Blueprint
+# Finpluse — Render Unified Service Blueprint
 # ==============================================================================
 # Deploys BOTH Frontend and Backend on a SINGLE Render Web Service instance.
 # No CORS issues, single URL for UI and API, optimal resource utilization.
 
 services:
   - type: web
-    name: finpaluse
+    name: finpluse
     runtime: python
     plan: free
     region: oregon

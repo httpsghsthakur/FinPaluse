@@ -1,5 +1,5 @@
 /**
- * FinPaluse API Configuration
+ * Finpluse API Configuration
  * 
  * Changing USE_MOCK to false allows this frontend client to switch
  * seamlessly to a real REST/WebSocket backend without modifying any UI components.

@@ -57,7 +57,7 @@ export const InsightsPage: React.FC = () => {
       showToast({
         type: 'info',
         title: 'Insight Dismissed',
-        description: 'FinPaluse AI will tune similar notifications.',
+        description: 'Finpluse AI will tune similar notifications.',
       });
     } catch (e) {
       console.error(e);

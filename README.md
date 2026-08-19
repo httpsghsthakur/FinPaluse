@@ -1,4 +1,4 @@
-# FinPaluse — AI Financial Copilot
+# Finpluse — AI Financial Copilot
 
 <div align="center">
 
@@ -40,11 +40,11 @@
 
 ## Overview
 
-**FinPaluse** bridges the gap between raw financial banking data and actionable money intelligence. Built with strict layer separation and certified financial grounding, every calculation (net worth, burn rate, runway, pacing, and goal ETA) is calculated deterministically before reaching the AI conversational layer—eliminating numeric hallucinations.
+**Finpluse** bridges the gap between raw financial banking data and actionable money intelligence. Built with strict layer separation and certified financial grounding, every calculation (net worth, burn rate, runway, pacing, and goal ETA) is calculated deterministically before reaching the AI conversational layer—eliminating numeric hallucinations.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    FinPaluse Architecture                   │
+│                    Finpluse Architecture                   │
 └─────────────────────────────────────────────────────────────┘
                                │
                ┌───────────────┴───────────────┐
@@ -151,8 +151,8 @@ To start the database, backend, and all services:
 
 ```bash
 # Clone the repository
-git clone https://github.com/httpsghsthakur/FinPaluse.git
-cd FinPaluse
+git clone https://github.com/httpsghsthakur/Finpluse.git
+cd Finpluse
 
 # Start backend services
 cd backend

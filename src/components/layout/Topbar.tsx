@@ -62,7 +62,7 @@ export const Topbar: React.FC = () => {
           {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <NavLink to="/app" className="font-extrabold text-sm text-white flex items-center gap-1">
-          <span>FinPaluse</span>
+          <span>Finpluse</span>
           <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-1 rounded border border-emerald-500/30">AI</span>
         </NavLink>
       </div>

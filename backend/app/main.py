@@ -27,7 +27,7 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     """Application startup/shutdown lifecycle."""
     setup_logging()
-    logger.info("FinPaluse backend starting up...")
+    logger.info("Finpluse backend starting up...")
 
     # Create tables & verify schema with graceful fallback
     try:
@@ -52,18 +52,18 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Seed skipped: {e}")
 
-    logger.info(f"FinPaluse backend ready — env={settings.app_env}")
+    logger.info(f"Finpluse backend ready — env={settings.app_env}")
     yield
 
     # Shutdown
     await engine.dispose()
-    logger.info("FinPaluse backend shut down.")
+    logger.info("Finpluse backend shut down.")
 
 
 app = FastAPI(
-    title="FinPaluse — AI Financial Copilot API",
+    title="Finpluse — AI Financial Copilot API",
     description=(
-        "Complete financial intelligence backend for FinPaluse.\n\n"
+        "Complete financial intelligence backend for Finpluse.\n\n"
         "Provides transaction management, ML-powered categorization, "
         "cash-flow forecasting, anomaly detection, what-if simulation, "
         "goal tracking, and an AI copilot with grounded financial reasoning."
@@ -131,7 +131,7 @@ else:
     @app.get("/", tags=["Health"])
     async def root():
         return {
-            "app": "FinPaluse AI Financial Copilot",
+            "app": "Finpluse AI Financial Copilot",
             "version": "1.0.0",
             "status": "running",
             "docs": "/docs",

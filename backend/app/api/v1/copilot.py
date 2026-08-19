@@ -26,7 +26,7 @@ router = APIRouter()
 def _format_currency(amount: float) -> str:
     """Format currency for display."""
     sign = "-" if amount < 0 else ""
-    return f"{sign}${abs(amount):,.2f}"
+    return f"{sign}₹{abs(amount):,.2f}"
 
 
 def _format_pct(value: float) -> str:
@@ -105,10 +105,10 @@ def _generate_response(query: str, data: dict, personality: str) -> dict:
 
     if any(kw in q for kw in ("afford", "buy", "purchase")):
         import re
-        match = re.search(r"\$?([\d,]+)", q)
-        amount = float(match.group(1).replace(",", "")) if match else 650
+        match = re.search(r"₹?([\d,]+)", q)
+        amount = float(match.group(1).replace(",", "")) if match else 6500
         post = data["checking"] - amount
-        safe = post > 2500
+        safe = post > 25000
 
         return {
             "content": f"### Affordability Assessment for {_format_currency(amount)}\n\n"
@@ -194,7 +194,7 @@ def _generate_response(query: str, data: dict, personality: str) -> dict:
 
     # Default
     return {
-        "content": f"### FinPilot AI Financial Assessment\n\n"
+        "content": f"### Finpluse AI Financial Assessment\n\n"
                    f"- **Net Worth**: **{_format_currency(data['net_worth'])}**\n"
                    f"- **Liquidity**: **{_format_currency(data['liquid'])}** ({data['runway']} months runway)\n"
                    f"- **Savings Rate**: **{data['savings_rate']:.1f}%**\n\n"

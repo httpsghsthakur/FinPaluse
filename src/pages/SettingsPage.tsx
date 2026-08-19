@@ -424,6 +424,38 @@ export const SettingsPage: React.FC = () => {
                     Reset Sandbox
                   </button>
                 </div>
+
+                <div className="p-4 rounded-2xl bg-indigo-950/20 border border-indigo-500/30 flex items-center justify-between gap-4 text-xs">
+                  <div>
+                    <div className="font-semibold text-indigo-300">Load Custom CSV Data</div>
+                    <div className="text-slate-400 text-[11px]">Wipe existing transactions and replace with your uploaded CSV.</div>
+                  </div>
+                  <label className="px-3.5 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-semibold rounded-xl border border-indigo-500/40 cursor-pointer inline-flex items-center">
+                    <span>Upload CSV</span>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = async (event) => {
+                            try {
+                              const text = event.target?.result as string;
+                              await api.replaceTransactionsFromCSV(text);
+                              showToast({ type: 'success', title: 'Data Loaded', description: 'Replaced transactions with CSV data.' });
+                              loadSettingsData();
+                            } catch (err) {
+                              showToast({ type: 'error', title: 'Upload failed' });
+                            }
+                          };
+                          reader.readAsText(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           )}

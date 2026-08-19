@@ -316,6 +316,48 @@ class ApiClient {
     return { importedCount };
   }
 
+  async replaceTransactionsFromCSV(csvText: string): Promise<{ importedCount: number }> {
+    if (!API_CONFIG.USE_MOCK) {
+      const res = await apiFetch(`/admin/replace_transactions_from_csv`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csvText }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to replace transactions from CSV`);
+      return res.json();
+    }
+
+    await delay(700);
+    const data = loadStoredData();
+    data.transactions = []; // wipe existing transactions
+    const lines = csvText.trim().split('\n');
+    let importedCount = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',').map((p) => p.trim().replace(/^["']|["']$/g, ''));
+      if (parts.length >= 3) {
+        const [dateStr, merchantStr, amountStr, catStr] = parts;
+        const amount = parseFloat(amountStr);
+        if (!isNaN(amount)) {
+          data.transactions.unshift({
+            id: `tx-import-${Date.now()}-${i}`,
+            date: dateStr || format(new Date(), 'yyyy-MM-dd'),
+            merchant: merchantStr || 'Imported Merchant',
+            amount: amount,
+            categoryId: catStr || 'cat-other',
+            accountId: 'acc-checking',
+            status: 'settled',
+            isRecurring: false,
+          });
+          importedCount++;
+        }
+      }
+    }
+
+    saveStoredData(data);
+    return { importedCount };
+  }
+
   async exportTransactionsCSV(): Promise<string> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/transactions/export`);

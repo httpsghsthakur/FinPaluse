@@ -210,3 +210,41 @@ async def export_all_data(db: AsyncSession = Depends(get_db)):
         "recurring": [{"id": r.id, "merchant": r.merchant, "categoryId": r.category_id, "accountId": r.account_id, "isRecurring": r.is_recurring, "frequency": r.frequency, "expectedAmount": r.expected_amount, "expectedNextDate": r.expected_next_date.isoformat() if r.expected_next_date else None, "confidence": r.confidence, "isActive": r.is_active} for r in recs],
         "insights": [{"id": i.id, "title": i.title, "description": i.description, "severity": i.severity, "type": i.type, "date": i.date.isoformat() if i.date else "", "isDismissed": i.is_dismissed, "whyExplanation": i.why_explanation, "groundedData": i.grounded_data or [], "actionLabel": i.action_label, "actionPath": i.action_path} for i in insights],
     }
+
+@router.post("/replace_transactions_from_csv", status_code=200)
+async def replace_transactions_from_csv(data: dict, db: AsyncSession = Depends(get_db)):
+    """Wipes all transactions and loads them from CSV text."""
+    # Wipe transactions
+    await db.execute(delete(Transaction).where(Transaction.user_id == DEMO_USER_ID))
+    
+    csv_text = data.get("csvText", "")
+    lines = csv_text.strip().split("\n")
+    imported = 0
+
+    for i, line in enumerate(lines):
+        if i == 0:
+            continue  # skip header
+        parts = [p.strip().strip("\"'") for p in line.split(",")]
+        if len(parts) >= 3:
+            date_str, merchant_str, amount_str = parts[0], parts[1], parts[2]
+            cat_str = parts[3] if len(parts) > 3 else "cat-other"
+            try:
+                amount = float(amount_str)
+            except ValueError:
+                continue
+            tx = Transaction(
+                id=f"tx-import-{int(datetime.utcnow().timestamp() * 1000)}-{i}",
+                user_id=DEMO_USER_ID,
+                date=date.fromisoformat(date_str) if date_str else date.today(),
+                merchant=merchant_str or "Imported Merchant",
+                amount=amount,
+                category_id=cat_str,
+                account_id="acc-checking",
+                status="settled",
+                is_recurring=False,
+            )
+            db.add(tx)
+            imported += 1
+
+    await db.flush()
+    return {"importedCount": imported}

@@ -1,0 +1,278 @@
+Date,Merchant,Amount,Category
+2026-03-01,TechCorp India Pvt Ltd (Salary),95000.0,cat-income
+2026-03-01,Truffles,-891.0,cat-dining
+2026-03-01,Nykaa,-2593.0,cat-shopping
+2026-03-02,Prestige Apartments Rent,-25000.0,cat-housing
+2026-03-03,Rameshwaram Cafe,-1399.0,cat-dining
+2026-03-03,Hotstar,-899.0,cat-subscriptions
+2026-03-04,Spotify Premium,-499.0,cat-subscriptions
+2026-03-04,Nature's Basket,-1606.0,cat-groceries
+2026-03-05,JioFiber Broadband,-1178.0,cat-utilities
+2026-03-05,BookMyShow,-436.0,cat-entertainment
+2026-03-06,Myntra,-2398.0,cat-shopping
+2026-03-06,Shell Petrol,-545.0,cat-transport
+2026-03-06,Myntra,-1645.0,cat-shopping
+2026-03-07,Spotify Premium,-499.0,cat-subscriptions
+2026-03-07,Third Wave Coffee,-1131.0,cat-dining
+2026-03-07,Reliance Fresh,-1596.0,cat-groceries
+2026-03-08,Zomato,-471.0,cat-dining
+2026-03-09,Steam Games,-348.0,cat-entertainment
+2026-03-09,Steam Games,-1084.0,cat-entertainment
+2026-03-10,Cult.fit Gym,-1500.0,cat-health
+2026-03-10,Nykaa,-1548.0,cat-shopping
+2026-03-10,Amazon.in,-3833.0,cat-shopping
+2026-03-11,Shell Petrol,-539.0,cat-transport
+2026-03-11,Reliance Fresh,-300.0,cat-groceries
+2026-03-13,PVR Cinemas,-328.0,cat-entertainment
+2026-03-13,Rameshwaram Cafe,-691.0,cat-dining
+2026-03-14,Hotstar,-1499.0,cat-subscriptions
+2026-03-15,BESCOM Electricity Bill,-1946.0,cat-utilities
+2026-03-15,Nykaa,-530.0,cat-shopping
+2026-03-15,Swiggy,-1441.0,cat-dining
+2026-03-15,Swiggy,-528.0,cat-dining
+2026-03-17,Amazon.in,-2414.0,cat-shopping
+2026-03-17,BookMyShow,-385.0,cat-entertainment
+2026-03-17,Namma Metro,-251.0,cat-transport
+2026-03-18,Third Wave Coffee,-578.0,cat-dining
+2026-03-20,Indian Oil,-528.0,cat-transport
+2026-03-20,Amazon.in,-2115.0,cat-shopping
+2026-03-20,DMart,-530.0,cat-groceries
+2026-03-21,Reliance Fresh,-1656.0,cat-groceries
+2026-03-21,PVR Cinemas,-476.0,cat-entertainment
+2026-03-23,Decathlon,-617.0,cat-shopping
+2026-03-25,Flipkart,-757.0,cat-shopping
+2026-03-26,Myntra,-3646.0,cat-shopping
+2026-03-26,Hotstar,-899.0,cat-subscriptions
+2026-03-28,Reliance Fresh,-2072.0,cat-groceries
+2026-03-28,DMart,-403.0,cat-groceries
+2026-03-28,BookMyShow,-1120.0,cat-entertainment
+2026-03-31,Steam Games,-737.0,cat-entertainment
+2026-03-31,Instamart,-2485.0,cat-groceries
+2026-04-01,TechCorp India Pvt Ltd (Salary),95000.0,cat-income
+2026-04-01,Hotstar,-1499.0,cat-subscriptions
+2026-04-02,Prestige Apartments Rent,-25000.0,cat-housing
+2026-04-04,Shell Petrol,-331.0,cat-transport
+2026-04-04,Indian Oil,-767.0,cat-transport
+2026-04-04,Amazon.in,-4185.0,cat-shopping
+2026-04-05,JioFiber Broadband,-1178.0,cat-utilities
+2026-04-05,BookMyShow,-1061.0,cat-entertainment
+2026-04-05,Nykaa,-3432.0,cat-shopping
+2026-04-05,Shell Petrol,-246.0,cat-transport
+2026-04-07,Ola Cabs,-582.0,cat-transport
+2026-04-07,Nykaa,-1281.0,cat-shopping
+2026-04-07,Reliance Fresh,-2429.0,cat-groceries
+2026-04-08,Myntra,-2213.0,cat-shopping
+2026-04-08,PVR Cinemas,-1122.0,cat-entertainment
+2026-04-09,Spotify Premium,-499.0,cat-subscriptions
+2026-04-09,Amazon Prime,-499.0,cat-subscriptions
+2026-04-09,Reliance Fresh,-398.0,cat-groceries
+2026-04-10,Cult.fit Gym,-1500.0,cat-health
+2026-04-10,Blinkit,-2491.0,cat-groceries
+2026-04-10,Spotify Premium,-1499.0,cat-subscriptions
+2026-04-11,Instamart,-1747.0,cat-groceries
+2026-04-12,Uber,-104.0,cat-transport
+2026-04-12,Namma Metro,-533.0,cat-transport
+2026-04-13,Shell Petrol,-601.0,cat-transport
+2026-04-13,Indian Oil,-739.0,cat-transport
+2026-04-13,DMart,-2050.0,cat-groceries
+2026-04-14,Decathlon,-1522.0,cat-shopping
+2026-04-14,Shell Petrol,-678.0,cat-transport
+2026-04-14,Meghana Foods,-412.0,cat-dining
+2026-04-15,BESCOM Electricity Bill,-1879.0,cat-utilities
+2026-04-16,Spotify Premium,-199.0,cat-subscriptions
+2026-04-16,Nature's Basket,-1589.0,cat-groceries
+2026-04-18,PVR Cinemas,-746.0,cat-entertainment
+2026-04-18,H&M,-2336.0,cat-shopping
+2026-04-20,Amazon.in,-1951.0,cat-shopping
+2026-04-20,BookMyShow,-811.0,cat-entertainment
+2026-04-20,BookMyShow,-819.0,cat-entertainment
+2026-04-22,Truffles,-1010.0,cat-dining
+2026-04-22,DMart,-694.0,cat-groceries
+2026-04-24,Flipkart,-3194.0,cat-shopping
+2026-04-24,Zepto,-438.0,cat-groceries
+2026-04-24,Third Wave Coffee,-1378.0,cat-dining
+2026-04-25,H&M,-4416.0,cat-shopping
+2026-04-25,Amazon Prime,-299.0,cat-subscriptions
+2026-04-25,Flipkart,-1950.0,cat-shopping
+2026-04-26,Uber,-495.0,cat-transport
+2026-04-26,BookMyShow,-401.0,cat-entertainment
+2026-04-26,Spotify Premium,-299.0,cat-subscriptions
+2026-04-27,Truffles,-702.0,cat-dining
+2026-04-27,Shell Petrol,-709.0,cat-transport
+2026-04-28,Uber,-588.0,cat-transport
+2026-04-28,PVR Cinemas,-401.0,cat-entertainment
+2026-04-28,PVR Cinemas,-448.0,cat-entertainment
+2026-04-29,Starbucks,-368.0,cat-dining
+2026-04-29,Steam Games,-1133.0,cat-entertainment
+2026-04-29,Nature's Basket,-1068.0,cat-groceries
+2026-05-01,TechCorp India Pvt Ltd (Salary),95000.0,cat-income
+2026-05-02,Prestige Apartments Rent,-25000.0,cat-housing
+2026-05-03,PVR Cinemas,-840.0,cat-entertainment
+2026-05-03,Swiggy,-936.0,cat-dining
+2026-05-03,Instamart,-2006.0,cat-groceries
+2026-05-05,JioFiber Broadband,-1178.0,cat-utilities
+2026-05-06,Shell Petrol,-113.0,cat-transport
+2026-05-06,Steam Games,-1019.0,cat-entertainment
+2026-05-08,Nykaa,-2993.0,cat-shopping
+2026-05-08,Truffles,-949.0,cat-dining
+2026-05-08,BookMyShow,-400.0,cat-entertainment
+2026-05-10,Cult.fit Gym,-1500.0,cat-health
+2026-05-10,Flipkart,-3478.0,cat-shopping
+2026-05-10,Steam Games,-1093.0,cat-entertainment
+2026-05-10,Steam Games,-392.0,cat-entertainment
+2026-05-11,Spotify Premium,-1499.0,cat-subscriptions
+2026-05-12,Blinkit,-1890.0,cat-groceries
+2026-05-12,Amazon Prime,-899.0,cat-subscriptions
+2026-05-13,DMart,-530.0,cat-groceries
+2026-05-13,Amazon Prime,-499.0,cat-subscriptions
+2026-05-14,Nature's Basket,-2405.0,cat-groceries
+2026-05-14,Uber,-613.0,cat-transport
+2026-05-14,PVR Cinemas,-715.0,cat-entertainment
+2026-05-15,BESCOM Electricity Bill,-1351.0,cat-utilities
+2026-05-16,Spotify Premium,-1499.0,cat-subscriptions
+2026-05-17,Spotify Premium,-899.0,cat-subscriptions
+2026-05-17,Instamart,-1183.0,cat-groceries
+2026-05-19,Spotify Premium,-199.0,cat-subscriptions
+2026-05-19,BookMyShow,-1115.0,cat-entertainment
+2026-05-20,Uber,-294.0,cat-transport
+2026-05-21,Blinkit,-2242.0,cat-groceries
+2026-05-21,Namma Metro,-208.0,cat-transport
+2026-05-22,Reliance Fresh,-1722.0,cat-groceries
+2026-05-23,Meghana Foods,-1192.0,cat-dining
+2026-05-24,Steam Games,-483.0,cat-entertainment
+2026-05-24,Flipkart,-4265.0,cat-shopping
+2026-05-25,Netflix India,-499.0,cat-subscriptions
+2026-05-27,DMart,-2400.0,cat-groceries
+2026-05-27,Uber,-586.0,cat-transport
+2026-05-27,Namma Metro,-600.0,cat-transport
+2026-05-28,Nykaa,-3735.0,cat-shopping
+2026-05-28,Spotify Premium,-499.0,cat-subscriptions
+2026-05-28,Indian Oil,-451.0,cat-transport
+2026-05-29,Ola Cabs,-757.0,cat-transport
+2026-05-29,Zepto,-1952.0,cat-groceries
+2026-05-30,Nature's Basket,-2386.0,cat-groceries
+2026-05-31,Zomato,-823.0,cat-dining
+2026-05-31,PVR Cinemas,-908.0,cat-entertainment
+2026-06-01,TechCorp India Pvt Ltd (Salary),95000.0,cat-income
+2026-06-02,Prestige Apartments Rent,-25000.0,cat-housing
+2026-06-02,BookMyShow,-1128.0,cat-entertainment
+2026-06-03,Nykaa,-1184.0,cat-shopping
+2026-06-03,Rameshwaram Cafe,-317.0,cat-dining
+2026-06-03,DMart,-2428.0,cat-groceries
+2026-06-04,Truffles,-897.0,cat-dining
+2026-06-05,JioFiber Broadband,-1178.0,cat-utilities
+2026-06-07,BookMyShow,-694.0,cat-entertainment
+2026-06-07,Decathlon,-3639.0,cat-shopping
+2026-06-09,Zepto,-1348.0,cat-groceries
+2026-06-10,Cult.fit Gym,-1500.0,cat-health
+2026-06-10,H&M,-3050.0,cat-shopping
+2026-06-10,Reliance Fresh,-412.0,cat-groceries
+2026-06-10,Blinkit,-1150.0,cat-groceries
+2026-06-11,Spotify Premium,-199.0,cat-subscriptions
+2026-06-11,Rameshwaram Cafe,-1419.0,cat-dining
+2026-06-11,Decathlon,-2833.0,cat-shopping
+2026-06-12,Myntra,-4007.0,cat-shopping
+2026-06-13,Amazon Prime,-899.0,cat-subscriptions
+2026-06-13,Namma Metro,-153.0,cat-transport
+2026-06-13,Instamart,-677.0,cat-groceries
+2026-06-14,BookMyShow,-413.0,cat-entertainment
+2026-06-14,Third Wave Coffee,-799.0,cat-dining
+2026-06-14,Uber,-763.0,cat-transport
+2026-06-15,BESCOM Electricity Bill,-2429.0,cat-utilities
+2026-06-15,Starbucks,-1474.0,cat-dining
+2026-06-15,Shell Petrol,-742.0,cat-transport
+2026-06-16,Spotify Premium,-499.0,cat-subscriptions
+2026-06-16,Hotstar,-199.0,cat-subscriptions
+2026-06-17,Starbucks,-583.0,cat-dining
+2026-06-21,BookMyShow,-959.0,cat-entertainment
+2026-06-21,Swiggy,-1467.0,cat-dining
+2026-06-22,Zomato,-1016.0,cat-dining
+2026-06-22,Flipkart,-2629.0,cat-shopping
+2026-06-23,Blinkit,-1934.0,cat-groceries
+2026-06-24,PVR Cinemas,-947.0,cat-entertainment
+2026-06-24,Namma Metro,-499.0,cat-transport
+2026-06-24,DMart,-2485.0,cat-groceries
+2026-06-25,Steam Games,-1073.0,cat-entertainment
+2026-06-25,Amazon Prime,-299.0,cat-subscriptions
+2026-06-25,Blinkit,-1112.0,cat-groceries
+2026-06-26,Amazon Prime,-199.0,cat-subscriptions
+2026-06-26,Namma Metro,-404.0,cat-transport
+2026-06-27,Instamart,-559.0,cat-groceries
+2026-06-27,Amazon Prime,-1499.0,cat-subscriptions
+2026-06-28,Instamart,-1941.0,cat-groceries
+2026-06-29,Steam Games,-1181.0,cat-entertainment
+2026-07-01,TechCorp India Pvt Ltd (Salary),95000.0,cat-income
+2026-07-01,Rameshwaram Cafe,-1456.0,cat-dining
+2026-07-01,Ola Cabs,-232.0,cat-transport
+2026-07-01,Reliance Fresh,-1235.0,cat-groceries
+2026-07-02,Prestige Apartments Rent,-25000.0,cat-housing
+2026-07-02,Netflix India,-199.0,cat-subscriptions
+2026-07-02,DMart,-2044.0,cat-groceries
+2026-07-02,Instamart,-939.0,cat-groceries
+2026-07-04,Amazon Prime,-499.0,cat-subscriptions
+2026-07-04,Rameshwaram Cafe,-1277.0,cat-dining
+2026-07-04,Namma Metro,-517.0,cat-transport
+2026-07-05,JioFiber Broadband,-1178.0,cat-utilities
+2026-07-05,Hotstar,-499.0,cat-subscriptions
+2026-07-05,PVR Cinemas,-470.0,cat-entertainment
+2026-07-06,Reliance Fresh,-2456.0,cat-groceries
+2026-07-06,PVR Cinemas,-537.0,cat-entertainment
+2026-07-06,Hotstar,-199.0,cat-subscriptions
+2026-07-09,Zomato,-1366.0,cat-dining
+2026-07-09,Reliance Fresh,-1935.0,cat-groceries
+2026-07-10,Cult.fit Gym,-1500.0,cat-health
+2026-07-10,Ola Cabs,-785.0,cat-transport
+2026-07-10,Uber,-455.0,cat-transport
+2026-07-10,Flipkart,-930.0,cat-shopping
+2026-07-12,Decathlon,-934.0,cat-shopping
+2026-07-12,Amazon Prime,-499.0,cat-subscriptions
+2026-07-13,PVR Cinemas,-366.0,cat-entertainment
+2026-07-13,Swiggy,-1239.0,cat-dining
+2026-07-14,Indian Oil,-518.0,cat-transport
+2026-07-15,BESCOM Electricity Bill,-2409.0,cat-utilities
+2026-07-16,DMart,-1467.0,cat-groceries
+2026-07-17,Indian Oil,-152.0,cat-transport
+2026-07-18,Shell Petrol,-702.0,cat-transport
+2026-07-18,Reliance Fresh,-2304.0,cat-groceries
+2026-07-20,Netflix India,-1499.0,cat-subscriptions
+2026-07-20,Instamart,-345.0,cat-groceries
+2026-07-20,Meghana Foods,-1412.0,cat-dining
+2026-07-21,Zomato,-1342.0,cat-dining
+2026-07-22,Swiggy,-324.0,cat-dining
+2026-07-22,Third Wave Coffee,-155.0,cat-dining
+2026-07-22,Decathlon,-3539.0,cat-shopping
+2026-07-23,Amazon Prime,-899.0,cat-subscriptions
+2026-07-23,Truffles,-1235.0,cat-dining
+2026-07-24,Rameshwaram Cafe,-662.0,cat-dining
+2026-07-24,Meghana Foods,-291.0,cat-dining
+2026-07-25,Shell Petrol,-459.0,cat-transport
+2026-07-27,Spotify Premium,-899.0,cat-subscriptions
+2026-07-27,Myntra,-1931.0,cat-shopping
+2026-07-29,Meghana Foods,-659.0,cat-dining
+2026-07-30,Amazon Prime,-899.0,cat-subscriptions
+2026-07-30,Swiggy,-1403.0,cat-dining
+2026-07-31,Flipkart,-4435.0,cat-shopping
+2026-08-01,TechCorp India Pvt Ltd (Salary),95000.0,cat-income
+2026-08-02,Prestige Apartments Rent,-25000.0,cat-housing
+2026-08-03,Amazon Prime,-299.0,cat-subscriptions
+2026-08-04,Myntra,-1522.0,cat-shopping
+2026-08-04,Amazon.in,-769.0,cat-shopping
+2026-08-04,Nature's Basket,-2456.0,cat-groceries
+2026-08-05,JioFiber Broadband,-1178.0,cat-utilities
+2026-08-07,PVR Cinemas,-1073.0,cat-entertainment
+2026-08-10,Cult.fit Gym,-1500.0,cat-health
+2026-08-10,Indian Oil,-462.0,cat-transport
+2026-08-11,BookMyShow,-846.0,cat-entertainment
+2026-08-11,Ola Cabs,-455.0,cat-transport
+2026-08-11,Rameshwaram Cafe,-1080.0,cat-dining
+2026-08-12,DMart,-736.0,cat-groceries
+2026-08-12,Indian Oil,-657.0,cat-transport
+2026-08-15,BESCOM Electricity Bill,-2170.0,cat-utilities
+2026-08-15,Hotstar,-899.0,cat-subscriptions
+2026-08-15,Shell Petrol,-293.0,cat-transport
+2026-08-15,Reliance Fresh,-354.0,cat-groceries
+2026-08-16,Spotify Premium,-1499.0,cat-subscriptions
+2026-08-16,Amazon.in,-3265.0,cat-shopping
+2026-08-18,Decathlon,-4070.0,cat-shopping
+2026-08-18,PVR Cinemas,-886.0,cat-entertainment
+2026-08-18,Uber,-366.0,cat-transport

@@ -94,7 +94,13 @@ app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/health", tags=["Health"])
 async def health():
-    return {"status": "healthy"}
+    try:
+        from sqlalchemy import text
+        async with engine.begin() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "healthy", "db": "connected"}
+    except Exception as e:
+        return {"status": "degraded", "db_error": str(e)}
 
 
 # ── Static SPA Hosting (Unified Frontend + Backend) ──────────────────────────

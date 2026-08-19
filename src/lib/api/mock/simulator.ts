@@ -11,15 +11,15 @@ export function runWhatIfSimulation(scenario: Scenario, data: StorageData): Scen
   const initialNetWorth = initialLiquid + totalCredit;
 
   // Compute base monthly income and base monthly expenses from recent transactions
-  const baseMonthlyIncome = 7700; // salary ($7700) + avg freelance ($600)
-  const baseMonthlyExpense = 4250; // rent $2100, bills $600, food $1000, misc $550
-  const baseMonthlyNet = baseMonthlyIncome - baseMonthlyExpense; // ~$3450/mo savings
+  const baseMonthlyIncome = 72500; // salary (₹72,500)
+  const baseMonthlyExpense = 42500; // rent ₹25k, bills ₹4.5k, food ₹8k, misc ₹5k
+  const baseMonthlyNet = baseMonthlyIncome - baseMonthlyExpense; // ~₹30,000/mo savings
 
   const baselineRunwayMonths = Number((initialLiquid / baseMonthlyExpense).toFixed(1));
 
   // Scenario adjustments
   const incomeFactor = (100 + scenario.incomeChangePct) / 100;
-  const expenseReduction = (scenario.expenseCutPct / 100) * 800; // up to $800 cut
+  const expenseReduction = (scenario.expenseCutPct / 100) * 8000; // up to ₹8,000 cut
   const scenarioMonthlyIncome = baseMonthlyIncome * incomeFactor;
   const scenarioMonthlyExpense = Math.max(1500, baseMonthlyExpense - expenseReduction - scenario.monthlySavingsChange);
   

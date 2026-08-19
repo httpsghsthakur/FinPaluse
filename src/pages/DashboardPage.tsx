@@ -120,7 +120,7 @@ export const DashboardPage: React.FC = () => {
           title="Monthly Spend"
           value={data.monthlySpending}
           changePct={-3.2}
-          changePeriodText="vs Budget ($4,940)"
+          changePeriodText="vs Budget (₹4,94,000)"
           icon={CreditCard}
         />
         <KpiCard
@@ -150,7 +150,7 @@ export const DashboardPage: React.FC = () => {
           <ChartCard
             title="Cash Flow Dynamics"
             subtitle="6-Month Income vs Expenses Comparison"
-            footerNote="Net savings averaged +$3,796/month across this period."
+            footerNote="Net savings averaged +₹3,79,600/month across this period."
             actions={
               <div className="flex items-center gap-3 text-xs font-mono">
                 <span className="flex items-center gap-1.5 text-emerald-400">
@@ -252,7 +252,7 @@ export const DashboardPage: React.FC = () => {
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
                         <span className="truncate">{cat.categoryName}</span>
                       </span>
-                      <span className="font-mono font-medium">${cat.amount.toFixed(0)}</span>
+                      <span className="font-mono font-medium">{formatCurrency(cat.amount, user.currency)}</span>
                     </div>
                     <ProgressBar
                       value={cat.amount}

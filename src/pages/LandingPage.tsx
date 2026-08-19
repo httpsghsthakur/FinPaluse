@@ -99,8 +99,11 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800/60 gap-4">
             <div className="text-left">
               <div className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Net Worth Trajectory</div>
-              <div className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400 mt-1">
-                $43,270.75 <span className="text-xs text-emerald-500 font-sans font-medium">(+18.4% YTD)</span>
+              <div className="mt-2 mb-6">
+                <div className="text-slate-400 text-sm mb-1">Total Net Worth</div>
+                <div className="text-4xl font-mono font-medium text-white tracking-tight flex items-baseline gap-3">
+                  ₹24,43,270.75 <span className="text-xs text-emerald-500 font-sans font-medium">(+18.4% YTD)</span>
+                </div>
               </div>
             </div>
 
@@ -132,11 +135,11 @@ export const LandingPage: React.FC = () => {
                   stroke="#64748B"
                   fontSize={12}
                   tickLine={false}
-                  tickFormatter={(v) => `$${v / 1000}k`}
+                  tickFormatter={(v) => `₹${v / 1000}k`}
                 />
                 <Tooltip
                   contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(51, 65, 85, 0.6)', borderRadius: 16, backdropFilter: 'blur(8px)' }}
-                  formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Balance']}
+                  formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Balance']}
                 />
                 <Area
                   type="monotone"
@@ -172,9 +175,9 @@ export const LandingPage: React.FC = () => {
           {[
             {
               icon: Bot,
-              title: 'Grounded AI Copilot',
+              title: 'Conversational AI Engine',
               description:
-                'Ask questions like "Can I afford a $650 purchase?" and get answers calculated directly from your real balances and bills.',
+                'Ask questions like "Can I afford a ₹6,500 purchase?" and get answers calculated directly from your real balances and bills.',
               color: '#10B981',
             },
             {

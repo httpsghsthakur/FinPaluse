@@ -98,10 +98,9 @@ export const Topbar: React.FC = () => {
             className="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 text-slate-200 text-xs font-mono font-medium rounded-xl px-2.5 py-1.5 appearance-none pr-6 focus:outline-none focus:border-emerald-500 cursor-pointer"
             aria-label="Currency selection"
           >
-            <option value="USD">$ USD</option>
-            <option value="EUR">€ EUR</option>
-            <option value="GBP">£ GBP</option>
             <option value="INR">₹ INR</option>
+            <option value="USD">$ USD</option>
+            <option value="GBP">£ GBP</option>
           </select>
           <span className="absolute right-2 top-2 pointer-events-none text-[10px] text-slate-400">▾</span>
         </div>

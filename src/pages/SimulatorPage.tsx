@@ -47,21 +47,21 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
     },
   },
   {
-    name: 'Major Purchase (Car $12k Down)',
+    name: 'Major Purchase (Car ₹10L Down)',
     params: {
-      name: 'Major Purchase (Car $12k Down)',
+      name: 'Major Purchase (Car ₹10L Down)',
       monthlyIncomeDelta: 0,
       monthlyExpenseDelta: 450, // car payment + insurance
-      oneTimeExpense: 12000,
+      oneTimeExpense: 1000000,
       monthsWithoutIncome: 0,
     },
   },
   {
-    name: 'Aggressive F.I.R.E. Cut (-$600/mo)',
+    name: 'Aggressive Saving (Cut ₹15,000/mo)',
     params: {
-      name: 'Aggressive F.I.R.E. Cut (-$600/mo)',
+      name: 'Aggressive Saving (Cut ₹15,000/mo)',
       monthlyIncomeDelta: 0,
-      monthlyExpenseDelta: -600,
+      monthlyExpenseDelta: -15000,
       oneTimeExpense: 0,
       monthsWithoutIncome: 0,
     },
@@ -191,18 +191,18 @@ export const SimulatorPage: React.FC = () => {
             </div>
             <input
               type="range"
-              min="-4000"
-              max="5000"
+              min="-400000"
+              max="500000"
               step="100"
               value={monthlyIncomeDelta}
               onChange={(e) => setMonthlyIncomeDelta(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>-$4,000</span>
-              <span>$0</span>
-              <span>+$5,000</span>
-            </div>
+              <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
+                <span>-₹4,00,000</span>
+                <span>₹0</span>
+                <span>+₹5,00,000</span>
+              </div>
           </div>
 
           {/* Lever 2: Monthly Expense Change */}
@@ -223,18 +223,18 @@ export const SimulatorPage: React.FC = () => {
             </div>
             <input
               type="range"
-              min="-2000"
-              max="3000"
+              min="-20000"
+              max="30000"
               step="50"
               value={monthlyExpenseDelta}
               onChange={(e) => setMonthlyExpenseDelta(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>-$2,000 (Cuts)</span>
-              <span>$0</span>
-              <span>+$3,000 (Lifestyle)</span>
-            </div>
+              <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
+                <span>-₹20,000 (Cuts)</span>
+                <span>₹0</span>
+                <span>+₹30,000 (Lifestyle)</span>
+              </div>
           </div>
 
           {/* Lever 3: One-time Lump-sum Purchase */}
@@ -248,17 +248,17 @@ export const SimulatorPage: React.FC = () => {
             <input
               type="range"
               min="0"
-              max="30000"
+              max="300000"
               step="500"
               value={oneTimeExpense}
               onChange={(e) => setOneTimeExpense(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>$0</span>
-              <span>$15,000</span>
-              <span>$30,000</span>
-            </div>
+              <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
+                <span>₹0</span>
+                <span>₹1,50,000</span>
+                <span>₹3,00,000</span>
+              </div>
           </div>
 
           {/* Lever 4: Months without income (Sabbatical / Job Search) */}

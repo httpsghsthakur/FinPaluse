@@ -22,7 +22,7 @@ import { api } from '../lib/api';
 import { formatCurrency, formatDate } from '../lib/utils/formatters';
 
 const SUGGESTED_PROMPTS = [
-  'Can I afford a $650 dinner without delaying my emergency fund goal?',
+  'Can I afford a ₹6,500 dinner without delaying my emergency fund goal?',
   'What is my monthly burn rate and runway if I lose my job today?',
   'Why did my dining spending increase by 34% this month?',
   'How much can I safely invest into index funds this paycheck?',

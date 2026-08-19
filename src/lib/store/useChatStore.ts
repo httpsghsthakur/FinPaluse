@@ -11,14 +11,14 @@ I have real-time visibility into your accounts, cash burn, and goal trajectories
     timestamp: new Date().toISOString(),
     confidence: 'High',
     quickActions: [
-      { label: 'Check Affordability ($500)', action: 'prompt' },
+      { label: 'Check Affordability (₹5,000)', action: 'prompt' },
       { label: 'Dining vs Budget', action: 'prompt' },
       { label: 'Cash Runway Status', action: 'prompt' },
     ],
   },
 ];
 
-const CHAT_STORAGE_KEY = 'finpilot_chat_history_v1';
+const CHAT_STORAGE_KEY = 'finpluse_chat_history_v1';
 
 function loadChatHistory(): ChatMessage[] {
   try {

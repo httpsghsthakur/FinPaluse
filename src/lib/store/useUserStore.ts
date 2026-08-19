@@ -14,7 +14,7 @@ const DEFAULT_PROFILE: UserProfile = {
   name: 'Alex Morgan',
   email: 'alex.morgan@finpluse.ai',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  currency: 'USD',
+  currency: 'INR',
   theme: 'dark',
   firstDayOfMonth: 1,
   notificationsEnabled: true,
@@ -24,7 +24,7 @@ const DEFAULT_PROFILE: UserProfile = {
   pinCode: '4829',
 };
 
-const USER_STORAGE_KEY = 'finpilot_user_profile';
+const USER_STORAGE_KEY = 'finpluse_user_profile';
 
 function loadInitialProfile(): UserProfile {
   try {

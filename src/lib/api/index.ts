@@ -607,19 +607,19 @@ class ApiClient {
 
     await delay();
     const data = loadStoredData();
-    const totalChecking = data.accounts.find((a) => a.type === 'checking')?.balance || 8450;
-    const totalSavings = data.accounts.find((a) => a.type === 'savings')?.balance || 34820;
+    const totalChecking = data.accounts.find((a) => a.type === 'checking')?.balance || 245000;
+    const totalSavings = data.accounts.find((a) => a.type === 'savings')?.balance || 1500000;
     const currentLiquid = totalChecking + totalSavings;
 
     const points: ForecastPoint[] = [];
     const events: ForecastEvent[] = [];
     const today = new Date();
 
-    let pastRunning = currentLiquid - 3400;
+    let pastRunning = currentLiquid - 340000;
     for (let d = 30; d >= 1; d--) {
       const pastDate = subDays(today, d);
       const dateStr = format(pastDate, 'yyyy-MM-dd');
-      pastRunning += (d % 15 === 0 ? 3850 : 0) - (d % 30 === 0 ? 2100 : 85);
+      pastRunning += (d % 15 === 0 ? 47500 : 0) - (d % 30 === 0 ? 25000 : 850);
 
       points.push({
         date: dateStr,
@@ -633,7 +633,7 @@ class ApiClient {
     }
 
     let runningBalance = currentLiquid;
-    const dailyBurnAverage = 115;
+    const dailyBurnAverage = 1150;
 
     for (let day = 0; day <= days; day++) {
       const futureDate = addDays(today, day);
@@ -647,12 +647,12 @@ class ApiClient {
           date: dateStr,
           type: 'payday',
           title: 'Direct Deposit Payroll',
-          amount: 3850.0,
+          amount: 47500.0,
           accountId: 'acc-checking',
         };
         dayEvents.push(ev);
         events.push(ev);
-        runningBalance += 3850;
+        runningBalance += 47500.0;
       }
 
       if (dayOfMonth === 1) {
@@ -661,12 +661,12 @@ class ApiClient {
           date: dateStr,
           type: 'recurring_bill',
           title: 'Apartment Rent Lease',
-          amount: -2100.0,
+          amount: -25000.0,
           accountId: 'acc-checking',
         };
         dayEvents.push(ev);
         events.push(ev);
-        runningBalance -= 2100;
+        runningBalance -= 25000.0;
       }
 
       if (dayOfMonth === 5) {
@@ -675,7 +675,7 @@ class ApiClient {
           date: dateStr,
           type: 'goal_contrib',
           title: 'Auto Goal Savings (Emergency Fund)',
-          amount: -800.0,
+          amount: -15000.0,
           accountId: 'acc-savings',
         };
         dayEvents.push(ev);
@@ -683,7 +683,7 @@ class ApiClient {
       }
 
       runningBalance -= dailyBurnAverage;
-      const uncertainty = day * 35;
+      const uncertainty = day * 350;
 
       points.push({
         date: dateStr,
@@ -749,19 +749,19 @@ class ApiClient {
     return {
       weekRange: 'Aug 11 – Aug 18, 2026',
       summaryTitle: 'High savings momentum, watch dining pace',
-      totalIncome: 3850.0,
-      totalExpenses: 1120.4,
-      netSavings: 2729.6,
+      totalIncome: 47500.0,
+      totalExpenses: 21200.4,
+      netSavings: 26299.6,
       topCategoryName: 'Dining & Drinks',
-      topCategorySpend: 298.5,
+      topCategorySpend: 3980.5,
       vsLastWeekPct: -8.4,
       bullets: [
         'Total spending was 8.4% lower than last week, led by fewer discretionary retail purchases.',
-        'Marcus HYSA yield generated +$34.60 in accrued interest this week.',
-        '1 unusual transaction flagged at Apple Store ($489.00), Amex card balance is within standard cycle limit.',
+        'SBI Fixed Deposit yield generated +₹2,134.60 in accrued interest this week.',
+        '1 unusual transaction flagged at Chroma (₹45,000.00), ICICI card balance is within standard cycle limit.',
       ],
       actionableTip:
-        'Moving $150 from this week’s surplus to your Tokyo Trip goal will bring completion 18 days forward.',
+        'Moving ₹1,500 from this week’s surplus to your Bali Trip goal will bring completion 18 days forward.',
       anomaliesDetectedCount: 1,
     };
   }
@@ -786,12 +786,12 @@ class ApiClient {
     const netWorth = liquidCash - totalDebt;
 
     const cashFlowHistory = [
-      { month: 'Mar', income: 7700, expenses: 4320, savings: 3380 },
-      { month: 'Apr', income: 9150, expenses: 4890, savings: 4260 },
-      { month: 'May', income: 7700, expenses: 4120, savings: 3580 },
-      { month: 'Jun', income: 8900, expenses: 4650, savings: 4250 },
-      { month: 'Jul', income: 7700, expenses: 4410, savings: 3290 },
-      { month: 'Aug', income: 8100, expenses: 3980, savings: 4120 },
+      { month: 'Mar', income: 77000, expenses: 43200, savings: 33800 },
+      { month: 'Apr', income: 91500, expenses: 48900, savings: 42600 },
+      { month: 'May', income: 77000, expenses: 41200, savings: 35800 },
+      { month: 'Jun', income: 89000, expenses: 46500, savings: 42500 },
+      { month: 'Jul', income: 77000, expenses: 44100, savings: 32900 },
+      { month: 'Aug', income: 81000, expenses: 39800, savings: 41200 },
     ];
 
     const currentMonthPrefix = format(new Date(), 'yyyy-MM');
@@ -799,7 +799,7 @@ class ApiClient {
       (t) => t.date.startsWith(currentMonthPrefix) && t.amount < 0 && t.categoryId !== 'cat-transfers'
     );
 
-    const totalMonthlySpend = Math.abs(monthTx.reduce((sum, t) => sum + t.amount, 0)) || 3980;
+    const totalMonthlySpend = Math.abs(monthTx.reduce((sum, t) => sum + t.amount, 0)) || 39800;
     const totalBudget = data.categories.reduce((sum, c) => sum + (c.monthlyBudget || 0), 0);
 
     const categorySpend = data.categories
@@ -820,44 +820,44 @@ class ApiClient {
       })
       .sort((a, b) => b.amount - a.amount);
 
-    const monthlyBurn = totalMonthlySpend > 0 ? totalMonthlySpend : 4100;
+    const monthlyBurn = totalMonthlySpend > 0 ? totalMonthlySpend : 41000;
     const cashRunwayMonths = Number((liquidCash / monthlyBurn).toFixed(1));
 
     const upcomingBills = [
       {
         id: 'bill-1',
-        merchant: 'Avalon Bay Communities (Rent)',
-        amount: 2100.0,
+        merchant: 'Prestige Apartments (Rent)',
+        amount: 25000.0,
         dueDate: format(addDays(new Date(), 13), 'yyyy-MM-dd'),
         categoryId: 'cat-housing',
-        accountName: 'Chase Checking (4821)',
+        accountName: 'HDFC Checking (4821)',
         daysAway: 13,
       },
       {
         id: 'bill-2',
-        merchant: 'Equinox Fitness Club',
-        amount: 220.0,
+        merchant: 'CureFit Cult',
+        amount: 1500.0,
         dueDate: format(addDays(new Date(), 6), 'yyyy-MM-dd'),
         categoryId: 'cat-health',
-        accountName: 'Chase Checking (4821)',
+        accountName: 'HDFC Checking (4821)',
         daysAway: 6,
       },
       {
         id: 'bill-3',
-        merchant: 'Sonic Fiber Internet',
-        amount: 65.0,
+        merchant: 'JioFiber Broadband',
+        amount: 1499.0,
         dueDate: format(addDays(new Date(), 4), 'yyyy-MM-dd'),
         categoryId: 'cat-utilities',
-        accountName: 'Chase Checking (4821)',
+        accountName: 'HDFC Checking (4821)',
         daysAway: 4,
       },
       {
         id: 'bill-4',
-        merchant: 'Netflix Premium 4K',
-        amount: 22.99,
+        merchant: 'Netflix Premium',
+        amount: 649.0,
         dueDate: format(addDays(new Date(), 8), 'yyyy-MM-dd'),
         categoryId: 'cat-subscriptions',
-        accountName: 'Amex Gold (1004)',
+        accountName: 'ICICI Amazon Pay (1004)',
         daysAway: 8,
       },
     ];

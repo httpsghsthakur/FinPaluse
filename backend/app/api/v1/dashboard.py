@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, date
+from calendar import monthrange
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select, func, and_
@@ -11,11 +12,11 @@ from app.db.session import get_db
 from app.db.models.account import Account
 from app.db.models.transaction import Transaction
 from app.db.models.category import Category
+from app.db.models.recurring import RecurringTransaction
 from app.schemas.dashboard import DashboardSummaryResponse
 from app.services.seed_service import DEMO_USER_ID
 
 router = APIRouter()
-
 
 @router.get("/summary", response_model=DashboardSummaryResponse)
 async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
@@ -26,6 +27,7 @@ async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
         select(Account).where(Account.user_id == DEMO_USER_ID)
     )
     accounts = acc_result.scalars().all()
+    account_map = {a.id: a.name for a in accounts}
 
     checking = sum(a.balance for a in accounts if a.type == "checking")
     savings = sum(a.balance for a in accounts if a.type == "savings")
@@ -37,16 +39,15 @@ async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
 
     # Current month spending
     today = date.today()
-    from calendar import monthrange
     start_date = date(today.year, today.month, 1)
     _, last_day = monthrange(today.year, today.month)
     end_date = date(today.year, today.month, last_day)
 
+    # Get all transactions for the current month
     tx_result = await db.execute(
         select(Transaction).where(
             and_(
                 Transaction.user_id == DEMO_USER_ID,
-                Transaction.amount < 0,
                 Transaction.category_id != "cat-transfers",
                 Transaction.date >= start_date,
                 Transaction.date <= end_date,
@@ -54,7 +55,17 @@ async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
         )
     )
     month_txs = tx_result.scalars().all()
-    total_monthly_spend = abs(sum(tx.amount for tx in month_txs)) if month_txs else 3980
+    
+    # Calculate current month's income and expenses
+    current_month_income = sum(tx.amount for tx in month_txs if tx.amount > 0)
+    current_month_expenses = abs(sum(tx.amount for tx in month_txs if tx.amount < 0))
+    total_monthly_spend = current_month_expenses
+    
+    # Dynamic Savings Rate
+    if current_month_income > 0:
+        savings_rate = max(0.0, round(((current_month_income - current_month_expenses) / current_month_income) * 100, 1))
+    else:
+        savings_rate = 0.0
 
     # Get categories for budget total
     cat_result = await db.execute(
@@ -67,23 +78,38 @@ async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
     expense_cats = [c for c in categories if c.type == "expense"]
     cat_spending: dict[str, float] = {}
     for tx in month_txs:
-        cat_spending[tx.category_id] = cat_spending.get(tx.category_id, 0) + abs(tx.amount)
+        if tx.amount < 0:
+            cat_spending[tx.category_id] = cat_spending.get(tx.category_id, 0) + abs(tx.amount)
 
     category_spend = []
     for cat in expense_cats:
         spent = round(cat_spending.get(cat.id, 0), 2)
-        effective = spent if spent > 0 else round((cat.monthly_budget or 0) * 0.72)
-        category_spend.append({
-            "categoryId": cat.id,
-            "categoryName": cat.name,
-            "color": cat.color,
-            "amount": effective,
-            "percentage": round((effective / (total_monthly_spend or 1)) * 100),
-            "budget": cat.monthly_budget or 0,
-        })
+        if spent > 0 or cat.monthly_budget:
+            category_spend.append({
+                "categoryId": cat.id,
+                "categoryName": cat.name,
+                "color": cat.color,
+                "amount": spent,
+                "percentage": round((spent / (total_monthly_spend or 1)) * 100) if total_monthly_spend else 0,
+                "budget": cat.monthly_budget or 0,
+            })
     category_spend.sort(key=lambda x: x["amount"], reverse=True)
 
-    monthly_burn = total_monthly_spend if total_monthly_spend > 0 else 4100
+    # Dynamic Monthly Burn (Rolling 30 days)
+    rolling_30_start = today - timedelta(days=30)
+    rolling_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            and_(
+                Transaction.user_id == DEMO_USER_ID,
+                Transaction.amount < 0,
+                Transaction.category_id != "cat-transfers",
+                Transaction.date >= rolling_30_start,
+                Transaction.date <= today,
+            )
+        )
+    )
+    rolling_30_spend = abs(rolling_tx_result.scalar() or 0.0)
+    monthly_burn = rolling_30_spend if rolling_30_spend > 0 else 4100
     cash_runway = round(liquid_cash / monthly_burn, 1) if monthly_burn else 0
 
     # Recent transactions
@@ -112,64 +138,80 @@ async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
             "tags": tags,
         })
 
-    # Upcoming bills
-    today = datetime.now()
-    upcoming_bills = [
-        {
-            "id": "bill-1",
-            "merchant": "Avalon Bay Communities (Rent)",
-            "amount": 2100.0,
-            "dueDate": (today + timedelta(days=13)).strftime("%Y-%m-%d"),
-            "categoryId": "cat-housing",
-            "accountName": "Chase Checking (4821)",
-            "daysAway": 13,
-        },
-        {
-            "id": "bill-2",
-            "merchant": "Equinox Fitness Club",
-            "amount": 220.0,
-            "dueDate": (today + timedelta(days=6)).strftime("%Y-%m-%d"),
-            "categoryId": "cat-health",
-            "accountName": "Chase Checking (4821)",
-            "daysAway": 6,
-        },
-        {
-            "id": "bill-3",
-            "merchant": "Sonic Fiber Internet",
-            "amount": 65.0,
-            "dueDate": (today + timedelta(days=4)).strftime("%Y-%m-%d"),
-            "categoryId": "cat-utilities",
-            "accountName": "Chase Checking (4821)",
-            "daysAway": 4,
-        },
-        {
-            "id": "bill-4",
-            "merchant": "Netflix Premium 4K",
-            "amount": 22.99,
-            "dueDate": (today + timedelta(days=8)).strftime("%Y-%m-%d"),
-            "categoryId": "cat-subscriptions",
-            "accountName": "Amex Gold (1004)",
-            "daysAway": 8,
-        },
-    ]
+    # Dynamic Upcoming Bills
+    rec_result = await db.execute(
+        select(RecurringTransaction)
+        .where(
+            and_(
+                RecurringTransaction.user_id == DEMO_USER_ID,
+                RecurringTransaction.is_active == True,
+                RecurringTransaction.expected_next_date >= today
+            )
+        )
+        .order_by(RecurringTransaction.expected_next_date.asc())
+        .limit(5)
+    )
+    recs = rec_result.scalars().all()
+    upcoming_bills = []
+    for r in recs:
+        days_away = (r.expected_next_date - today).days
+        upcoming_bills.append({
+            "id": r.id,
+            "merchant": r.merchant,
+            "amount": abs(r.expected_amount),
+            "dueDate": r.expected_next_date.isoformat(),
+            "categoryId": r.category_id or "cat-utilities",
+            "accountName": account_map.get(r.account_id, "Main Checking"),
+            "daysAway": days_away
+        })
 
-    # Cash flow history (last 6 months)
-    cash_flow_history = [
-        {"month": "Mar", "income": 7700, "expenses": 4320, "savings": 3380},
-        {"month": "Apr", "income": 9150, "expenses": 4890, "savings": 4260},
-        {"month": "May", "income": 7700, "expenses": 4120, "savings": 3580},
-        {"month": "Jun", "income": 8900, "expenses": 4650, "savings": 4250},
-        {"month": "Jul", "income": 7700, "expenses": 4410, "savings": 3290},
-        {"month": "Aug", "income": 8100, "expenses": 3980, "savings": 4120},
-    ]
+    # Dynamic Cash Flow History (Last 6 Months)
+    cash_flow_history = []
+    for i in range(5, -1, -1):
+        # Determine start and end of the target month
+        target_month_date = today.replace(day=1) - timedelta(days=i * 28)
+        target_month_date = target_month_date.replace(day=1)
+        _, t_last = monthrange(target_month_date.year, target_month_date.month)
+        t_start = target_month_date
+        t_end = target_month_date.replace(day=t_last)
+        
+        hist_tx_res = await db.execute(
+            select(Transaction.amount).where(
+                and_(
+                    Transaction.user_id == DEMO_USER_ID,
+                    Transaction.category_id != "cat-transfers",
+                    Transaction.date >= t_start,
+                    Transaction.date <= t_end
+                )
+            )
+        )
+        hist_amounts = hist_tx_res.scalars().all()
+        inc = sum(a for a in hist_amounts if a > 0)
+        exp = abs(sum(a for a in hist_amounts if a < 0))
+        sav = inc - exp
+        
+        cash_flow_history.append({
+            "month": t_start.strftime("%b"),
+            "income": round(inc),
+            "expenses": round(exp),
+            "savings": round(sav)
+        })
+
+    # Dynamic Net Worth MoM %
+    current_month_net = current_month_income - current_month_expenses
+    last_month_net_worth = net_worth - current_month_net
+    if last_month_net_worth > 0:
+        net_worth_mom_pct = round(((net_worth - last_month_net_worth) / last_month_net_worth) * 100, 1)
+    else:
+        net_worth_mom_pct = 0.0
 
     return {
         "netWorth": net_worth,
-        "netWorthMomPct": 4.8,
+        "netWorthMomPct": net_worth_mom_pct,
         "monthlySpending": total_monthly_spend,
         "monthlyBudgetTotal": total_budget,
         "cashRunwayMonths": cash_runway,
-        "savingsRatePct": 42.5,
+        "savingsRatePct": savings_rate,
         "totalLiquidCash": liquid_cash,
         "totalDebt": total_debt,
         "cashFlowHistory": cash_flow_history,
@@ -177,7 +219,7 @@ async def get_dashboard_summary(db: AsyncSession = Depends(get_db)):
         "recentTransactions": recent_transactions,
         "upcomingBills": upcoming_bills,
         "lowBalanceAlert": {
-            "hasLowBalance": False,
+            "hasLowBalance": liquid_cash < 2000,
             "threshold": 2000,
         },
     }

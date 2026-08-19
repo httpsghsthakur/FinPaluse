@@ -359,6 +359,94 @@ def generate_transactions(user_id: str) -> list[dict]:
     return transactions
 
 
+def generate_recurring(user_id: str) -> list[dict]:
+    """Generate recurring transactions (bills, subscriptions, salary) for the demo user."""
+    today = datetime.now()
+    
+    return [
+        {
+            "id": "rec-rent",
+            "user_id": user_id,
+            "merchant": "Avalon Bay Communities (Rent)",
+            "category_id": "cat-housing",
+            "account_id": "acc-checking",
+            "is_recurring": True,
+            "frequency": "monthly",
+            "expected_amount": -2100.0,
+            "amount_variance": 0.0,
+            "expected_next_date": (today.replace(day=1) + timedelta(days=32)).replace(day=1).date().isoformat(),
+            "confidence": 0.99,
+            "last_seen_date": today.replace(day=1).date().isoformat(),
+            "occurrence_count": 12,
+            "is_active": True,
+        },
+        {
+            "id": "rec-gym",
+            "user_id": user_id,
+            "merchant": "Equinox Fitness Club",
+            "category_id": "cat-health",
+            "account_id": "acc-checking",
+            "is_recurring": True,
+            "frequency": "monthly",
+            "expected_amount": -220.0,
+            "amount_variance": 0.0,
+            "expected_next_date": (today + timedelta(days=6)).date().isoformat(),
+            "confidence": 0.95,
+            "last_seen_date": (today - timedelta(days=24)).date().isoformat(),
+            "occurrence_count": 6,
+            "is_active": True,
+        },
+        {
+            "id": "rec-internet",
+            "user_id": user_id,
+            "merchant": "Sonic Fiber Internet",
+            "category_id": "cat-utilities",
+            "account_id": "acc-checking",
+            "is_recurring": True,
+            "frequency": "monthly",
+            "expected_amount": -65.0,
+            "amount_variance": 0.0,
+            "expected_next_date": (today + timedelta(days=4)).date().isoformat(),
+            "confidence": 0.98,
+            "last_seen_date": (today - timedelta(days=26)).date().isoformat(),
+            "occurrence_count": 24,
+            "is_active": True,
+        },
+        {
+            "id": "rec-netflix",
+            "user_id": user_id,
+            "merchant": "Netflix Premium 4K",
+            "category_id": "cat-subscriptions",
+            "account_id": "acc-credit",
+            "is_recurring": True,
+            "frequency": "monthly",
+            "expected_amount": -22.99,
+            "amount_variance": 0.0,
+            "expected_next_date": (today + timedelta(days=8)).date().isoformat(),
+            "confidence": 0.98,
+            "last_seen_date": (today - timedelta(days=22)).date().isoformat(),
+            "occurrence_count": 18,
+            "is_active": True,
+        },
+        {
+            "id": "rec-salary",
+            "user_id": user_id,
+            "merchant": "Acme Corp Direct Deposit",
+            "category_id": "cat-income",
+            "account_id": "acc-checking",
+            "is_recurring": True,
+            "frequency": "biweekly",
+            "expected_amount": 3850.0,
+            "amount_variance": 0.0,
+            "expected_next_date": (today + timedelta(days=2)).date().isoformat(),
+            "confidence": 0.99,
+            "last_seen_date": (today - timedelta(days=12)).date().isoformat(),
+            "occurrence_count": 48,
+            "is_active": True,
+        }
+    ]
+
+
 def generate_user(user_id: str) -> dict:
     """Generate the demo user matching frontend DEFAULT_PROFILE."""
     return {

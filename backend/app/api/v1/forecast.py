@@ -4,16 +4,18 @@ from __future__ import annotations
 from datetime import datetime, timedelta, date
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.db.models.account import Account
+from app.db.models.transaction import Transaction
+from app.db.models.recurring import RecurringTransaction
+from app.db.models.goal import Goal
 from app.schemas.forecast import ForecastResponse, ForecastPointResponse, ForecastEventResponse
 from app.services.seed_service import DEMO_USER_ID
 
 router = APIRouter()
-
 
 @router.get("", response_model=ForecastResponse)
 async def get_forecast(
@@ -22,9 +24,7 @@ async def get_forecast(
 ):
     """
     Generate cash-flow forecast matching frontend's getForecast().
-    
-    Phase 1: Deterministic forecast (mirrors frontend mock logic).
-    Phase 4: Replaced by ML forecasting models (Prophet, XGBoost).
+    Dynamically computes based on real historical transactions and recurring bills.
     """
     # Get account balances
     result = await db.execute(
@@ -36,29 +36,87 @@ async def get_forecast(
     total_savings = sum(a.balance for a in accounts if a.type == "savings")
     current_liquid = total_checking + total_savings
 
+    today = datetime.now().date()
+    start_history = today - timedelta(days=30)
+    
+    # Get all transactions from last 30 days
+    tx_result = await db.execute(
+        select(Transaction).where(
+            and_(
+                Transaction.user_id == DEMO_USER_ID,
+                Transaction.date >= start_history,
+                Transaction.date <= today
+            )
+        ).order_by(Transaction.date.asc())
+    )
+    history_txs = tx_result.scalars().all()
+    
+    # Calculate daily burn rate (average daily expenses excluding transfers and large anomalies)
+    total_expenses = sum(abs(tx.amount) for tx in history_txs if tx.amount < 0 and not tx.is_anomaly and tx.category_id != "cat-transfers")
+    daily_burn = total_expenses / 30 if total_expenses > 0 else 115.0
+
     points: list[dict] = []
     events: list[dict] = []
-    today = datetime.now().date()
+    
+    # Calculate daily net flow for past 30 days
+    daily_flow = {start_history + timedelta(days=i): 0.0 for i in range(31)}
+    for tx in history_txs:
+        if isinstance(tx.date, datetime):
+            d = tx.date.date()
+        else:
+            d = tx.date
+        if d in daily_flow:
+            daily_flow[d] += tx.amount
 
-    # Past 30 days — historical actual balance points
-    past_running = current_liquid - 3400
-    for d in range(30, 0, -1):
-        past_date = today - timedelta(days=d)
-        past_running += (3850 if d % 15 == 0 else 0) - (2100 if d % 30 == 0 else 85)
+    # Backwards compute historical balances
+    # If today's balance is current_liquid, yesterday's was current_liquid - today's net flow
+    historical_balances = {today: current_liquid}
+    running_back = current_liquid
+    for i in range(1, 31):
+        d = today - timedelta(days=i)
+        d_next = today - timedelta(days=i-1)
+        running_back -= daily_flow.get(d_next, 0)
+        historical_balances[d] = running_back
 
+    # Add historical points
+    for i in range(30, 0, -1):
+        d = today - timedelta(days=i)
+        bal = historical_balances.get(d, current_liquid)
         points.append({
-            "date": past_date.isoformat(),
-            "actualBalance": round(past_running),
-            "forecastedBalance": round(past_running),
-            "lowerBound": round(past_running * 0.98),
-            "upperBound": round(past_running * 1.02),
+            "date": d.isoformat(),
+            "actualBalance": round(bal),
+            "forecastedBalance": round(bal),
+            "lowerBound": round(bal * 0.98),
+            "upperBound": round(bal * 1.02),
             "isActual": True,
             "events": [],
         })
 
+    # Fetch Recurring Transactions for Future Projection
+    rec_result = await db.execute(
+        select(RecurringTransaction).where(
+            and_(
+                RecurringTransaction.user_id == DEMO_USER_ID,
+                RecurringTransaction.is_active == True
+            )
+        )
+    )
+    recurring_items = rec_result.scalars().all()
+    
+    # Fetch active Goals for auto-contributions
+    goal_result = await db.execute(
+        select(Goal).where(
+            and_(
+                Goal.user_id == DEMO_USER_ID,
+                Goal.is_completed == False,
+                Goal.monthly_contribution > 0
+            )
+        )
+    )
+    active_goals = goal_result.scalars().all()
+
     # Future projected days
     running_balance = current_liquid
-    daily_burn = 115  # ~$3,450 / 30
 
     for day in range(days + 1):
         future_date = today + timedelta(days=day)
@@ -66,47 +124,47 @@ async def get_forecast(
         day_events: list[dict] = []
         dom = future_date.day
 
-        # Payday on 1st and 15th
-        if dom in (1, 15):
-            ev = {
-                "id": f"ev-pay-{day}",
-                "date": date_str,
-                "type": "payday",
-                "title": "Direct Deposit Payroll",
-                "amount": 3850.0,
-                "accountId": "acc-checking",
-            }
-            day_events.append(ev)
-            events.append(ev)
-            running_balance += 3850
+        # Check recurring items
+        for rec in recurring_items:
+            # Simple check based on frequency (assuming monthly occurs on the same dom, biweekly every 14 days)
+            is_occurrence = False
+            if rec.frequency == "monthly" and rec.expected_next_date and dom == rec.expected_next_date.day:
+                is_occurrence = True
+            elif rec.frequency == "biweekly" and rec.expected_next_date:
+                days_since = (future_date - rec.expected_next_date).days
+                if days_since >= 0 and days_since % 14 == 0:
+                    is_occurrence = True
+            
+            if is_occurrence:
+                ev = {
+                    "id": f"ev-rec-{rec.id}-{day}",
+                    "date": date_str,
+                    "type": "payday" if rec.expected_amount > 0 else "recurring_bill",
+                    "title": rec.merchant,
+                    "amount": rec.expected_amount,
+                    "accountId": rec.account_id or "acc-checking",
+                }
+                day_events.append(ev)
+                events.append(ev)
+                running_balance += rec.expected_amount
 
-        # Rent on 1st
-        if dom == 1:
-            ev = {
-                "id": f"ev-rent-{day}",
-                "date": date_str,
-                "type": "recurring_bill",
-                "title": "Apartment Rent Lease",
-                "amount": -2100.0,
-                "accountId": "acc-checking",
-            }
-            day_events.append(ev)
-            events.append(ev)
-            running_balance -= 2100
-
-        # Goal auto-contribution on 5th
+        # Check goal contributions (assume 5th of month)
         if dom == 5:
-            ev = {
-                "id": f"ev-goal-{day}",
-                "date": date_str,
-                "type": "goal_contrib",
-                "title": "Auto Goal Savings (Emergency Fund)",
-                "amount": -800.0,
-                "accountId": "acc-savings",
-            }
-            day_events.append(ev)
-            events.append(ev)
+            for g in active_goals:
+                if g.monthly_contribution:
+                    ev = {
+                        "id": f"ev-goal-{g.id}-{day}",
+                        "date": date_str,
+                        "type": "goal_contrib",
+                        "title": f"Auto Goal: {g.name}",
+                        "amount": -g.monthly_contribution,
+                        "accountId": g.linked_account_id or "acc-savings",
+                    }
+                    day_events.append(ev)
+                    events.append(ev)
+                    running_balance -= g.monthly_contribution
 
+        # Subtract daily burn
         running_balance -= daily_burn
         uncertainty = day * 35
 

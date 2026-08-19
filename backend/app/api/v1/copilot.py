@@ -47,18 +47,28 @@ async def _compute_financials(db: AsyncSession) -> dict:
     liquid = checking + savings
     net_worth = liquid + credit
 
-    # Recent transactions
+    # Past 30 days transactions for metrics
+    from datetime import datetime, timedelta, date
+    today = date.today()
+    start_30 = today - timedelta(days=30)
+    
     tx_result = await db.execute(
-        select(Transaction).where(Transaction.user_id == DEMO_USER_ID).order_by(Transaction.date.desc()).limit(75)
+        select(Transaction).where(
+            and_(
+                Transaction.user_id == DEMO_USER_ID,
+                Transaction.date >= start_30,
+                Transaction.date <= today
+            )
+        )
     )
     recent_txs = tx_result.scalars().all()
     expense_txs = [t for t in recent_txs if t.amount < 0 and t.category_id != "cat-transfers"]
     income_txs = [t for t in recent_txs if t.amount > 0]
     total_expense = abs(sum(t.amount for t in expense_txs))
     total_income = sum(t.amount for t in income_txs)
-    monthly_burn = total_expense if total_expense > 0 else 4200
-    runway = round(liquid / monthly_burn, 1) if monthly_burn else 0
-    savings_rate = max(0, ((total_income - total_expense) / total_income * 100)) if total_income > 0 else 38
+    monthly_burn = total_expense if total_expense > 0 else 0
+    runway = round(liquid / monthly_burn, 1) if monthly_burn > 0 else 0
+    savings_rate = max(0.0, ((total_income - total_expense) / total_income * 100)) if total_income > 0 else 0.0
 
     # Category spending
     dining_spend = abs(sum(t.amount for t in expense_txs if t.category_id == "cat-dining"))
@@ -76,7 +86,7 @@ async def _compute_financials(db: AsyncSession) -> dict:
         select(Category).where(Category.id == "cat-dining", Category.user_id == DEMO_USER_ID)
     )
     dining_cat = cat_result.scalar_one_or_none()
-    dining_budget = dining_cat.monthly_budget if dining_cat else 450
+    dining_budget = dining_cat.monthly_budget if dining_cat else 0
 
     return {
         "checking": checking, "savings": savings, "credit": credit,

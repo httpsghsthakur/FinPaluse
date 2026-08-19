@@ -16,6 +16,7 @@ from app.db.models.transaction import Transaction
 from app.db.models.category import Category
 from app.db.models.goal import Goal
 from app.db.models.insight import Insight
+from app.db.models.recurring import RecurringTransaction
 from app.services.seed_service import (
     DEMO_USER_ID,
     generate_user,
@@ -24,6 +25,7 @@ from app.services.seed_service import (
     generate_goals,
     generate_insights,
     generate_transactions,
+    generate_recurring,
 )
 
 router = APIRouter()
@@ -130,6 +132,27 @@ async def seed_database(db: AsyncSession) -> None:
         db.add(tx)
     await db.flush()
 
+    # Create recurring
+    for rec_data in generate_recurring(DEMO_USER_ID):
+        rec = RecurringTransaction(
+            id=rec_data["id"],
+            user_id=DEMO_USER_ID,
+            merchant=rec_data["merchant"],
+            category_id=rec_data["category_id"],
+            account_id=rec_data["account_id"],
+            is_recurring=rec_data["is_recurring"],
+            frequency=rec_data["frequency"],
+            expected_amount=rec_data["expected_amount"],
+            amount_variance=rec_data["amount_variance"],
+            expected_next_date=datetime.fromisoformat(rec_data["expected_next_date"]).date(),
+            confidence=rec_data["confidence"],
+            last_seen_date=datetime.fromisoformat(rec_data["last_seen_date"]).date(),
+            occurrence_count=rec_data["occurrence_count"],
+            is_active=rec_data["is_active"],
+        )
+        db.add(rec)
+    await db.flush()
+
     # Create insights
     for ins_data in generate_insights(DEMO_USER_ID):
         ins = Insight(
@@ -155,6 +178,7 @@ async def reset_all_data(db: AsyncSession = Depends(get_db)):
     """Reset all demo data to initial state."""
     # Delete in dependency order
     await db.execute(delete(Transaction).where(Transaction.user_id == DEMO_USER_ID))
+    await db.execute(delete(RecurringTransaction).where(RecurringTransaction.user_id == DEMO_USER_ID))
     await db.execute(delete(Insight).where(Insight.user_id == DEMO_USER_ID))
     await db.execute(delete(Goal).where(Goal.user_id == DEMO_USER_ID))
     await db.execute(delete(Account).where(Account.user_id == DEMO_USER_ID))
@@ -175,6 +199,7 @@ async def export_all_data(db: AsyncSession = Depends(get_db)):
     txs = (await db.execute(
         select(Transaction).where(Transaction.user_id == DEMO_USER_ID).order_by(Transaction.date.desc())
     )).scalars().all()
+    recs = (await db.execute(select(RecurringTransaction).where(RecurringTransaction.user_id == DEMO_USER_ID))).scalars().all()
     insights = (await db.execute(select(Insight).where(Insight.user_id == DEMO_USER_ID))).scalars().all()
 
     return {
@@ -182,5 +207,6 @@ async def export_all_data(db: AsyncSession = Depends(get_db)):
         "categories": [{"id": c.id, "name": c.name, "icon": c.icon, "color": c.color, "type": c.type, "monthlyBudget": c.monthly_budget, "isSystem": c.is_system, "isCustom": c.is_custom} for c in cats],
         "goals": [{"id": g.id, "name": g.name, "targetAmount": g.target_amount, "currentAmount": g.current_amount, "deadline": g.deadline.isoformat() if isinstance(g.deadline, date) else str(g.deadline), "category": g.category, "linkedAccountId": g.linked_account_id, "monthlyContribution": g.monthly_contribution, "color": g.color, "icon": g.icon, "isCompleted": g.is_completed, "boostSuggestion": g.boost_suggestion} for g in goals],
         "transactions": [{"id": t.id, "date": t.date.isoformat() if isinstance(t.date, date) else str(t.date), "merchant": t.merchant, "categoryId": t.category_id, "accountId": t.account_id, "amount": t.amount, "status": t.status, "isRecurring": t.is_recurring, "isAnomaly": t.is_anomaly, "anomalyReason": t.anomaly_reason, "notes": t.notes} for t in txs],
+        "recurring": [{"id": r.id, "merchant": r.merchant, "categoryId": r.category_id, "accountId": r.account_id, "isRecurring": r.is_recurring, "frequency": r.frequency, "expectedAmount": r.expected_amount, "expectedNextDate": r.expected_next_date.isoformat() if r.expected_next_date else None, "confidence": r.confidence, "isActive": r.is_active} for r in recs],
         "insights": [{"id": i.id, "title": i.title, "description": i.description, "severity": i.severity, "type": i.type, "date": i.date.isoformat() if i.date else "", "isDismissed": i.is_dismissed, "whyExplanation": i.why_explanation, "groundedData": i.grounded_data or [], "actionLabel": i.action_label, "actionPath": i.action_path} for i in insights],
     }

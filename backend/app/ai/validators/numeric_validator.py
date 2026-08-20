@@ -22,8 +22,8 @@ class NumericValidator:
         if not grounded_metrics:
             return True
 
-        # Extract dollar amounts from text ($12,345 or $123.45)
-        text_amounts = set(re.findall(r"\$[\d,]+(?:\.\d+)?", response_text))
+        # Extract dollar amounts from text (₹12,345 or ₹123.45)
+        text_amounts = set(re.findall(r"₹[\d,]+(?:\.\d+)?", response_text))
         metric_values = {m.get("value") for m in grounded_metrics if m.get("value")}
 
         # At least one grounded metric should be referenced or contextualized

@@ -17,7 +17,7 @@ export const CURRENCY_RATES: Record<CurrencyCode, number> = {
 
 export function formatCurrency(
   amount: number,
-  currency: CurrencyCode = 'USD',
+  currency: CurrencyCode = 'INR',
   options?: {
     showDecimals?: boolean;
     compact?: boolean;
@@ -25,7 +25,7 @@ export function formatCurrency(
   }
 ): string {
   const { showDecimals = true, compact = false, showSign = false } = options || {};
-  const symbol = CURRENCY_SYMBOLS[currency] || '$';
+  const symbol = CURRENCY_SYMBOLS[currency] || '₹';
   const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
 

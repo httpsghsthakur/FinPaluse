@@ -111,7 +111,7 @@ class PersonalizedEnsembleClassifier:
                 # Build explanation
                 factors = [
                     f"Merchant text pattern matching '{clean_m}'",
-                    f"Transaction amount (${abs(amount):.2f}) matches category distribution",
+                    f"Transaction amount (₹{abs(amount):.2f}) matches category distribution",
                 ]
                 explanation = f"Classified based on merchant text characteristics and typical amount range."
 

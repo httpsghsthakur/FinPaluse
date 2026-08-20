@@ -66,11 +66,11 @@ class GoalProjectionEngine:
         # Boost suggestions
         if not on_track:
             monthly_diff = required_monthly - effective_contribution
-            boost_suggestion = f"Increase contribution by ${monthly_diff:.2f}/mo to meet your deadline."
+            boost_suggestion = f"Increase contribution by ₹{monthly_diff:.2f}/mo to meet your deadline."
         else:
             accelerate_months = 2
             accel_contrib = round(remaining / max(1, months_to_complete - accelerate_months), 2)
-            boost_suggestion = f"Adding ${accel_contrib - effective_contribution:.2f}/mo will complete this {accelerate_months} months earlier."
+            boost_suggestion = f"Adding ₹{accel_contrib - effective_contribution:.2f}/mo will complete this {accelerate_months} months earlier."
 
         return {
             "is_completed": False,

@@ -80,11 +80,11 @@ class AnomalyDetector:
         clean_cat = category_id.replace("cat-", "").capitalize() if category_id else "General"
         if is_anomaly:
             explanation = (
-                f"${abs_amt:,.2f} is {multiplier:.1f}x higher than your typical {clean_cat} "
-                f"transaction (avg ${cat_mean:,.2f})."
+                f"₹{abs_amt:,.2f} is {multiplier:.1f}x higher than your typical {clean_cat} "
+                f"transaction (avg ₹{cat_mean:,.2f})."
             )
         else:
-            explanation = f"Within normal range for {clean_cat} (typical avg ${cat_mean:,.2f})."
+            explanation = f"Within normal range for {clean_cat} (typical avg ₹{cat_mean:,.2f})."
 
         return {
             "is_anomaly": is_anomaly,

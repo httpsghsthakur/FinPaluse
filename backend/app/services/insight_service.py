@@ -52,16 +52,16 @@ class InsightGeneratorService:
                     insights.append({
                         "id": f"ins-bgt-{cid}-{current_month}",
                         "title": f"{cat.get('name', 'Category')} pacing {int((projected / limit - 1) * 100)}% over budget",
-                        "description": f"You have spent ${spent:,.2f} of your ${limit:,.2f} budget with {30 - current_day} days left in cycle.",
+                        "description": f"You have spent ₹{spent:,.2f} of your ₹{limit:,.2f} budget with {30 - current_day} days left in cycle.",
                         "severity": "warning" if spent < limit else "alert",
                         "type": "alert",
                         "date": today.isoformat(),
                         "is_dismissed": False,
-                        "why_explanation": f"Daily average spend in {cat.get('name')} is ${(spent / current_day):,.2f} vs ${(limit / 30):,.2f} target.",
+                        "why_explanation": f"Daily average spend in {cat.get('name')} is ₹{(spent / current_day):,.2f} vs ₹{(limit / 30):,.2f} target.",
                         "grounded_data": [
-                            {"label": f"Current {cat.get('name')} Spend", "value": f"${spent:,.2f}"},
-                            {"label": "Monthly Limit", "value": f"${limit:,.2f}"},
-                            {"label": "Projected Overage", "value": f"${overage:,.2f}"},
+                            {"label": f"Current {cat.get('name')} Spend", "value": f"₹{spent:,.2f}"},
+                            {"label": "Monthly Limit", "value": f"₹{limit:,.2f}"},
+                            {"label": "Projected Overage", "value": f"₹{overage:,.2f}"},
                         ],
                         "action_label": f"Adjust {cat.get('name')} Budget",
                         "action_path": "/app/budgets",
@@ -75,7 +75,7 @@ class InsightGeneratorService:
                 monthly_interest = round(bal * (0.0475 / 12), 2)
                 insights.append({
                     "id": f"ins-yield-{current_month}",
-                    "title": f"High-Yield Savings earned ${monthly_interest:,.2f} interest",
+                    "title": f"High-Yield Savings earned ₹{monthly_interest:,.2f} interest",
                     "description": f"Your {savings_acc.get('name', 'HYSA')} balance generated monthly yield at 4.75% APY.",
                     "severity": "success",
                     "type": "win",
@@ -84,8 +84,8 @@ class InsightGeneratorService:
                     "why_explanation": "Calculated from 30-day compound interest rate across your liquid cash balance.",
                     "grounded_data": [
                         {"label": "APY Rate", "value": "4.75%"},
-                        {"label": "Monthly Gain", "value": f"+${monthly_interest:,.2f}"},
-                        {"label": "Annualized Return", "value": f"${monthly_interest * 12:,.2f}"},
+                        {"label": "Monthly Gain", "value": f"+₹{monthly_interest:,.2f}"},
+                        {"label": "Annualized Return", "value": f"₹{monthly_interest * 12:,.2f}"},
                     ],
                     "action_label": "View HYSA Balance",
                     "action_path": "/app/forecast",
@@ -97,7 +97,7 @@ class InsightGeneratorService:
             top_anom = anomaly_txs[0]
             insights.append({
                 "id": f"ins-anom-{top_anom.get('id', '1')}",
-                "title": f"Unusual transaction flagged: {top_anom.get('merchant')} ${abs(float(top_anom.get('amount', 0))):,.2f}",
+                "title": f"Unusual transaction flagged: {top_anom.get('merchant')} ₹{abs(float(top_anom.get('amount', 0))):,.2f}",
                 "description": top_anom.get("anomalyReason") or top_anom.get("anomaly_reason") or "This transaction is higher than your typical average.",
                 "severity": "alert",
                 "type": "alert",
@@ -106,7 +106,7 @@ class InsightGeneratorService:
                 "why_explanation": "AI anomaly detection evaluates baseline distribution per merchant category.",
                 "grounded_data": [
                     {"label": "Merchant", "value": str(top_anom.get("merchant"))},
-                    {"label": "Amount", "value": f"${abs(float(top_anom.get('amount', 0))):,.2f}"},
+                    {"label": "Amount", "value": f"₹{abs(float(top_anom.get('amount', 0))):,.2f}"},
                 ],
                 "action_label": "Inspect Transaction",
                 "action_path": "/app/transactions",

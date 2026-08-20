@@ -24,6 +24,7 @@ import { SimulationScenario, SimulationResult } from '../types';
 import { api } from '../lib/api';
 import { formatCurrency } from '../lib/utils/formatters';
 import { useUIStore } from '../lib/store/useUIStore';
+import { useUserStore } from '../lib/store/useUserStore';
 
 const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] = [
   {
@@ -70,6 +71,7 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
 
 export const SimulatorPage: React.FC = () => {
   const { showToast } = useUIStore();
+  const { profile } = useUserStore();
   const [scenarioName, setScenarioName] = useState('Custom Scenario');
   const [monthlyIncomeDelta, setMonthlyIncomeDelta] = useState<number>(0);
   const [monthlyExpenseDelta, setMonthlyExpenseDelta] = useState<number>(0);

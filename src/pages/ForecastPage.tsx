@@ -24,8 +24,10 @@ import { ChartSkeleton } from '../components/ui/Skeletons';
 import { ForecastPoint, ForecastEvent } from '../types';
 import { api } from '../lib/api';
 import { formatCurrency, formatDate } from '../lib/utils/formatters';
+import { useUserStore } from '../lib/store/useUserStore';
 
 export const ForecastPage: React.FC = () => {
+  const { profile } = useUserStore();
   const [range, setRange] = useState<30 | 60 | 90>(90);
   const [points, setPoints] = useState<ForecastPoint[]>([]);
   const [events, setEvents] = useState<ForecastEvent[]>([]);

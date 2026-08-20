@@ -358,12 +358,12 @@ export const SimulatorPage: React.FC = () => {
                         stroke="#64748B"
                         fontSize={11}
                         tickLine={false}
-                        tickFormatter={(v) => `$${Math.round(v / 1000)}k`}
+                        tickFormatter={(v) => `₹${Math.round(v / 1000)}k`}
                       />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
                         formatter={(val: any, name: any) => [
-                          `$${Number(val).toLocaleString()}`,
+                          `₹${Number(val).toLocaleString()}`,
                           name === 'baseline' ? 'Baseline Path' : 'Simulated Path',
                         ]}
                       />

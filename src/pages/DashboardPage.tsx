@@ -186,11 +186,11 @@ export const DashboardPage: React.FC = () => {
                     stroke="#64748B"
                     fontSize={11}
                     tickLine={false}
-                    tickFormatter={(v) => `$${v / 1000}k`}
+                    tickFormatter={(v) => `₹${v / 1000}k`}
                   />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                    formatter={(val: any) => [`$${Number(val).toLocaleString()}`, '']}
+                    formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, '']}
                   />
                   <Area
                     type="monotone"
@@ -229,7 +229,7 @@ export const DashboardPage: React.FC = () => {
                   <PieChart>
                     <Tooltip
                       contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                      formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Spent']}
+                      formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Spent']}
                     />
                     <Pie
                       data={data.categorySpend.slice(0, 5)}
@@ -442,7 +442,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-xs font-mono font-bold text-white shrink-0">
-                  ${bill.amount.toFixed(2)}
+                  {formatCurrency(bill.amount, profile.currency)}
                 </div>
               </div>
             ))}

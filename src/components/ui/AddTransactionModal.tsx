@@ -48,7 +48,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       showToast({
         type: 'success',
         title: 'Transaction Logged',
-        description: `Added ${merchant} (${type === 'expense' ? '-' : '+'}$${num.toFixed(2)})`,
+        description: `Added ${merchant} (${type === 'expense' ? '-' : '+'}₹${num.toFixed(2)})`,
       });
 
       setMerchant('');

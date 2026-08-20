@@ -43,13 +43,13 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
         monthlyContribution: monthly,
         color,
         icon,
-        boostSuggestion: `Automating $${Math.round(monthly * 0.2)}/mo more will achieve this 3 weeks earlier.`,
+        boostSuggestion: `Automating ₹${Math.round(monthly * 0.2)}/mo more will achieve this 3 weeks earlier.`,
       });
 
       showToast({
         type: 'success',
         title: 'Goal Created',
-        description: `Tracking "${name}" with monthly target of $${monthly}.`,
+        description: `Tracking "${name}" with monthly target of ₹${monthly}.`,
       });
 
       setName('');

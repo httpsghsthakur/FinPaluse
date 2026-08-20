@@ -505,7 +505,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Default Monthly Budget ($)</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">Default Monthly Budget (₹)</label>
             <input
               type="number"
               required

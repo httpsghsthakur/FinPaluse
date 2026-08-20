@@ -250,7 +250,7 @@ export const GoalsPage: React.FC = () => {
         >
           <form onSubmit={handleDeposit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Deposit Amount ($)</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Deposit Amount (₹)</label>
               <input
                 type="number"
                 step="10"
@@ -269,7 +269,7 @@ export const GoalsPage: React.FC = () => {
                   onClick={() => setDepositAmount(preset)}
                   className="flex-1 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-slate-300 rounded-lg cursor-pointer"
                 >
-                  +${preset}
+                  +₹{preset}
                 </button>
               ))}
             </div>

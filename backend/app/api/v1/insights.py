@@ -139,10 +139,10 @@ async def get_weekly_digest(db: AsyncSession = Depends(get_db)):
         bullets.append(f"Total spending was {abs(vs_last_week)}% {'higher' if vs_last_week > 0 else 'lower'} than last week.")
         
     if top_cat_id:
-        bullets.append(f"Your highest spending category was {top_cat_name} at ${top_cat_amount:.2f}.")
+        bullets.append(f"Your highest spending category was {top_cat_name} at ₹{top_cat_amount:,.2f}.")
         
     for a in anomalies:
-        bullets.append(f"Unusual transaction flagged: {a.merchant} (${abs(a.amount):.2f}).")
+        bullets.append(f"Unusual transaction flagged: {a.merchant} (₹{abs(a.amount):,.2f}).")
         
     if not bullets:
         bullets.append("Routine week, no major spending anomalies detected.")

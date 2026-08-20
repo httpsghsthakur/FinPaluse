@@ -275,7 +275,7 @@ export const ForecastPage: React.FC = () => {
             </li>
             <li className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
-              <span>Fixed apartment rent lease of ₹25,000 debited on the 1st of every month.</span>
+              <span>Fixed apartment rent lease of {formatCurrency(25000, profile.currency)} debited on the 1st of every month.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />

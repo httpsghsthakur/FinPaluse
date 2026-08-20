@@ -47,9 +47,9 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
     },
   },
   {
-    name: 'Major Purchase (Car ₹10L Down)',
+    name: 'Major Purchase (Car Downpayment)',
     params: {
-      name: 'Major Purchase (Car ₹10L Down)',
+      name: 'Major Purchase (Car Downpayment)',
       monthlyIncomeDelta: 0,
       monthlyExpenseDelta: 450, // car payment + insurance
       oneTimeExpense: 1000000,
@@ -57,9 +57,9 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
     },
   },
   {
-    name: 'Aggressive Saving (Cut ₹15,000/mo)',
+    name: 'Aggressive Saving (Cut 15k/mo)',
     params: {
-      name: 'Aggressive Saving (Cut ₹15,000/mo)',
+      name: 'Aggressive Saving (Cut 15k/mo)',
       monthlyIncomeDelta: 0,
       monthlyExpenseDelta: -15000,
       oneTimeExpense: 0,
@@ -199,9 +199,9 @@ export const SimulatorPage: React.FC = () => {
               className="w-full accent-emerald-500 cursor-pointer"
             />
               <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
-                <span>-₹4,00,000</span>
-                <span>₹0</span>
-                <span>+₹5,00,000</span>
+                <span>-{formatCurrency(400000, profile.currency)}</span>
+                <span>{formatCurrency(0, profile.currency)}</span>
+                <span>+{formatCurrency(500000, profile.currency)}</span>
               </div>
           </div>
 
@@ -231,9 +231,9 @@ export const SimulatorPage: React.FC = () => {
               className="w-full accent-emerald-500 cursor-pointer"
             />
               <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
-                <span>-₹20,000 (Cuts)</span>
-                <span>₹0</span>
-                <span>+₹30,000 (Lifestyle)</span>
+                <span>-{formatCurrency(20000, profile.currency)} (Cuts)</span>
+                <span>{formatCurrency(0, profile.currency)}</span>
+                <span>+{formatCurrency(30000, profile.currency)} (Lifestyle)</span>
               </div>
           </div>
 
@@ -255,9 +255,9 @@ export const SimulatorPage: React.FC = () => {
               className="w-full accent-emerald-500 cursor-pointer"
             />
               <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
-                <span>₹0</span>
-                <span>₹1,50,000</span>
-                <span>₹3,00,000</span>
+                <span>{formatCurrency(0, profile.currency)}</span>
+                <span>{formatCurrency(150000, profile.currency)}</span>
+                <span>{formatCurrency(300000, profile.currency)}</span>
               </div>
           </div>
 

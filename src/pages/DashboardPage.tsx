@@ -84,6 +84,10 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
+  const avgSavings = data.cashFlowHistory.length 
+    ? data.cashFlowHistory.reduce((acc, curr) => acc + curr.savings, 0) / data.cashFlowHistory.length 
+    : 0;
+
   return (
     <div className="space-y-6">
       {/* Low-Balance Alert Banner if active */}
@@ -94,7 +98,7 @@ export const DashboardPage: React.FC = () => {
             <div className="text-xs">
               <span className="font-bold text-amber-300">Low Balance Forecast Warning: </span>
               <span className="text-slate-200">
-                Checking balance projected to dip below ${data.lowBalanceAlert.threshold} on{' '}
+                Checking balance projected to dip below {formatCurrency(data.lowBalanceAlert.threshold || 0, profile.currency)} on{' '}
                 {data.lowBalanceAlert.date}.
               </span>
             </div>
@@ -122,7 +126,7 @@ export const DashboardPage: React.FC = () => {
           title="Monthly Spend"
           value={data.monthlySpending}
           changePct={-3.2}
-          changePeriodText="vs Budget (₹4,94,000)"
+          changePeriodText={`vs Budget (${formatCurrency(data.monthlyBudgetTotal, profile.currency)})`}
           icon={CreditCard}
         />
         <KpiCard
@@ -152,7 +156,7 @@ export const DashboardPage: React.FC = () => {
           <ChartCard
             title="Cash Flow Dynamics"
             subtitle="6-Month Income vs Expenses Comparison"
-            footerNote="Net savings averaged +₹3,79,600/month across this period."
+            footerNote={`Net savings averaged ${avgSavings >= 0 ? '+' : ''}${formatCurrency(avgSavings, profile.currency)}/month across this period.`}
             actions={
               <div className="flex items-center gap-3 text-xs font-mono">
                 <span className="flex items-center gap-1.5 text-emerald-400">

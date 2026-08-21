@@ -1,35 +1,58 @@
 import { Scenario, ScenarioResult } from '../../../types';
 import { StorageData } from './seed';
-import { addMonths, format } from 'date-fns';
+import { addMonths, format, subDays, parseISO, isBefore } from 'date-fns';
 
 export function runWhatIfSimulation(scenario: Scenario, data: StorageData): ScenarioResult {
-  // Baseline calculations
+  // Baseline calculations from real account balances
   const totalChecking = data.accounts.find(a => a.type === 'checking')?.balance || 0;
   const totalSavings = data.accounts.find(a => a.type === 'savings')?.balance || 0;
   const totalCredit = data.accounts.find(a => a.type === 'credit')?.balance || 0;
   const initialLiquid = totalChecking + totalSavings;
   const initialNetWorth = initialLiquid + totalCredit;
 
-  // Compute base monthly income and base monthly expenses from recent transactions
-  const baseMonthlyIncome = 72500; // salary (₹72,500)
-  const baseMonthlyExpense = 42500; // rent ₹25k, bills ₹4.5k, food ₹8k, misc ₹5k
-  const baseMonthlyNet = baseMonthlyIncome - baseMonthlyExpense; // ~₹30,000/mo savings
+  // ── Compute REAL base monthly income and expenses from last 30 days of transactions ──
+  const today = new Date();
+  const thirtyDaysAgo = subDays(today, 30);
 
-  const baselineRunwayMonths = Number((initialLiquid / baseMonthlyExpense).toFixed(1));
+  const recentTx = data.transactions.filter((t) => {
+    const d = parseISO(t.date);
+    return !isBefore(d, thirtyDaysAgo);
+  });
 
-  // Scenario adjustments
-  const incomeFactor = (100 + scenario.incomeChangePct) / 100;
-  const expenseReduction = (scenario.expenseCutPct / 100) * 8000; // up to ₹8,000 cut
-  const scenarioMonthlyIncome = baseMonthlyIncome * incomeFactor;
-  const scenarioMonthlyExpense = Math.max(1500, baseMonthlyExpense - expenseReduction - scenario.monthlySavingsChange);
-  
-  // Months without income effect
+  const baseMonthlyIncome = recentTx
+    .filter(t => t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const baseMonthlyExpense = Math.abs(
+    recentTx
+      .filter(t => t.amount < 0 && t.categoryId !== 'cat-transfers')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+
+  const baseMonthlyNet = baseMonthlyIncome - baseMonthlyExpense;
+
+  const baselineRunwayMonths = baseMonthlyExpense > 0
+    ? Number((initialLiquid / baseMonthlyExpense).toFixed(1))
+    : 999;
+
+  // ── Apply scenario adjustments using the CORRECT delta fields ──
+  // SimulatorPage sends: monthlyIncomeDelta, monthlyExpenseDelta, oneTimeExpense, monthsWithoutIncome
+  const incomeDelta = scenario.monthlyIncomeDelta || 0;
+  const expenseDelta = scenario.monthlyExpenseDelta || 0;
+
+  const scenarioMonthlyIncome = baseMonthlyIncome + incomeDelta;
+  const scenarioMonthlyExpense = Math.max(0, baseMonthlyExpense + expenseDelta);
+
+  // Months without income
   const zeroIncomeMonths = scenario.monthsWithoutIncome || 0;
 
+  // One-time expense impact
   let simLiquid = initialLiquid - scenario.oneTimeExpense;
-  const scenarioRunwayMonths = Number((Math.max(0, simLiquid) / scenarioMonthlyExpense).toFixed(1));
+  const scenarioRunwayMonths = scenarioMonthlyExpense > 0
+    ? Number((Math.max(0, simLiquid) / scenarioMonthlyExpense).toFixed(1))
+    : 999;
 
-  // 12-month projections
+  // ── 12-month projections ──
   const monthlyPoints = [];
   let baseRunningNW = initialNetWorth;
   let scenRunningNW = initialNetWorth - scenario.oneTimeExpense;
@@ -39,12 +62,12 @@ export function runWhatIfSimulation(scenario: Scenario, data: StorageData): Scen
     const monthLabel = format(addMonths(now, m), 'MMM yy');
     
     if (m > 0) {
-      // Baseline delta
+      // Baseline delta (no changes applied)
       baseRunningNW += baseMonthlyNet;
 
       // Scenario delta
       const effectiveIncome = m <= zeroIncomeMonths ? 0 : scenarioMonthlyIncome;
-      const scenDelta = effectiveIncome - scenarioMonthlyExpense + scenario.monthlySavingsChange;
+      const scenDelta = effectiveIncome - scenarioMonthlyExpense;
       scenRunningNW += scenDelta;
     }
 
@@ -55,43 +78,51 @@ export function runWhatIfSimulation(scenario: Scenario, data: StorageData): Scen
     });
   }
 
-  // Goal impacts
+  // ── Goal impacts computed from REAL goal data ──
   const goalImpacts = data.goals.map(g => {
     const remaining = Math.max(0, g.targetAmount - g.currentAmount);
-    const origMonthly = g.monthlyContribution || 400;
+    const origMonthly = g.monthlyContribution || 1;
     const origMonths = Math.ceil(remaining / origMonthly);
 
-    // If scenario cuts cash/savings or adds big one-time expense
+    // Estimate how scenario affects contribution capacity
+    const scenarioNetChange = incomeDelta - expenseDelta;
     let newMonthly = origMonthly;
-    if (scenario.incomeChangePct < 0) {
-      newMonthly = Math.max(50, origMonthly * (1 + scenario.incomeChangePct / 100));
-    } else if (scenario.monthlySavingsChange > 0) {
-      newMonthly = origMonthly + scenario.monthlySavingsChange * 0.4;
+
+    // If scenario improves net cash flow, contributions can increase proportionally
+    if (scenarioNetChange > 0) {
+      newMonthly = origMonthly + scenarioNetChange * 0.3; // 30% of improvement goes to goals
+    } else if (scenarioNetChange < 0) {
+      // If scenario worsens cash flow, contributions may be reduced
+      newMonthly = Math.max(100, origMonthly + scenarioNetChange * 0.3);
     }
 
-    // Delay from one-time expense taking funds away
+    // Delay from one-time expense reducing available capital
     let delayPenaltyMonths = 0;
-    if (scenario.oneTimeExpense > 5000) {
-      delayPenaltyMonths = Math.round(scenario.oneTimeExpense / 4000);
+    if (scenario.oneTimeExpense > 0) {
+      delayPenaltyMonths = Math.round(scenario.oneTimeExpense / (origMonthly * 3));
     }
     if (zeroIncomeMonths > 0) {
       delayPenaltyMonths += zeroIncomeMonths;
     }
 
     const newMonths = Math.max(1, Math.ceil(remaining / newMonthly) + delayPenaltyMonths);
-    const delayedMonths = newMonths - origMonths;
+    const impactMonths = newMonths - origMonths;
+
+    const newTargetDate = format(addMonths(now, newMonths), 'MMM yyyy');
 
     return {
       goalId: g.id,
       goalName: g.name,
       originalMonths: origMonths,
       newMonths: newMonths,
-      delayedMonths: delayedMonths,
+      delayedMonths: impactMonths,
+      impactMonths: impactMonths,
+      newTargetDate,
     };
   });
 
   return {
-    scenarioId: scenario.id,
+    scenarioId: scenario.id || 'sim-active',
     baselineRunwayMonths,
     scenarioRunwayMonths,
     baselineNetWorth12m: monthlyPoints[monthlyPoints.length - 1].baseline,

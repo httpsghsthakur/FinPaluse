@@ -26,7 +26,7 @@ import {
   StorageData,
 } from './mock/seed';
 import { runWhatIfSimulation } from './mock/simulator';
-import { addDays, format, isAfter, isBefore, parseISO, subDays } from 'date-fns';
+import { addDays, addMonths, format, getDaysInMonth, isAfter, isBefore, parseISO, startOfMonth, subDays, subMonths } from 'date-fns';
 
 import { supabaseAuth } from '../supabase';
 
@@ -459,13 +459,19 @@ class ApiClient {
     const monthTx = data.transactions.filter((t) => t.date.startsWith(targetMonth) && t.amount < 0);
     const expenseCategories = data.categories.filter((c) => c.type === 'expense');
 
+    // Use real days in month instead of hardcoded 30
+    const targetDate = parseISO(`${targetMonth}-01`);
+    const actualDaysInMonth = getDaysInMonth(targetDate);
+    const today = new Date();
+    const isCurrentMonth = format(today, 'yyyy-MM') === targetMonth;
+    const elapsedDays = isCurrentMonth ? today.getDate() : actualDaysInMonth;
+
     return expenseCategories.map((cat) => {
       const spent = Math.abs(
         monthTx.filter((t) => t.categoryId === cat.id).reduce((sum, t) => sum + t.amount, 0)
       );
-      const currentDay = new Date().getDate();
-      const daysInMonth = 30;
-      const pacing = currentDay > 0 ? (spent / currentDay) * daysInMonth : spent;
+      // Predict month-end spend based on daily pacing and actual days in month
+      const pacing = elapsedDays > 0 ? (spent / elapsedDays) * actualDaysInMonth : spent;
       const predictedSpend = Math.round(pacing * 100) / 100;
 
       return {
@@ -607,21 +613,63 @@ class ApiClient {
 
     await delay();
     const data = loadStoredData();
-    const totalChecking = data.accounts.find((a) => a.type === 'checking')?.balance || 245000;
-    const totalSavings = data.accounts.find((a) => a.type === 'savings')?.balance || 1500000;
+    const totalChecking = data.accounts.find((a) => a.type === 'checking')?.balance || 0;
+    const totalSavings = data.accounts.find((a) => a.type === 'savings')?.balance || 0;
     const currentLiquid = totalChecking + totalSavings;
+
+    // ── Derive daily burn from real transactions (last 90 days) ──
+    const today = new Date();
+    const ninetyDaysAgo = subDays(today, 90);
+    const recentExpenses = data.transactions.filter(
+      (t) => t.amount < 0 && t.categoryId !== 'cat-transfers' && !isBefore(parseISO(t.date), ninetyDaysAgo)
+    );
+    const totalRecentExpense = Math.abs(recentExpenses.reduce((sum, t) => sum + t.amount, 0));
+    const dailyBurnAverage = totalRecentExpense > 0 ? totalRecentExpense / 90 : 1000;
+
+    // ── Derive recurring income (salary) from actual recurring income transactions ──
+    const recurringIncome = data.transactions.filter((t) => t.isRecurring && t.amount > 0);
+    // Get unique merchants and their typical amounts
+    const incomeByMerchant = new Map<string, { amount: number; dayOfMonth: number[] }>();
+    recurringIncome.forEach((t) => {
+      const existing = incomeByMerchant.get(t.merchant);
+      const dom = parseISO(t.date).getDate();
+      if (existing) {
+        existing.dayOfMonth.push(dom);
+      } else {
+        incomeByMerchant.set(t.merchant, { amount: t.amount, dayOfMonth: [dom] });
+      }
+    });
+
+    // ── Derive recurring bills from actual recurring expense transactions ──
+    const recurringBills = data.transactions.filter((t) => t.isRecurring && t.amount < 0);
+    const billsByMerchant = new Map<string, { amount: number; dayOfMonth: number; categoryId: string }>();
+    recurringBills.forEach((t) => {
+      if (!billsByMerchant.has(t.merchant)) {
+        billsByMerchant.set(t.merchant, {
+          amount: Math.abs(t.amount),
+          dayOfMonth: parseISO(t.date).getDate(),
+          categoryId: t.categoryId,
+        });
+      }
+    });
 
     const points: ForecastPoint[] = [];
     const events: ForecastEvent[] = [];
-    const today = new Date();
 
-    let pastRunning = currentLiquid - 340000;
-    for (let d = 30; d >= 1; d--) {
+    // ── Build past 30-day actual balance by replaying transactions backwards ──
+    let pastRunning = currentLiquid;
+    const pastPoints: ForecastPoint[] = [];
+
+    for (let d = 1; d <= 30; d++) {
       const pastDate = subDays(today, d);
       const dateStr = format(pastDate, 'yyyy-MM-dd');
-      pastRunning += (d % 15 === 0 ? 47500 : 0) - (d % 30 === 0 ? 25000 : 850);
 
-      points.push({
+      // Find transactions on this date and reverse their effect
+      const dayTx = data.transactions.filter((t) => t.date === dateStr);
+      const dayNet = dayTx.reduce((sum, t) => sum + t.amount, 0);
+      pastRunning -= dayNet; // Reverse the transaction to get prior balance
+
+      pastPoints.unshift({
         date: dateStr,
         actualBalance: Math.round(pastRunning),
         forecastedBalance: Math.round(pastRunning),
@@ -631,59 +679,55 @@ class ApiClient {
         events: [],
       });
     }
+    points.push(...pastPoints);
 
+    // ── Build future forecast ──
     let runningBalance = currentLiquid;
-    const dailyBurnAverage = 1150;
 
     for (let day = 0; day <= days; day++) {
       const futureDate = addDays(today, day);
       const dateStr = format(futureDate, 'yyyy-MM-dd');
       const dayEvents: ForecastEvent[] = [];
-
       const dayOfMonth = futureDate.getDate();
-      if (dayOfMonth === 1 || dayOfMonth === 15) {
-        const ev: ForecastEvent = {
-          id: `ev-pay-${day}`,
-          date: dateStr,
-          type: 'payday',
-          title: 'Direct Deposit Payroll',
-          amount: 47500.0,
-          accountId: 'acc-checking',
-        };
-        dayEvents.push(ev);
-        events.push(ev);
-        runningBalance += 47500.0;
-      }
 
-      if (dayOfMonth === 1) {
-        const ev: ForecastEvent = {
-          id: `ev-rent-${day}`,
-          date: dateStr,
-          type: 'recurring_bill',
-          title: 'Apartment Rent Lease',
-          amount: -25000.0,
-          accountId: 'acc-checking',
-        };
-        dayEvents.push(ev);
-        events.push(ev);
-        runningBalance -= 25000.0;
-      }
+      // Apply recurring income on detected pay days
+      incomeByMerchant.forEach((info, merchant) => {
+        const avgDay = Math.round(info.dayOfMonth.reduce((a, b) => a + b, 0) / info.dayOfMonth.length);
+        if (dayOfMonth === avgDay) {
+          const ev: ForecastEvent = {
+            id: `ev-income-${merchant.substring(0, 10)}-${day}`,
+            date: dateStr,
+            type: 'payday',
+            title: merchant,
+            amount: info.amount,
+            accountId: 'acc-checking',
+          };
+          dayEvents.push(ev);
+          events.push(ev);
+          runningBalance += info.amount;
+        }
+      });
 
-      if (dayOfMonth === 5) {
-        const ev: ForecastEvent = {
-          id: `ev-goal-${day}`,
-          date: dateStr,
-          type: 'goal_contrib',
-          title: 'Auto Goal Savings (Emergency Fund)',
-          amount: -15000.0,
-          accountId: 'acc-savings',
-        };
-        dayEvents.push(ev);
-        events.push(ev);
-      }
+      // Apply recurring bills on detected bill days
+      billsByMerchant.forEach((info, merchant) => {
+        if (dayOfMonth === info.dayOfMonth) {
+          const ev: ForecastEvent = {
+            id: `ev-bill-${merchant.substring(0, 10)}-${day}`,
+            date: dateStr,
+            type: 'recurring_bill',
+            title: merchant,
+            amount: -info.amount,
+            accountId: 'acc-checking',
+          };
+          dayEvents.push(ev);
+          events.push(ev);
+          runningBalance -= info.amount;
+        }
+      });
 
+      // Apply daily discretionary burn
       runningBalance -= dailyBurnAverage;
-      const uncertainty = day * 350;
+      const uncertainty = day * (dailyBurnAverage * 0.3); // 30% daily uncertainty growth
 
       points.push({
         date: dateStr,
@@ -746,23 +790,105 @@ class ApiClient {
       return res.json();
     }
     await delay();
+    const data = loadStoredData();
+    const today = new Date();
+    const weekStart = subDays(today, 7);
+    const prevWeekStart = subDays(today, 14);
+
+    // ── Current week transactions ──
+    const weekTx = data.transactions.filter((t) => {
+      const d = parseISO(t.date);
+      return !isBefore(d, weekStart) && !isAfter(d, today);
+    });
+
+    const totalIncome = weekTx.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = Math.abs(
+      weekTx.filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers').reduce((sum, t) => sum + t.amount, 0)
+    );
+    const netSavings = totalIncome - totalExpenses;
+
+    // ── Previous week for comparison ──
+    const prevWeekTx = data.transactions.filter((t) => {
+      const d = parseISO(t.date);
+      return !isBefore(d, prevWeekStart) && isBefore(d, weekStart);
+    });
+    const prevWeekExpenses = Math.abs(
+      prevWeekTx.filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers').reduce((sum, t) => sum + t.amount, 0)
+    );
+    const vsLastWeekPct = prevWeekExpenses > 0
+      ? Math.round(((totalExpenses - prevWeekExpenses) / prevWeekExpenses) * 100 * 10) / 10
+      : 0;
+
+    // ── Top spending category this week ──
+    const catSpendMap = new Map<string, number>();
+    weekTx
+      .filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers')
+      .forEach((t) => {
+        catSpendMap.set(t.categoryId, (catSpendMap.get(t.categoryId) || 0) + Math.abs(t.amount));
+      });
+
+    let topCategoryId = '';
+    let topCategorySpend = 0;
+    catSpendMap.forEach((amount, catId) => {
+      if (amount > topCategorySpend) {
+        topCategorySpend = amount;
+        topCategoryId = catId;
+      }
+    });
+    const topCategoryName = data.categories.find((c) => c.id === topCategoryId)?.name || 'General';
+
+    // ── Anomalies this week ──
+    const anomaliesDetectedCount = weekTx.filter((t) => t.isAnomaly).length;
+
+    // ── Dynamic week range label ──
+    const weekRange = `${format(weekStart, 'MMM d')} – ${format(today, 'MMM d, yyyy')}`;
+
+    // ── Generate contextual bullets from real data ──
+    const bullets: string[] = [];
+
+    if (vsLastWeekPct !== 0) {
+      const direction = vsLastWeekPct < 0 ? 'lower' : 'higher';
+      bullets.push(`Total spending was ${Math.abs(vsLastWeekPct)}% ${direction} than last week.`);
+    }
+
+    const interestTx = weekTx.filter((t) => t.amount > 0 && t.merchant.toLowerCase().includes('interest'));
+    if (interestTx.length > 0) {
+      const interestTotal = interestTx.reduce((sum, t) => sum + t.amount, 0);
+      bullets.push(`Earned ₹${interestTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })} in interest/yield income this week.`);
+    }
+
+    if (anomaliesDetectedCount > 0) {
+      const topAnomaly = weekTx.find((t) => t.isAnomaly);
+      if (topAnomaly) {
+        bullets.push(`${anomaliesDetectedCount} unusual transaction${anomaliesDetectedCount > 1 ? 's' : ''} flagged: ${topAnomaly.merchant} (₹${Math.abs(topAnomaly.amount).toLocaleString('en-IN')}).`);
+      }
+    }
+
+    if (bullets.length === 0) {
+      bullets.push(`Processed ${weekTx.length} transactions this week across your connected accounts.`);
+    }
+
+    // ── Actionable tip from real data ──
+    const goalsWithRoom = data.goals.filter((g) => !g.isCompleted && g.currentAmount < g.targetAmount);
+    const actionableTip = netSavings > 0 && goalsWithRoom.length > 0
+      ? `Moving ₹${Math.min(Math.round(netSavings * 0.1), 5000).toLocaleString('en-IN')} from this week's surplus to your ${goalsWithRoom[0].name} goal can accelerate completion.`
+      : `Review your spending patterns to identify potential savings opportunities.`;
+
     return {
-      weekRange: 'Aug 11 – Aug 18, 2026',
-      summaryTitle: 'High savings momentum, watch dining pace',
-      totalIncome: 47500.0,
-      totalExpenses: 21200.4,
-      netSavings: 26299.6,
-      topCategoryName: 'Dining & Drinks',
-      topCategorySpend: 3980.5,
-      vsLastWeekPct: -8.4,
-      bullets: [
-        'Total spending was 8.4% lower than last week, led by fewer discretionary retail purchases.',
-        'SBI Fixed Deposit yield generated +₹2,134.60 in accrued interest this week.',
-        '1 unusual transaction flagged at Chroma (₹45,000.00), ICICI card balance is within standard cycle limit.',
-      ],
-      actionableTip:
-        'Moving ₹1,500 from this week’s surplus to your Bali Trip goal will bring completion 18 days forward.',
-      anomaliesDetectedCount: 1,
+      weekRange,
+      weekLabel: weekRange,
+      summaryTitle: netSavings > 0
+        ? `Positive cash flow week — ₹${Math.round(netSavings).toLocaleString('en-IN')} net saved`
+        : `Net outflow week — review spending patterns`,
+      totalIncome: Math.round(totalIncome * 100) / 100,
+      totalExpenses: Math.round(totalExpenses * 100) / 100,
+      netSavings: Math.round(netSavings * 100) / 100,
+      topCategoryName,
+      topCategorySpend: Math.round(topCategorySpend * 100) / 100,
+      vsLastWeekPct,
+      bullets,
+      actionableTip,
+      anomaliesDetectedCount,
     };
   }
 
@@ -785,90 +911,154 @@ class ApiClient {
     const totalDebt = Math.abs(credit);
     const netWorth = liquidCash - totalDebt;
 
-    const cashFlowHistory = [
-      { month: 'Mar', income: 77000, expenses: 43200, savings: 33800 },
-      { month: 'Apr', income: 91500, expenses: 48900, savings: 42600 },
-      { month: 'May', income: 77000, expenses: 41200, savings: 35800 },
-      { month: 'Jun', income: 89000, expenses: 46500, savings: 42500 },
-      { month: 'Jul', income: 77000, expenses: 44100, savings: 32900 },
-      { month: 'Aug', income: 81000, expenses: 39800, savings: 41200 },
-    ];
+    // ── Compute cashFlowHistory from REAL transactions (last 6 months) ──
+    const today = new Date();
+    const cashFlowHistory: { month: string; income: number; expenses: number; savings: number }[] = [];
 
-    const currentMonthPrefix = format(new Date(), 'yyyy-MM');
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = subMonths(today, i);
+      const monthPrefix = format(monthDate, 'yyyy-MM');
+      const monthLabel = format(monthDate, 'MMM');
+
+      const monthTransactions = data.transactions.filter((t) => t.date.startsWith(monthPrefix));
+
+      const income = monthTransactions
+        .filter((t) => t.amount > 0)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const expenses = Math.abs(
+        monthTransactions
+          .filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers')
+          .reduce((sum, t) => sum + t.amount, 0)
+      );
+
+      cashFlowHistory.push({
+        month: monthLabel,
+        income: Math.round(income * 100) / 100,
+        expenses: Math.round(expenses * 100) / 100,
+        savings: Math.round((income - expenses) * 100) / 100,
+      });
+    }
+
+    // ── Compute netWorthMomPct from monthly net deltas ──
+    const currentMonthCF = cashFlowHistory[cashFlowHistory.length - 1];
+    const prevMonthCF = cashFlowHistory[cashFlowHistory.length - 2];
+    let netWorthMomPct = 0;
+    if (prevMonthCF && prevMonthCF.savings !== 0) {
+      netWorthMomPct = Math.round(((currentMonthCF.savings - prevMonthCF.savings) / Math.abs(prevMonthCF.savings)) * 100 * 10) / 10;
+    }
+
+    // ── Compute current month spending from REAL transactions ──
+    const currentMonthPrefix = format(today, 'yyyy-MM');
     const monthTx = data.transactions.filter(
       (t) => t.date.startsWith(currentMonthPrefix) && t.amount < 0 && t.categoryId !== 'cat-transfers'
     );
 
-    const totalMonthlySpend = Math.abs(monthTx.reduce((sum, t) => sum + t.amount, 0)) || 39800;
+    const totalMonthlySpend = Math.abs(monthTx.reduce((sum, t) => sum + t.amount, 0));
     const totalBudget = data.categories.reduce((sum, c) => sum + (c.monthlyBudget || 0), 0);
 
+    // ── Compute monthlySpendVsBudgetPct ──
+    const monthlySpendVsBudgetPct = totalBudget > 0
+      ? Math.round(((totalMonthlySpend - totalBudget) / totalBudget) * 100 * 10) / 10
+      : 0;
+
+    // ── Category spend from REAL transactions (no fake fallbacks) ──
     const categorySpend = data.categories
       .filter((c) => c.type === 'expense')
       .map((cat) => {
         const spent = Math.abs(
           monthTx.filter((t) => t.categoryId === cat.id).reduce((sum, t) => sum + t.amount, 0)
         );
-        const effectiveSpend = spent > 0 ? spent : Math.round((cat.monthlyBudget || 0) * 0.72);
         return {
           categoryId: cat.id,
           categoryName: cat.name,
           color: cat.color,
-          amount: effectiveSpend,
-          percentage: Math.round((effectiveSpend / (totalMonthlySpend || 1)) * 100),
+          amount: Math.round(spent * 100) / 100,
+          percentage: Math.round((spent / (totalMonthlySpend || 1)) * 100),
           budget: cat.monthlyBudget || 0,
         };
       })
       .sort((a, b) => b.amount - a.amount);
 
-    const monthlyBurn = totalMonthlySpend > 0 ? totalMonthlySpend : 41000;
+    // ── Cash runway from REAL monthly burn ──
+    const monthlyBurn = totalMonthlySpend > 0 ? totalMonthlySpend : (cashFlowHistory.length > 0
+      ? cashFlowHistory.reduce((sum, m) => sum + m.expenses, 0) / cashFlowHistory.filter(m => m.expenses > 0).length
+      : 1);
     const cashRunwayMonths = Number((liquidCash / monthlyBurn).toFixed(1));
 
-    const upcomingBills = [
-      {
-        id: 'bill-1',
-        merchant: 'Prestige Apartments (Rent)',
-        amount: 25000.0,
-        dueDate: format(addDays(new Date(), 13), 'yyyy-MM-dd'),
-        categoryId: 'cat-housing',
-        accountName: 'HDFC Checking (4821)',
-        daysAway: 13,
-      },
-      {
-        id: 'bill-2',
-        merchant: 'CureFit Cult',
-        amount: 1500.0,
-        dueDate: format(addDays(new Date(), 6), 'yyyy-MM-dd'),
-        categoryId: 'cat-health',
-        accountName: 'HDFC Checking (4821)',
-        daysAway: 6,
-      },
-      {
-        id: 'bill-3',
-        merchant: 'JioFiber Broadband',
-        amount: 1499.0,
-        dueDate: format(addDays(new Date(), 4), 'yyyy-MM-dd'),
-        categoryId: 'cat-utilities',
-        accountName: 'HDFC Checking (4821)',
-        daysAway: 4,
-      },
-      {
-        id: 'bill-4',
-        merchant: 'Netflix Premium',
-        amount: 649.0,
-        dueDate: format(addDays(new Date(), 8), 'yyyy-MM-dd'),
-        categoryId: 'cat-subscriptions',
-        accountName: 'ICICI Amazon Pay (1004)',
-        daysAway: 8,
-      },
-    ];
+    // ── Savings rate from REAL income/expenses ──
+    const currentMonthIncome = data.transactions
+      .filter((t) => t.date.startsWith(currentMonthPrefix) && t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+    const savingsRatePct = currentMonthIncome > 0
+      ? Math.round(((currentMonthIncome - totalMonthlySpend) / currentMonthIncome) * 100 * 10) / 10
+      : 0;
+
+    // ── Savings rate MoM delta ──
+    const prevMonthPrefix = format(subMonths(today, 1), 'yyyy-MM');
+    const prevMonthIncome = data.transactions
+      .filter((t) => t.date.startsWith(prevMonthPrefix) && t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+    const prevMonthExpenses = Math.abs(
+      data.transactions
+        .filter((t) => t.date.startsWith(prevMonthPrefix) && t.amount < 0 && t.categoryId !== 'cat-transfers')
+        .reduce((sum, t) => sum + t.amount, 0)
+    );
+    const prevSavingsRate = prevMonthIncome > 0
+      ? ((prevMonthIncome - prevMonthExpenses) / prevMonthIncome) * 100
+      : 0;
+    const savingsRateMomDelta = Math.round((savingsRatePct - prevSavingsRate) * 10) / 10;
+
+    // ── Upcoming bills from REAL recurring transactions ──
+    const recurringExpenses = data.transactions.filter((t) => t.isRecurring && t.amount < 0);
+    // Deduplicate by merchant to get unique recurring bills
+    const merchantMap = new Map<string, Transaction>();
+    recurringExpenses.forEach((t) => {
+      const existing = merchantMap.get(t.merchant);
+      if (!existing || new Date(t.date) > new Date(existing.date)) {
+        merchantMap.set(t.merchant, t);
+      }
+    });
+
+    const upcomingBills = Array.from(merchantMap.values())
+      .map((t) => {
+        // Estimate next due date: ~30 days after last occurrence
+        const lastDate = parseISO(t.date);
+        let nextDue = addDays(lastDate, 30);
+        // If next due is in the past, shift forward
+        while (isBefore(nextDue, today)) {
+          nextDue = addDays(nextDue, 30);
+        }
+        const daysAway = Math.ceil((nextDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const acc = data.accounts.find((a) => a.id === t.accountId);
+
+        return {
+          id: `bill-${t.id}`,
+          merchant: t.merchant,
+          amount: Math.abs(t.amount),
+          dueDate: format(nextDue, 'yyyy-MM-dd'),
+          categoryId: t.categoryId,
+          accountName: acc ? `${acc.name} (${acc.mask})` : 'Unknown',
+          daysAway,
+        };
+      })
+      .filter((b) => b.daysAway <= 30 && b.daysAway >= 0)
+      .sort((a, b) => a.daysAway - b.daysAway)
+      .slice(0, 5);
+
+    // ── Low balance alert from forecast ──
+    const projectedMinBalance = liquidCash - (monthlyBurn * 2);
+    const lowBalanceThreshold = monthlyBurn; // 1 month of expenses as threshold
 
     return {
       netWorth,
-      netWorthMomPct: 4.8,
-      monthlySpending: totalMonthlySpend,
+      netWorthMomPct,
+      monthlySpending: Math.round(totalMonthlySpend * 100) / 100,
       monthlyBudgetTotal: totalBudget,
+      monthlySpendVsBudgetPct,
       cashRunwayMonths,
-      savingsRatePct: 42.5,
+      savingsRatePct,
+      savingsRateMomDelta,
       totalLiquidCash: liquidCash,
       totalDebt,
       cashFlowHistory,
@@ -876,8 +1066,12 @@ class ApiClient {
       recentTransactions: data.transactions.slice(0, 8),
       upcomingBills,
       lowBalanceAlert: {
-        hasLowBalance: false,
-        threshold: 2000,
+        hasLowBalance: projectedMinBalance < lowBalanceThreshold,
+        threshold: Math.round(lowBalanceThreshold),
+        ...(projectedMinBalance < lowBalanceThreshold ? {
+          date: format(addDays(today, 60), 'yyyy-MM-dd'),
+          predictedBalance: Math.round(projectedMinBalance),
+        } : {}),
       },
     };
   }

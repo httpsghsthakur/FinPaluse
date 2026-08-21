@@ -27,6 +27,7 @@ import { api } from '../lib/api';
 import { useUIStore } from '../lib/store/useUIStore';
 import { formatDate, formatCurrency } from '../lib/utils/formatters';
 import { useUserStore } from '../lib/store/useUserStore';
+import { CURRENCY_SYMBOLS } from '../lib/utils/formatters';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -125,7 +126,7 @@ export const DashboardPage: React.FC = () => {
         <KpiCard
           title="Monthly Spend"
           value={data.monthlySpending}
-          changePct={-3.2}
+          changePct={data.monthlySpendVsBudgetPct}
           changePeriodText={`vs Budget (${formatCurrency(data.monthlyBudgetTotal, profile.currency)})`}
           icon={CreditCard}
         />
@@ -143,7 +144,7 @@ export const DashboardPage: React.FC = () => {
           value={data.savingsRatePct}
           isCurrency={false}
           suffix="%"
-          changePct={+4.5}
+          changePct={data.savingsRateMomDelta}
           changePeriodText="vs last month"
           icon={PiggyBank}
         />
@@ -186,11 +187,11 @@ export const DashboardPage: React.FC = () => {
                     stroke="#64748B"
                     fontSize={11}
                     tickLine={false}
-                    tickFormatter={(v) => `₹${v / 1000}k`}
+                    tickFormatter={(v) => `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${v / 1000}k`}
                   />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                    formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, '']}
+                    formatter={(val: any) => [`${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`, '']}
                   />
                   <Area
                     type="monotone"
@@ -229,7 +230,7 @@ export const DashboardPage: React.FC = () => {
                   <PieChart>
                     <Tooltip
                       contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                      formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Spent']}
+                      formatter={(val: any) => [`${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`, 'Spent']}
                     />
                     <Pie
                       data={data.categorySpend.slice(0, 5)}

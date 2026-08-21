@@ -23,7 +23,7 @@ import { ChartCard } from '../components/ui/ChartCard';
 import { ChartSkeleton } from '../components/ui/Skeletons';
 import { ForecastPoint, ForecastEvent } from '../types';
 import { api } from '../lib/api';
-import { formatCurrency, formatDate } from '../lib/utils/formatters';
+import { formatCurrency, formatDate, CURRENCY_SYMBOLS } from '../lib/utils/formatters';
 import { useUserStore } from '../lib/store/useUserStore';
 
 export const ForecastPage: React.FC = () => {
@@ -158,12 +158,12 @@ export const ForecastPage: React.FC = () => {
                   stroke="#64748B"
                   fontSize={11}
                   tickLine={false}
-                  tickFormatter={(v) => `₹${Math.round(v / 1000)}k`}
+                  tickFormatter={(v) => `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Math.round(v / 1000)}k`}
                 />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
                   formatter={(val: any, name: any) => [
-                    `₹${Number(val).toLocaleString()}`,
+                    `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`,
                     name === 'actualBalance'
                       ? 'Actual Balance'
                       : name === 'forecastedBalance'

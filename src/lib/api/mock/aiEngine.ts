@@ -1,6 +1,7 @@
 import { ChatMessage, GroundedMetric } from '../../../types';
 import { StorageData } from './seed';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { subDays, parseISO, isBefore } from 'date-fns';
 
 interface AIResponseResult {
   content: string;
@@ -27,17 +28,24 @@ export function generateAICopilotResponse(
   const liquidCash = totalChecking + totalSavings;
   const netWorth = liquidCash + totalCredit; // totalCredit is negative
 
-  // Compute 30-day spending & income
-  const recent30DaysTx = data.transactions.slice(0, 75);
+  // ── Compute 30-day spending & income from REAL date-filtered transactions ──
+  const today = new Date();
+  const thirtyDaysAgo = subDays(today, 30);
+
+  const recent30DaysTx = data.transactions.filter((t) => {
+    const d = parseISO(t.date);
+    return !isBefore(d, thirtyDaysAgo);
+  });
+
   const totalExpense30d = Math.abs(
     recent30DaysTx.filter(t => t.amount < 0 && t.categoryId !== 'cat-transfers').reduce((acc, t) => acc + t.amount, 0)
   );
   const totalIncome30d = recent30DaysTx.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
-  const monthlyBurn = totalExpense30d > 0 ? totalExpense30d : 42000;
-  const runwayMonths = (liquidCash / monthlyBurn).toFixed(1);
-  const savingsRate = totalIncome30d > 0 ? Math.max(0, ((totalIncome30d - totalExpense30d) / totalIncome30d) * 100) : 38;
+  const monthlyBurn = totalExpense30d > 0 ? totalExpense30d : 0;
+  const runwayMonths = monthlyBurn > 0 ? (liquidCash / monthlyBurn).toFixed(1) : 'N/A';
+  const savingsRate = totalIncome30d > 0 ? Math.max(0, ((totalIncome30d - totalExpense30d) / totalIncome30d) * 100) : 0;
 
-  // Category breakdown
+  // Category breakdown from REAL filtered transactions
   const diningTx = recent30DaysTx.filter(t => t.categoryId === 'cat-dining');
   const diningSpend = Math.abs(diningTx.reduce((acc, t) => acc + t.amount, 0));
   const diningBudget = data.categories.find(c => c.id === 'cat-dining')?.monthlyBudget || 8000;
@@ -81,16 +89,16 @@ Based on your real-time liquidity and automated cash-flow obligations:
 
 1. **Checking Account Liquidity**: You currently hold **${formatCurrency(totalChecking)}** in your primary checking.
 2. **Buffer After Purchase**: Deducting ${formatCurrency(amountToTest)} leaves **${formatCurrency(postPurchaseChecking)}** in liquid checking reserves.
-3. **Upcoming Cash Outflows**: Over the next 14 days, you have scheduled rent and subscription debits of approximately **₹26,000**.
+3. **Upcoming Cash Outflows**: Over the next 14 days, you have scheduled recurring debits.
 4. **Recommendation**: ${
         isSafe
-          ? `**Comfortable to proceed.** Your SBI Fixed Deposit (${formatCurrency(totalSavings)}) guarantees **${runwayMonths} months of emergency runway**, so this single expense will not compromise your safety buffer.`
-          : `**Exercise caution.** Consider delaying until your next paycheck on the 15th, or transferring ₹5,000 from your discretionary dining allocation.`
+          ? `**Comfortable to proceed.** Your savings (${formatCurrency(totalSavings)}) guarantees **${runwayMonths} months of emergency runway**, so this single expense will not compromise your safety buffer.`
+          : `**Exercise caution.** Consider delaying until your next paycheck, or transferring from your discretionary allocation.`
       }`,
       groundedData: [
         { label: 'Proposed Item', value: formatCurrency(amountToTest) },
         { label: 'Checking Balance', value: formatCurrency(totalChecking) },
-        { label: 'HYSA Backup', value: formatCurrency(totalSavings) },
+        { label: 'Savings Backup', value: formatCurrency(totalSavings) },
         { label: 'Monthly Burn Rate', value: formatCurrency(monthlyBurn) },
       ],
       confidence: 'High',
@@ -110,8 +118,8 @@ Based on your real-time liquidity and automated cash-flow obligations:
 Here is your verified 30-day outflow breakdown across top active categories:
 
 - **Dining & Drinks**: **${formatCurrency(diningSpend)}** (${isDiningOver ? 'Over budget by ' + formatCurrency(diningSpend - diningBudget) : 'Within limit of ' + formatCurrency(diningBudget)})
-- **Groceries**: **${formatCurrency(grocerySpend)}** (Target: ₹12,000)
-- **Shopping & Gear**: **${formatCurrency(shoppingSpend)}** (Target: ₹8,000)
+- **Groceries**: **${formatCurrency(grocerySpend)}** (Target: ${formatCurrency(data.categories.find(c => c.id === 'cat-groceries')?.monthlyBudget || 0)})
+- **Shopping & Gear**: **${formatCurrency(shoppingSpend)}** (Target: ${formatCurrency(data.categories.find(c => c.id === 'cat-shopping')?.monthlyBudget || 0)})
 - **Total Discretionary Burn**: **${formatCurrency(totalExpense30d)}**
 
 ${
@@ -138,12 +146,13 @@ ${
     return {
       content: `### Net Worth & Runway Diagnostics
 
-- **Total Net Worth**: **${formatCurrency(netWorth)}** (+4.2% MoM)
+- **Total Net Worth**: **${formatCurrency(netWorth)}**
 - **Liquid Cash Reserves**: **${formatCurrency(liquidCash)}** (Checking: ${formatCurrency(totalChecking)} + Savings: ${formatCurrency(totalSavings)})
-- **Credit Card Liability**: **${formatCurrency(Math.abs(totalCredit))}** (ICICI Amazon Pay)
+- **Credit Card Liability**: **${formatCurrency(Math.abs(totalCredit))}**
 - **Calculated Cash Runway**: **${runwayMonths} months** without any new income.
+- **Current Savings Rate**: **${savingsRate.toFixed(1)}%** based on last 30 days of real transactions.
 
-Your financial cushion is in the **top tier (6+ months threshold)**. Your SBI Fixed Deposit is compounding ~₹8,800/month in zero-effort passive yield.`,
+Your financial cushion is ${Number(runwayMonths) >= 6 ? 'in the **top tier (6+ months threshold)**' : `at **${runwayMonths} months** — consider building reserves`}.`,
       groundedData: [
         { label: 'Net Worth', value: formatCurrency(netWorth) },
         { label: 'Liquid Cash', value: formatCurrency(liquidCash) },
@@ -174,7 +183,7 @@ Here is the progress and estimated completion timeline for your active goals:
 
 ${goalsList}
 
-**Optimization Tip**: You can accelerate your *Bali Vacation* goal by 3 weeks by reallocating ₹1,500 from your Subscriptions budget.`,
+**Optimization Tip**: Review your spending categories to identify potential reallocation toward your highest-priority goal.`,
       groundedData: [
         { label: 'Active Goals', value: `${data.goals.length}` },
         { label: 'Total Saved for Goals', value: formatCurrency(data.goals.reduce((a, b) => a + b.currentAmount, 0)) },
@@ -194,16 +203,16 @@ ${goalsList}
 
 Here is a live snapshot grounded in your connected accounts:
 
-- **Net Worth**: **${formatCurrency(netWorth)}** across 3 linked accounts.
+- **Net Worth**: **${formatCurrency(netWorth)}** across ${data.accounts.length} linked accounts.
 - **Available Liquidity**: **${formatCurrency(liquidCash)}** (${runwayMonths} months cash runway).
-- **Current Savings Rate**: **${savingsRate.toFixed(1)}%** of monthly tech engineering & consulting income.
-- **Immediate Attention**: Review your **Dining & Drinks** category pacing (${formatCurrency(diningSpend)} / ${formatCurrency(diningBudget)}) and confirm the recent **Chroma** charge anomaly.
+- **Current Savings Rate**: **${savingsRate.toFixed(1)}%** of monthly income.
+- **30-Day Spending**: **${formatCurrency(totalExpense30d)}** across ${recent30DaysTx.filter(t => t.amount < 0).length} expense transactions.
 
 Feel free to ask me to analyze specific transactions, test a what-if scenario, or compute your goal achievement dates!`,
     groundedData: [
       { label: 'Net Worth', value: formatCurrency(netWorth) },
       { label: 'Liquid Runway', value: `${runwayMonths} Mo` },
-      { label: 'Transactions Indexed', value: `${data.transactions.length}` },
+      { label: 'Transactions (30d)', value: `${recent30DaysTx.length}` },
       { label: 'Connected Accounts', value: `${data.accounts.length}` },
     ],
     confidence: 'High',

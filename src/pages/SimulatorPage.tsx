@@ -22,7 +22,7 @@ import {
 import { ChartCard } from '../components/ui/ChartCard';
 import { SimulationScenario, SimulationResult } from '../types';
 import { api } from '../lib/api';
-import { formatCurrency } from '../lib/utils/formatters';
+import { formatCurrency, CURRENCY_SYMBOLS } from '../lib/utils/formatters';
 import { useUIStore } from '../lib/store/useUIStore';
 import { useUserStore } from '../lib/store/useUserStore';
 
@@ -360,12 +360,12 @@ export const SimulatorPage: React.FC = () => {
                         stroke="#64748B"
                         fontSize={11}
                         tickLine={false}
-                        tickFormatter={(v) => `₹${Math.round(v / 1000)}k`}
+                        tickFormatter={(v) => `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Math.round(v / 1000)}k`}
                       />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
                         formatter={(val: any, name: any) => [
-                          `₹${Number(val).toLocaleString()}`,
+                          `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`,
                           name === 'baseline' ? 'Baseline Path' : 'Simulated Path',
                         ]}
                       />

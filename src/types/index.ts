@@ -112,6 +112,7 @@ export interface Insight {
 
 export interface WeeklyDigest {
   weekRange: string;
+  weekLabel?: string;
   summaryTitle: string;
   totalIncome: number;
   totalExpenses: number;
@@ -171,6 +172,8 @@ export interface GoalImpact {
   originalMonths: number;
   newMonths: number;
   delayedMonths: number;
+  impactMonths?: number;
+  newTargetDate?: string;
 }
 
 export interface ScenarioResult {
@@ -206,8 +209,10 @@ export interface DashboardSummary {
   netWorthMomPct: number;
   monthlySpending: number;
   monthlyBudgetTotal: number;
+  monthlySpendVsBudgetPct: number;
   cashRunwayMonths: number;
   savingsRatePct: number;
+  savingsRateMomDelta: number;
   totalLiquidCash: number;
   totalDebt: number;
   cashFlowHistory: {

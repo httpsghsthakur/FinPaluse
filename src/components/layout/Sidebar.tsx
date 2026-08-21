@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Bot,
@@ -15,20 +15,24 @@ import {
   Plus,
   RefreshCw,
   Zap,
-} from 'lucide-react';
-import { useUIStore } from '../../lib/store/useUIStore';
-import { cn } from '../../lib/utils/cn';
+} from "lucide-react";
+import { useUIStore } from "../../lib/store/useUIStore";
+import { cn } from "../../lib/utils/cn";
 
 const NAV_ITEMS = [
-  { name: 'Dashboard', path: '/app', icon: LayoutDashboard },
-  { name: 'AI Copilot', path: '/app/copilot', icon: Bot, highlight: true },
-  { name: 'Transactions', path: '/app/transactions', icon: Receipt },
-  { name: 'Budgets', path: '/app/budgets', icon: PieChart },
-  { name: 'Goals', path: '/app/goals', icon: Target },
-  { name: 'Forecast', path: '/app/forecast', icon: TrendingUp },
-  { name: 'What-If Simulator', path: '/app/simulator', icon: SlidersHorizontal },
-  { name: 'Insights & Digest', path: '/app/insights', icon: Lightbulb },
-  { name: 'Settings', path: '/app/settings', icon: Settings },
+  { name: "Dashboard", path: "/app", icon: LayoutDashboard },
+  { name: "AI Copilot", path: "/app/copilot", icon: Bot, highlight: true },
+  { name: "Transactions", path: "/app/transactions", icon: Receipt },
+  { name: "Budgets", path: "/app/budgets", icon: PieChart },
+  { name: "Goals", path: "/app/goals", icon: Target },
+  { name: "Forecast", path: "/app/forecast", icon: TrendingUp },
+  {
+    name: "What-If Simulator",
+    path: "/app/simulator",
+    icon: SlidersHorizontal,
+  },
+  { name: "Insights & Digest", path: "/app/insights", icon: Lightbulb },
+  { name: "Settings", path: "/app/settings", icon: Settings },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -38,17 +42,30 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col justify-between bg-[#0B0F19]/40 backdrop-blur-xl border-r border-slate-800/60 transition-all duration-300 z-30 shrink-0 select-none',
-        isSidebarCollapsed ? 'w-20' : 'w-64'
+        "hidden md:flex flex-col justify-between bg-[#0B0F19]/40 backdrop-blur-xl border-r border-slate-800/60 transition-all duration-300 z-30 shrink-0 select-none",
+        isSidebarCollapsed ? "w-20" : "w-64",
       )}
     >
       {/* Top Logo & App Brand */}
       <div>
         <div className="h-16 flex items-center justify-between px-5 border-b border-slate-800/60">
-          <NavLink to="/app" className="flex items-center gap-3 overflow-hidden">
+          <NavLink
+            to="/app"
+            className="flex items-center gap-3 overflow-hidden"
+          >
             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
-              <svg className="w-5 h-5 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              <svg
+                className="w-5 h-5 text-slate-900"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                />
               </svg>
             </div>
             {!isSidebarCollapsed && (
@@ -66,9 +83,15 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={toggleSidebar}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors cursor-pointer"
-            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={
+              isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+            }
           >
-            {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {isSidebarCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
           </button>
         </div>
 
@@ -77,8 +100,8 @@ export const Sidebar: React.FC = () => {
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
-              item.path === '/app'
-                ? location.pathname === '/app'
+              item.path === "/app"
+                ? location.pathname === "/app"
                 : location.pathname.startsWith(item.path);
 
             return (
@@ -86,17 +109,19 @@ export const Sidebar: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative',
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative",
                   isActive
-                    ? 'bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+                    ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30",
                 )}
               >
                 <Icon
                   className={cn(
-                    'w-4 h-4 shrink-0 transition-transform group-hover:scale-110',
-                    isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-200',
-                    item.highlight && !isActive && 'text-emerald-400'
+                    "w-4 h-4 shrink-0 transition-transform group-hover:scale-110",
+                    isActive
+                      ? "text-emerald-400"
+                      : "text-slate-400 group-hover:text-slate-200",
+                    item.highlight && !isActive && "text-emerald-400",
                   )}
                 />
                 {!isSidebarCollapsed && (
@@ -124,10 +149,16 @@ export const Sidebar: React.FC = () => {
           <>
             {/* AI Runway Widget */}
             <div className="bg-slate-800/30 backdrop-blur-md rounded-2xl p-3.5 border border-slate-700/30">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">AI Runway</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">
+                AI Runway
+              </p>
               <div className="flex items-end gap-1.5">
-                <span className="text-lg font-mono font-bold text-white">8.4</span>
-                <span className="text-xs text-slate-400 pb-0.5 font-medium">months</span>
+                <span className="text-lg font-mono font-bold text-white">
+                  8.4
+                </span>
+                <span className="text-xs text-slate-400 pb-0.5 font-medium">
+                  months
+                </span>
               </div>
               <div className="w-full bg-slate-700/40 h-1.5 rounded-full mt-2 overflow-hidden">
                 <div className="bg-emerald-500 h-full rounded-full w-[70%]" />

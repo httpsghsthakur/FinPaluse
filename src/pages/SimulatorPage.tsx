@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   SlidersHorizontal,
   TrendingUp,
@@ -10,7 +10,7 @@ import {
   Clock,
   Target,
   ArrowRight,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -18,19 +18,22 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-} from 'recharts';
-import { ChartCard } from '../components/ui/ChartCard';
-import { SimulationScenario, SimulationResult } from '../types';
-import { api } from '../lib/api';
-import { formatCurrency, CURRENCY_SYMBOLS } from '../lib/utils/formatters';
-import { useUIStore } from '../lib/store/useUIStore';
-import { useUserStore } from '../lib/store/useUserStore';
+} from "recharts";
+import { ChartCard } from "../components/ui/ChartCard";
+import { SimulationScenario, SimulationResult } from "../types";
+import { api } from "../lib/api";
+import { formatCurrency, CURRENCY_SYMBOLS } from "../lib/utils/formatters";
+import { useUIStore } from "../lib/store/useUIStore";
+import { useUserStore } from "../lib/store/useUserStore";
 
-const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] = [
+const PRESET_SCENARIOS: {
+  name: string;
+  params: Partial<SimulationScenario>;
+}[] = [
   {
-    name: 'Tech Promotion (+15% Salary)',
+    name: "Tech Promotion (+15% Salary)",
     params: {
-      name: 'Tech Promotion (+15% Salary)',
+      name: "Tech Promotion (+15% Salary)",
       monthlyIncomeDelta: 850,
       monthlyExpenseDelta: 0,
       oneTimeExpense: 0,
@@ -38,9 +41,9 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
     },
   },
   {
-    name: 'Career Break (4-Month Sabbatical)',
+    name: "Career Break (4-Month Sabbatical)",
     params: {
-      name: 'Career Break (4-Month Sabbatical)',
+      name: "Career Break (4-Month Sabbatical)",
       monthlyIncomeDelta: 0,
       monthlyExpenseDelta: -400, // cut expenses
       oneTimeExpense: 2500, // travel
@@ -48,9 +51,9 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
     },
   },
   {
-    name: 'Major Purchase (Car Downpayment)',
+    name: "Major Purchase (Car Downpayment)",
     params: {
-      name: 'Major Purchase (Car Downpayment)',
+      name: "Major Purchase (Car Downpayment)",
       monthlyIncomeDelta: 0,
       monthlyExpenseDelta: 450, // car payment + insurance
       oneTimeExpense: 1000000,
@@ -58,9 +61,9 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
     },
   },
   {
-    name: 'Aggressive Saving (Cut 15k/mo)',
+    name: "Aggressive Saving (Cut 15k/mo)",
     params: {
-      name: 'Aggressive Saving (Cut 15k/mo)',
+      name: "Aggressive Saving (Cut 15k/mo)",
       monthlyIncomeDelta: 0,
       monthlyExpenseDelta: -15000,
       oneTimeExpense: 0,
@@ -72,7 +75,7 @@ const PRESET_SCENARIOS: { name: string; params: Partial<SimulationScenario> }[] 
 export const SimulatorPage: React.FC = () => {
   const { showToast } = useUIStore();
   const { profile } = useUserStore();
-  const [scenarioName, setScenarioName] = useState('Custom Scenario');
+  const [scenarioName, setScenarioName] = useState("Custom Scenario");
   const [monthlyIncomeDelta, setMonthlyIncomeDelta] = useState<number>(0);
   const [monthlyExpenseDelta, setMonthlyExpenseDelta] = useState<number>(0);
   const [oneTimeExpense, setOneTimeExpense] = useState<number>(0);
@@ -84,7 +87,7 @@ export const SimulatorPage: React.FC = () => {
     setIsLoading(true);
     try {
       const scenario: SimulationScenario = {
-        id: 'sim-active',
+        id: "sim-active",
         name: scenarioName,
         monthlyIncomeDelta,
         monthlyExpenseDelta,
@@ -102,23 +105,28 @@ export const SimulatorPage: React.FC = () => {
 
   useEffect(() => {
     runSimulation();
-  }, [monthlyIncomeDelta, monthlyExpenseDelta, oneTimeExpense, monthsWithoutIncome]);
+  }, [
+    monthlyIncomeDelta,
+    monthlyExpenseDelta,
+    oneTimeExpense,
+    monthsWithoutIncome,
+  ]);
 
-  const applyPreset = (preset: typeof PRESET_SCENARIOS[0]) => {
+  const applyPreset = (preset: (typeof PRESET_SCENARIOS)[0]) => {
     setScenarioName(preset.name);
     setMonthlyIncomeDelta(preset.params.monthlyIncomeDelta || 0);
     setMonthlyExpenseDelta(preset.params.monthlyExpenseDelta || 0);
     setOneTimeExpense(preset.params.oneTimeExpense || 0);
     setMonthsWithoutIncome(preset.params.monthsWithoutIncome || 0);
     showToast({
-      type: 'info',
-      title: 'Preset Applied',
+      type: "info",
+      title: "Preset Applied",
       description: `Loaded scenario parameters for "${preset.name}".`,
     });
   };
 
   const handleReset = () => {
-    setScenarioName('Custom Scenario');
+    setScenarioName("Custom Scenario");
     setMonthlyIncomeDelta(0);
     setMonthlyExpenseDelta(0);
     setOneTimeExpense(0);
@@ -130,9 +138,12 @@ export const SimulatorPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">What-If Scenario Simulator</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            What-If Scenario Simulator
+          </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Test life decisions against your real baseline to forecast 12-month net worth and runway impacts
+            Test life decisions against your real baseline to forecast 12-month
+            net worth and runway impacts
           </p>
         </div>
 
@@ -149,7 +160,9 @@ export const SimulatorPage: React.FC = () => {
 
       {/* Preset Quick Chips */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="text-xs font-mono text-slate-400 shrink-0">Quick Presets:</span>
+        <span className="text-xs font-mono text-slate-400 shrink-0">
+          Quick Presets:
+        </span>
         {PRESET_SCENARIOS.map((p, i) => (
           <button
             key={i}
@@ -178,17 +191,22 @@ export const SimulatorPage: React.FC = () => {
           {/* Lever 1: Monthly Income Change */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <label className="text-slate-300 font-medium">Monthly Income Delta</label>
+              <label className="text-slate-300 font-medium">
+                Monthly Income Delta
+              </label>
               <span
                 className={`font-mono font-bold ${
                   monthlyIncomeDelta > 0
-                    ? 'text-emerald-400'
+                    ? "text-emerald-400"
                     : monthlyIncomeDelta < 0
-                    ? 'text-rose-400'
-                    : 'text-slate-400'
+                      ? "text-rose-400"
+                      : "text-slate-400"
                 }`}
               >
-                {monthlyIncomeDelta > 0 ? `+${formatCurrency(monthlyIncomeDelta)}` : formatCurrency(monthlyIncomeDelta)}/mo
+                {monthlyIncomeDelta > 0
+                  ? `+${formatCurrency(monthlyIncomeDelta)}`
+                  : formatCurrency(monthlyIncomeDelta)}
+                /mo
               </span>
             </div>
             <input
@@ -200,27 +218,32 @@ export const SimulatorPage: React.FC = () => {
               onChange={(e) => setMonthlyIncomeDelta(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-              <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
-                <span>-{formatCurrency(400000, profile.currency)}</span>
-                <span>{formatCurrency(0, profile.currency)}</span>
-                <span>+{formatCurrency(500000, profile.currency)}</span>
-              </div>
+            <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
+              <span>-{formatCurrency(400000, profile.currency)}</span>
+              <span>{formatCurrency(0, profile.currency)}</span>
+              <span>+{formatCurrency(500000, profile.currency)}</span>
+            </div>
           </div>
 
           {/* Lever 2: Monthly Expense Change */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <label className="text-slate-300 font-medium">Monthly Expense Delta</label>
+              <label className="text-slate-300 font-medium">
+                Monthly Expense Delta
+              </label>
               <span
                 className={`font-mono font-bold ${
                   monthlyExpenseDelta > 0
-                    ? 'text-rose-400'
+                    ? "text-rose-400"
                     : monthlyExpenseDelta < 0
-                    ? 'text-emerald-400'
-                    : 'text-slate-400'
+                      ? "text-emerald-400"
+                      : "text-slate-400"
                 }`}
               >
-                {monthlyExpenseDelta > 0 ? `+${formatCurrency(monthlyExpenseDelta)}` : formatCurrency(monthlyExpenseDelta)}/mo
+                {monthlyExpenseDelta > 0
+                  ? `+${formatCurrency(monthlyExpenseDelta)}`
+                  : formatCurrency(monthlyExpenseDelta)}
+                /mo
               </span>
             </div>
             <input
@@ -232,17 +255,21 @@ export const SimulatorPage: React.FC = () => {
               onChange={(e) => setMonthlyExpenseDelta(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-              <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
-                <span>-{formatCurrency(20000, profile.currency)} (Cuts)</span>
-                <span>{formatCurrency(0, profile.currency)}</span>
-                <span>+{formatCurrency(30000, profile.currency)} (Lifestyle)</span>
-              </div>
+            <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
+              <span>-{formatCurrency(20000, profile.currency)} (Cuts)</span>
+              <span>{formatCurrency(0, profile.currency)}</span>
+              <span>
+                +{formatCurrency(30000, profile.currency)} (Lifestyle)
+              </span>
+            </div>
           </div>
 
           {/* Lever 3: One-time Lump-sum Purchase */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <label className="text-slate-300 font-medium">One-Time Big Purchase</label>
+              <label className="text-slate-300 font-medium">
+                One-Time Big Purchase
+              </label>
               <span className="font-mono font-bold text-white">
                 {formatCurrency(oneTimeExpense)}
               </span>
@@ -256,19 +283,22 @@ export const SimulatorPage: React.FC = () => {
               onChange={(e) => setOneTimeExpense(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-              <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
-                <span>{formatCurrency(0, profile.currency)}</span>
-                <span>{formatCurrency(150000, profile.currency)}</span>
-                <span>{formatCurrency(300000, profile.currency)}</span>
-              </div>
+            <div className="flex justify-between text-xs text-slate-500 mb-2 font-mono">
+              <span>{formatCurrency(0, profile.currency)}</span>
+              <span>{formatCurrency(150000, profile.currency)}</span>
+              <span>{formatCurrency(300000, profile.currency)}</span>
+            </div>
           </div>
 
           {/* Lever 4: Months without income (Sabbatical / Job Search) */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <label className="text-slate-300 font-medium">Months Without Income</label>
+              <label className="text-slate-300 font-medium">
+                Months Without Income
+              </label>
               <span className="font-mono font-bold text-amber-400">
-                {monthsWithoutIncome} {monthsWithoutIncome === 1 ? 'Month' : 'Months'}
+                {monthsWithoutIncome}{" "}
+                {monthsWithoutIncome === 1 ? "Month" : "Months"}
               </span>
             </div>
             <input
@@ -290,147 +320,190 @@ export const SimulatorPage: React.FC = () => {
 
         {/* Results and Comparison Chart */}
         <div className="lg:col-span-2 space-y-6">
-          {results && (() => {
-            const finalPoint = results.monthlyPoints[11] || results.monthlyPoints[results.monthlyPoints.length - 1] || { baseline: 0, scenario: 0 };
-            const netWorthDelta = finalPoint.scenario - finalPoint.baseline;
-            const runwayDeltaMonths = results.scenarioRunwayMonths - results.baselineRunwayMonths;
-            return (
-            <>
-              {/* Impact KPI Summary Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-                  <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">12-Month Net Difference</span>
-                  <div
-                    className={`text-2xl lg:text-3xl font-bold font-mono ${
-                      netWorthDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {netWorthDelta >= 0
-                      ? `+${formatCurrency(netWorthDelta)}`
-                      : formatCurrency(netWorthDelta)}
-                  </div>
-                  <p className="text-xs text-slate-400">compared to current status quo</p>
-                </div>
-
-                <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-                  <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Runway Shift</span>
-                  <div
-                    className={`text-2xl lg:text-3xl font-bold font-mono ${
-                      runwayDeltaMonths >= 0 ? 'text-emerald-400' : 'text-amber-400'
-                    }`}
-                  >
-                    {runwayDeltaMonths >= 0
-                      ? `+${runwayDeltaMonths.toFixed(1)} Mo`
-                      : `${runwayDeltaMonths.toFixed(1)} Mo`}
-                  </div>
-                  <p className="text-xs text-slate-400">Survival cash buffer adjustment</p>
-                </div>
-
-                <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-                  <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Simulated 1-Yr Net Worth</span>
-                  <div className="text-2xl lg:text-3xl font-bold font-mono text-white">
-                    {formatCurrency(finalPoint.scenario || 0)}
-                  </div>
-                  <p className="text-xs text-slate-400">
-                    Baseline: {formatCurrency(finalPoint.baseline || 0)}
-                  </p>
-                </div>
-              </div>
-
-              {/* 12-Month Comparison Line Chart */}
-              <ChartCard
-                title="12-Month Trajectory: Baseline vs Scenario"
-                subtitle="Comparing status quo financial trajectory with active simulated levers"
-                actions={
-                  <div className="flex items-center gap-4 text-xs font-mono">
-                    <span className="flex items-center gap-1.5 text-slate-400">
-                      <span className="w-2.5 h-0.5 bg-slate-400" /> Baseline (Status Quo)
-                    </span>
-                    <span className="flex items-center gap-1.5 text-emerald-400">
-                      <span className="w-2.5 h-0.5 bg-emerald-400" /> Simulated Path
-                    </span>
-                  </div>
-                }
-              >
-                <div className="h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={results.monthlyPoints} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
-                      <XAxis dataKey="month" stroke="#64748B" fontSize={11} tickLine={false} />
-                      <YAxis
-                        stroke="#64748B"
-                        fontSize={11}
-                        tickLine={false}
-                        tickFormatter={(v) => `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Math.round(v / 1000)}k`}
-                      />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                        formatter={(val: any, name: any) => [
-                          `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`,
-                          name === 'baseline' ? 'Baseline Path' : 'Simulated Path',
-                        ]}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="baseline"
-                        stroke="#64748B"
-                        strokeWidth={2}
-                        strokeDasharray="3 3"
-                        dot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="scenario"
-                        stroke="#10B981"
-                        strokeWidth={3}
-                        dot={{ r: 3, fill: '#10B981' }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </ChartCard>
-
-              {/* Goal Impact Table */}
-              <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-6 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <Target className="w-4 h-4 text-indigo-400" />
-                  <span>Impact on Active Savings Goals</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {results.goalImpacts.map((g, i) => (
-                    <div
-                      key={i}
-                      className="p-3.5 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 flex items-center justify-between text-xs"
-                    >
-                      <div>
-                        <div className="font-semibold text-slate-100">{g.goalName}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">
-                          New Target: <span className="font-mono text-slate-300">{g.newTargetDate}</span>
-                        </div>
-                      </div>
-
-                      <span
-                        className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg ${
-                          g.impactMonths > 0
-                            ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
-                            : g.impactMonths < 0
-                            ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                            : 'bg-slate-800 text-slate-400'
+          {results &&
+            (() => {
+              const finalPoint = results.monthlyPoints[11] ||
+                results.monthlyPoints[results.monthlyPoints.length - 1] || {
+                  baseline: 0,
+                  scenario: 0,
+                };
+              const netWorthDelta = finalPoint.scenario - finalPoint.baseline;
+              const runwayDeltaMonths =
+                results.scenarioRunwayMonths - results.baselineRunwayMonths;
+              return (
+                <>
+                  {/* Impact KPI Summary Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+                      <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">
+                        12-Month Net Difference
+                      </span>
+                      <div
+                        className={`text-2xl lg:text-3xl font-bold font-mono ${
+                          netWorthDelta >= 0
+                            ? "text-emerald-400"
+                            : "text-rose-400"
                         }`}
                       >
-                        {g.impactMonths > 0
-                          ? `+${g.impactMonths} mo delay`
-                          : g.impactMonths < 0
-                          ? `${g.impactMonths} mo earlier!`
-                          : 'No change'}
-                      </span>
+                        {netWorthDelta >= 0
+                          ? `+${formatCurrency(netWorthDelta)}`
+                          : formatCurrency(netWorthDelta)}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        compared to current status quo
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </>
-            );
-          })()}
+
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+                      <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">
+                        Runway Shift
+                      </span>
+                      <div
+                        className={`text-2xl lg:text-3xl font-bold font-mono ${
+                          runwayDeltaMonths >= 0
+                            ? "text-emerald-400"
+                            : "text-amber-400"
+                        }`}
+                      >
+                        {runwayDeltaMonths >= 0
+                          ? `+${runwayDeltaMonths.toFixed(1)} Mo`
+                          : `${runwayDeltaMonths.toFixed(1)} Mo`}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        Survival cash buffer adjustment
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5.5 space-y-1 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+                      <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">
+                        Simulated 1-Yr Net Worth
+                      </span>
+                      <div className="text-2xl lg:text-3xl font-bold font-mono text-white">
+                        {formatCurrency(finalPoint.scenario || 0)}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        Baseline: {formatCurrency(finalPoint.baseline || 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 12-Month Comparison Line Chart */}
+                  <ChartCard
+                    title="12-Month Trajectory: Baseline vs Scenario"
+                    subtitle="Comparing status quo financial trajectory with active simulated levers"
+                    actions={
+                      <div className="flex items-center gap-4 text-xs font-mono">
+                        <span className="flex items-center gap-1.5 text-slate-400">
+                          <span className="w-2.5 h-0.5 bg-slate-400" /> Baseline
+                          (Status Quo)
+                        </span>
+                        <span className="flex items-center gap-1.5 text-emerald-400">
+                          <span className="w-2.5 h-0.5 bg-emerald-400" />{" "}
+                          Simulated Path
+                        </span>
+                      </div>
+                    }
+                  >
+                    <div className="h-72 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={results.monthlyPoints}
+                          margin={{ top: 10, right: 10, left: -5, bottom: 0 }}
+                        >
+                          <XAxis
+                            dataKey="month"
+                            stroke="#64748B"
+                            fontSize={11}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            stroke="#64748B"
+                            fontSize={11}
+                            tickLine={false}
+                            tickFormatter={(v) =>
+                              `${CURRENCY_SYMBOLS[profile.currency] || "₹"}${Math.round(v / 1000)}k`
+                            }
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#0F172A",
+                              borderColor: "#334155",
+                              borderRadius: 12,
+                            }}
+                            formatter={(val: any, name: any) => [
+                              `${CURRENCY_SYMBOLS[profile.currency] || "₹"}${Number(val).toLocaleString()}`,
+                              name === "baseline"
+                                ? "Baseline Path"
+                                : "Simulated Path",
+                            ]}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="baseline"
+                            stroke="#64748B"
+                            strokeWidth={2}
+                            strokeDasharray="3 3"
+                            dot={false}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="scenario"
+                            stroke="#10B981"
+                            strokeWidth={3}
+                            dot={{ r: 3, fill: "#10B981" }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </ChartCard>
+
+                  {/* Goal Impact Table */}
+                  <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-6 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+                    <div className="flex items-center gap-2 text-sm font-bold text-white">
+                      <Target className="w-4 h-4 text-indigo-400" />
+                      <span>Impact on Active Savings Goals</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {results.goalImpacts.map((g, i) => (
+                        <div
+                          key={i}
+                          className="p-3.5 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 flex items-center justify-between text-xs"
+                        >
+                          <div>
+                            <div className="font-semibold text-slate-100">
+                              {g.goalName}
+                            </div>
+                            <div className="text-[11px] text-slate-400 mt-0.5">
+                              New Target:{" "}
+                              <span className="font-mono text-slate-300">
+                                {g.newTargetDate}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span
+                            className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg ${
+                              g.impactMonths > 0
+                                ? "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                                : g.impactMonths < 0
+                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                                  : "bg-slate-800 text-slate-400"
+                            }`}
+                          >
+                            {g.impactMonths > 0
+                              ? `+${g.impactMonths} mo delay`
+                              : g.impactMonths < 0
+                                ? `${g.impactMonths} mo earlier!`
+                                : "No change"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
         </div>
       </div>
     </div>

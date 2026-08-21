@@ -5,6 +5,7 @@ Both the **React 19 Frontend** and **FastAPI Python Backend** run together on th
 ---
 
 ## Why Single-Service Deployment?
+
 - ✅ **1 Service Instead of 2**: Saves free-tier quota on Render.
 - ✅ **Zero CORS Configuration**: Frontend and API share the exact same domain (`https://your-app.onrender.com`).
 - ✅ **Fast Cold Starts**: Only 1 service spins up instead of 2 separate instances.
@@ -30,7 +31,7 @@ If configuring manually without Blueprints:
 2. Configure settings:
    - **Name**: `finpluse`
    - **Region**: Any (e.g. `Oregon (US West)`)
-   - **Root Directory**: *(Leave blank)*
+   - **Root Directory**: _(Leave blank)_
    - **Runtime**: `Python 3`
    - **Build Command**:
      ```bash
@@ -41,15 +42,15 @@ If configuring manually without Blueprints:
      cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
      ```
 3. Add **Environment Variables**:
-   | Key | Value |
-   | :--- | :--- |
-   | `PYTHON_VERSION` | `3.11.9` |
-   | `NODE_VERSION` | `20.14.0` |
-   | `ENVIRONMENT` | `production` |
-   | `DEBUG` | `false` |
-   | `SEED_DEMO_DATA` | `true` |
-   | `DATABASE_URL` | `sqlite+aiosqlite:///./finpilot.db` |
-   | `SECRET_KEY` | *(Click "Generate" or enter random string)* |
+   | Key              | Value                                       |
+   | :--------------- | :------------------------------------------ |
+   | `PYTHON_VERSION` | `3.11.9`                                    |
+   | `NODE_VERSION`   | `20.14.0`                                   |
+   | `ENVIRONMENT`    | `production`                                |
+   | `DEBUG`          | `false`                                     |
+   | `SEED_DEMO_DATA` | `true`                                      |
+   | `DATABASE_URL`   | `sqlite+aiosqlite:///./finpilot.db`         |
+   | `SECRET_KEY`     | _(Click "Generate" or enter random string)_ |
 4. Click **Create Web Service**.
 
 ---
@@ -57,6 +58,7 @@ If configuring manually without Blueprints:
 ## Accessing Your App
 
 Once Render finishes building:
+
 - 🌐 **Web App & Dashboard**: `https://<your-app-name>.onrender.com/`
 - 💬 **AI Copilot**: `https://<your-app-name>.onrender.com/copilot`
 - 📊 **Simulator**: `https://<your-app-name>.onrender.com/simulator`

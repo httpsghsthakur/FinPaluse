@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import {
   Wallet,
   CreditCard,
@@ -14,20 +14,24 @@ import {
   Bot,
   Plus,
   RefreshCw,
-} from 'lucide-react';
-import { KpiCard } from '../components/ui/KpiCard';
-import { ChartCard } from '../components/ui/ChartCard';
-import { CategoryIcon } from '../components/ui/CategoryIcon';
-import { AmountText } from '../components/ui/AmountText';
-import { ProgressBar } from '../components/ui/ProgressBar';
-import { KpiSkeleton, ChartSkeleton, TableSkeleton } from '../components/ui/Skeletons';
-import { CitationChip } from '../components/ui/CitationChip';
-import { DashboardSummary, Insight } from '../types';
-import { api } from '../lib/api';
-import { useUIStore } from '../lib/store/useUIStore';
-import { formatDate, formatCurrency } from '../lib/utils/formatters';
-import { useUserStore } from '../lib/store/useUserStore';
-import { CURRENCY_SYMBOLS } from '../lib/utils/formatters';
+} from "lucide-react";
+import { KpiCard } from "../components/ui/KpiCard";
+import { ChartCard } from "../components/ui/ChartCard";
+import { CategoryIcon } from "../components/ui/CategoryIcon";
+import { AmountText } from "../components/ui/AmountText";
+import { ProgressBar } from "../components/ui/ProgressBar";
+import {
+  KpiSkeleton,
+  ChartSkeleton,
+  TableSkeleton,
+} from "../components/ui/Skeletons";
+import { CitationChip } from "../components/ui/CitationChip";
+import { DashboardSummary, Insight } from "../types";
+import { api } from "../lib/api";
+import { useUIStore } from "../lib/store/useUIStore";
+import { formatDate, formatCurrency } from "../lib/utils/formatters";
+import { useUserStore } from "../lib/store/useUserStore";
+import { CURRENCY_SYMBOLS } from "../lib/utils/formatters";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -38,20 +42,25 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts';
+} from "recharts";
 
 export const DashboardPage: React.FC = () => {
   const { openTxDetail, openAddTxModal } = useUIStore();
   const { profile } = useUserStore();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
-  const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
+  const [expandedInsightId, setExpandedInsightId] = useState<string | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   const loadDashboard = async () => {
     setIsLoading(true);
     try {
-      const [summary, insList] = await Promise.all([api.getDashboardSummary(), api.getInsights()]);
+      const [summary, insList] = await Promise.all([
+        api.getDashboardSummary(),
+        api.getInsights(),
+      ]);
       setData(summary);
       setInsights(insList.filter((i) => !i.isDismissed).slice(0, 3));
     } catch (e) {
@@ -85,8 +94,9 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
-  const avgSavings = data.cashFlowHistory.length 
-    ? data.cashFlowHistory.reduce((acc, curr) => acc + curr.savings, 0) / data.cashFlowHistory.length 
+  const avgSavings = data.cashFlowHistory.length
+    ? data.cashFlowHistory.reduce((acc, curr) => acc + curr.savings, 0) /
+      data.cashFlowHistory.length
     : 0;
 
   return (
@@ -97,10 +107,16 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
             <div className="text-xs">
-              <span className="font-bold text-amber-300">Low Balance Forecast Warning: </span>
+              <span className="font-bold text-amber-300">
+                Low Balance Forecast Warning:{" "}
+              </span>
               <span className="text-slate-200">
-                Checking balance projected to dip below {formatCurrency(data.lowBalanceAlert.threshold || 0, profile.currency)} on{' '}
-                {data.lowBalanceAlert.date}.
+                Checking balance projected to dip below{" "}
+                {formatCurrency(
+                  data.lowBalanceAlert.threshold || 0,
+                  profile.currency,
+                )}{" "}
+                on {data.lowBalanceAlert.date}.
               </span>
             </div>
           </div>
@@ -121,7 +137,7 @@ export const DashboardPage: React.FC = () => {
           changePct={data.netWorthMomPct}
           changePeriodText="MoM"
           icon={Wallet}
-          badge={{ text: 'Compounding', variant: 'emerald' }}
+          badge={{ text: "Compounding", variant: "emerald" }}
         />
         <KpiCard
           title="Monthly Spend"
@@ -137,7 +153,7 @@ export const DashboardPage: React.FC = () => {
           suffix=" Months"
           subtext="Liquid checking + HYSA reserves"
           icon={Clock}
-          badge={{ text: 'Safe Tier', variant: 'emerald' }}
+          badge={{ text: "Safe Tier", variant: "emerald" }}
         />
         <KpiCard
           title="Savings Rate"
@@ -157,11 +173,12 @@ export const DashboardPage: React.FC = () => {
           <ChartCard
             title="Cash Flow Dynamics"
             subtitle="6-Month Income vs Expenses Comparison"
-            footerNote={`Net savings averaged ${avgSavings >= 0 ? '+' : ''}${formatCurrency(avgSavings, profile.currency)}/month across this period.`}
+            footerNote={`Net savings averaged ${avgSavings >= 0 ? "+" : ""}${formatCurrency(avgSavings, profile.currency)}/month across this period.`}
             actions={
               <div className="flex items-center gap-3 text-xs font-mono">
                 <span className="flex items-center gap-1.5 text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" /> Income
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />{" "}
+                  Income
                 </span>
                 <span className="flex items-center gap-1.5 text-rose-400">
                   <span className="w-2 h-2 rounded-full bg-rose-400" /> Expenses
@@ -171,27 +188,62 @@ export const DashboardPage: React.FC = () => {
           >
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.cashFlowHistory} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <AreaChart
+                  data={data.cashFlowHistory}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                >
                   <defs>
                     <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
+                      <stop
+                        offset="5%"
+                        stopColor="#10B981"
+                        stopOpacity={0.35}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="#10B981"
+                        stopOpacity={0.0}
+                      />
                     </linearGradient>
-                    <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="expenseGrad"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#F43F5E" stopOpacity={0.0} />
+                      <stop
+                        offset="95%"
+                        stopColor="#F43F5E"
+                        stopOpacity={0.0}
+                      />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="month" stroke="#64748B" fontSize={11} tickLine={false} />
+                  <XAxis
+                    dataKey="month"
+                    stroke="#64748B"
+                    fontSize={11}
+                    tickLine={false}
+                  />
                   <YAxis
                     stroke="#64748B"
                     fontSize={11}
                     tickLine={false}
-                    tickFormatter={(v) => `${CURRENCY_SYMBOLS[profile.currency] || '₹'}${v / 1000}k`}
+                    tickFormatter={(v) =>
+                      `${CURRENCY_SYMBOLS[profile.currency] || "₹"}${v / 1000}k`
+                    }
                   />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                    formatter={(val: any) => [`${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`, '']}
+                    contentStyle={{
+                      backgroundColor: "#0F172A",
+                      borderColor: "#334155",
+                      borderRadius: 12,
+                    }}
+                    formatter={(val: any) => [
+                      `${CURRENCY_SYMBOLS[profile.currency] || "₹"}${Number(val).toLocaleString()}`,
+                      "",
+                    ]}
                   />
                   <Area
                     type="monotone"
@@ -219,7 +271,10 @@ export const DashboardPage: React.FC = () => {
             title="Spending by Category"
             subtitle="Current billing cycle distribution"
             actions={
-              <NavLink to="/app/budgets" className="text-xs text-emerald-400 hover:underline">
+              <NavLink
+                to="/app/budgets"
+                className="text-xs text-emerald-400 hover:underline"
+              >
                 View Budgets
               </NavLink>
             }
@@ -229,8 +284,15 @@ export const DashboardPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: 12 }}
-                      formatter={(val: any) => [`${CURRENCY_SYMBOLS[profile.currency] || '₹'}${Number(val).toLocaleString()}`, 'Spent']}
+                      contentStyle={{
+                        backgroundColor: "#0F172A",
+                        borderColor: "#334155",
+                        borderRadius: 12,
+                      }}
+                      formatter={(val: any) => [
+                        `${CURRENCY_SYMBOLS[profile.currency] || "₹"}${Number(val).toLocaleString()}`,
+                        "Spent",
+                      ]}
                     />
                     <Pie
                       data={data.categorySpend.slice(0, 5)}
@@ -256,10 +318,15 @@ export const DashboardPage: React.FC = () => {
                   <div key={cat.categoryId} className="text-xs space-y-1">
                     <div className="flex justify-between items-center text-slate-300">
                       <span className="flex items-center gap-1.5 truncate">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: cat.color }}
+                        />
                         <span className="truncate">{cat.categoryName}</span>
                       </span>
-                      <span className="font-mono font-medium">{formatCurrency(cat.amount, profile.currency)}</span>
+                      <span className="font-mono font-medium">
+                        {formatCurrency(cat.amount, profile.currency)}
+                      </span>
                     </div>
                     <ProgressBar
                       value={cat.amount}
@@ -283,8 +350,12 @@ export const DashboardPage: React.FC = () => {
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-100">Live AI Financial Signals</h3>
-              <p className="text-xs text-slate-400">Automated detections grounded in your daily cash telemetry</p>
+              <h3 className="text-sm font-bold text-slate-100">
+                Live AI Financial Signals
+              </h3>
+              <p className="text-xs text-slate-400">
+                Automated detections grounded in your daily cash telemetry
+              </p>
             </div>
           </div>
           <NavLink
@@ -300,10 +371,11 @@ export const DashboardPage: React.FC = () => {
           {insights.map((insight) => {
             const isExpanded = expandedInsightId === insight.id;
             const borderColors = {
-              alert: 'border-rose-500/30 bg-rose-950/20 backdrop-blur-sm',
-              warning: 'border-amber-500/30 bg-amber-950/20 backdrop-blur-sm',
-              success: 'border-emerald-500/30 bg-emerald-950/20 backdrop-blur-sm',
-              info: 'border-indigo-500/30 bg-indigo-950/20 backdrop-blur-sm',
+              alert: "border-rose-500/30 bg-rose-950/20 backdrop-blur-sm",
+              warning: "border-amber-500/30 bg-amber-950/20 backdrop-blur-sm",
+              success:
+                "border-emerald-500/30 bg-emerald-950/20 backdrop-blur-sm",
+              info: "border-indigo-500/30 bg-indigo-950/20 backdrop-blur-sm",
             };
 
             return (
@@ -312,23 +384,29 @@ export const DashboardPage: React.FC = () => {
                 className={`p-4 rounded-2xl border transition-all ${borderColors[insight.severity]} space-y-2`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="text-xs font-bold text-slate-200 leading-snug">{insight.title}</h4>
+                  <h4 className="text-xs font-bold text-slate-200 leading-snug">
+                    {insight.title}
+                  </h4>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">{insight.description}</p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  {insight.description}
+                </p>
 
                 <div className="pt-1 flex items-center justify-between text-xs">
                   <button
-                    onClick={() => setExpandedInsightId(isExpanded ? null : insight.id)}
+                    onClick={() =>
+                      setExpandedInsightId(isExpanded ? null : insight.id)
+                    }
                     className="text-[11px] text-emerald-400 hover:underline font-medium cursor-pointer"
                   >
-                    {isExpanded ? 'Hide explanation' : 'Why this alert?'}
+                    {isExpanded ? "Hide explanation" : "Why this alert?"}
                   </button>
                   {insight.actionPath && (
                     <NavLink
                       to={insight.actionPath}
                       className="text-[11px] text-slate-300 hover:text-white flex items-center gap-0.5"
                     >
-                      <span>{insight.actionLabel || 'View'}</span>
+                      <span>{insight.actionLabel || "View"}</span>
                       <ArrowRight className="w-3 h-3" />
                     </NavLink>
                   )}
@@ -352,8 +430,12 @@ export const DashboardPage: React.FC = () => {
         <div className="lg:col-span-2 bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5 md:p-6 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-100">Recent Transactions</h3>
-              <p className="text-xs text-slate-400">Real-time sync across connected accounts</p>
+              <h3 className="text-sm font-bold text-slate-100">
+                Recent Transactions
+              </h3>
+              <p className="text-xs text-slate-400">
+                Real-time sync across connected accounts
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -363,7 +445,10 @@ export const DashboardPage: React.FC = () => {
                 <Plus className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Add</span>
               </button>
-              <NavLink to="/app/transactions" className="text-xs text-emerald-400 hover:underline">
+              <NavLink
+                to="/app/transactions"
+                className="text-xs text-emerald-400 hover:underline"
+              >
                 View All
               </NavLink>
             </div>
@@ -397,10 +482,10 @@ export const DashboardPage: React.FC = () => {
                       )}
                     </td>
                     <td className="py-2.5 text-slate-400 font-mono whitespace-nowrap">
-                      {formatDate(tx.date, 'MMM d')}
+                      {formatDate(tx.date, "MMM d")}
                     </td>
                     <td className="py-2.5 text-slate-400 capitalize truncate max-w-[120px]">
-                      {tx.categoryId.replace('cat-', '').replace('-', ' ')}
+                      {tx.categoryId.replace("cat-", "").replace("-", " ")}
                     </td>
                     <td className="py-2.5 text-right font-mono font-medium">
                       <AmountText amount={tx.amount} colored />
@@ -416,10 +501,15 @@ export const DashboardPage: React.FC = () => {
         <div className="lg:col-span-1 bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-5 md:p-6 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-100">Upcoming Bills</h3>
+              <h3 className="text-sm font-bold text-slate-100">
+                Upcoming Bills
+              </h3>
               <p className="text-xs text-slate-400">Next 14 days auto-debits</p>
             </div>
-            <NavLink to="/app/forecast" className="text-xs text-emerald-400 hover:underline">
+            <NavLink
+              to="/app/forecast"
+              className="text-xs text-emerald-400 hover:underline"
+            >
               Forecast
             </NavLink>
           </div>
@@ -435,10 +525,15 @@ export const DashboardPage: React.FC = () => {
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div className="truncate">
-                    <div className="text-xs font-semibold text-slate-200 truncate">{bill.merchant}</div>
+                    <div className="text-xs font-semibold text-slate-200 truncate">
+                      {bill.merchant}
+                    </div>
                     <div className="text-[10px] text-slate-400">
-                      Due in <span className="text-amber-400 font-medium">{bill.daysAway} days</span> (
-                      {formatDate(bill.dueDate, 'MMM d')})
+                      Due in{" "}
+                      <span className="text-amber-400 font-medium">
+                        {bill.daysAway} days
+                      </span>{" "}
+                      ({formatDate(bill.dueDate, "MMM d")})
                     </div>
                   </div>
                 </div>
@@ -456,7 +551,8 @@ export const DashboardPage: React.FC = () => {
               <span>Need help planning cash flow?</span>
             </div>
             <p className="text-[11px] text-slate-300">
-              Ask Copilot if you can afford additional expenses before your next paycheck on the 1st.
+              Ask Copilot if you can afford additional expenses before your next
+              paycheck on the 1st.
             </p>
             <NavLink
               to="/app/copilot"

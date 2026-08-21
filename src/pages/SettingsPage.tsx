@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   User,
   Sliders,
@@ -15,36 +15,48 @@ import {
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
-} from 'lucide-react';
-import { useUserStore } from '../lib/store/useUserStore';
-import { useUIStore } from '../lib/store/useUIStore';
-import { Category, Account, CurrencyCode } from '../types';
-import { api } from '../lib/api';
-import { CategoryIcon } from '../components/ui/CategoryIcon';
-import { Modal } from '../components/ui/Modal';
-import { formatCurrency, formatDate } from '../lib/utils/formatters';
+} from "lucide-react";
+import { useUserStore } from "../lib/store/useUserStore";
+import { useUIStore } from "../lib/store/useUIStore";
+import { Category, Account, CurrencyCode } from "../types";
+import { api } from "../lib/api";
+import { CategoryIcon } from "../components/ui/CategoryIcon";
+import { Modal } from "../components/ui/Modal";
+import { formatCurrency, formatDate } from "../lib/utils/formatters";
 
-type SettingsTab = 'profile' | 'preferences' | 'categories' | 'datasources' | 'ai' | 'security' | 'about';
+type SettingsTab =
+  | "profile"
+  | "preferences"
+  | "categories"
+  | "datasources"
+  | "ai"
+  | "security"
+  | "about";
 
 export const SettingsPage: React.FC = () => {
   const { profile, updateProfile, setCurrency, toggleTheme } = useUserStore();
   const { openPlaidModal, showToast } = useUIStore();
 
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Category Edit/Create Modal
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [categoryName, setCategoryName] = useState('');
-  const [categoryColor, setCategoryColor] = useState('#10B981');
-  const [categoryBudget, setCategoryBudget] = useState('400');
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryColor, setCategoryColor] = useState("#10B981");
+  const [categoryBudget, setCategoryBudget] = useState("400");
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
+    null,
+  );
 
   const loadSettingsData = async () => {
     try {
-      const [cats, accs] = await Promise.all([api.getCategories(), api.getAccounts()]);
+      const [cats, accs] = await Promise.all([
+        api.getCategories(),
+        api.getAccounts(),
+      ]);
       setCategories(cats);
       setAccounts(accs);
     } catch (e) {
@@ -67,50 +79,59 @@ export const SettingsPage: React.FC = () => {
           color: categoryColor,
           defaultMonthlyBudget: parseFloat(categoryBudget) || 300,
         });
-        showToast({ type: 'success', title: 'Category Updated' });
+        showToast({ type: "success", title: "Category Updated" });
       } else {
         await api.createCategory({
           name: categoryName,
           color: categoryColor,
-          icon: 'Tag',
+          icon: "Tag",
           defaultMonthlyBudget: parseFloat(categoryBudget) || 300,
           isCustom: true,
         });
-        showToast({ type: 'success', title: 'New Category Created' });
+        showToast({ type: "success", title: "New Category Created" });
       }
       setIsCategoryModalOpen(false);
-      setCategoryName('');
+      setCategoryName("");
       setEditingCategoryId(null);
       loadSettingsData();
     } catch (err) {
-      showToast({ type: 'error', title: 'Failed to save category' });
+      showToast({ type: "error", title: "Failed to save category" });
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
     try {
       await api.deleteCategory(id);
-      showToast({ type: 'info', title: 'Category Removed' });
+      showToast({ type: "info", title: "Category Removed" });
       loadSettingsData();
     } catch (err) {
-      showToast({ type: 'error', title: 'Could not delete default category' });
+      showToast({ type: "error", title: "Could not delete default category" });
     }
   };
 
   const handleExportFullJSON = async () => {
     try {
       const data = await api.exportAllData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `Finpluse_Vault_Backup_${new Date().toISOString().slice(0, 10)}.json`);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `Finpluse_Vault_Backup_${new Date().toISOString().slice(0, 10)}.json`,
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast({ type: 'success', title: 'Vault JSON Exported', description: 'Full backup file saved locally.' });
+      showToast({
+        type: "success",
+        title: "Vault JSON Exported",
+        description: "Full backup file saved locally.",
+      });
     } catch (err) {
-      showToast({ type: 'error', title: 'Export failed' });
+      showToast({ type: "error", title: "Export failed" });
     }
   };
 
@@ -119,13 +140,13 @@ export const SettingsPage: React.FC = () => {
       await api.resetAllData();
       setIsResetConfirmOpen(false);
       showToast({
-        type: 'info',
-        title: 'Sandbox Reset',
-        description: 'Regenerated fresh 6-month financial baseline data.',
+        type: "info",
+        title: "Sandbox Reset",
+        description: "Regenerated fresh 6-month financial baseline data.",
       });
       loadSettingsData();
     } catch (err) {
-      showToast({ type: 'error', title: 'Reset failed' });
+      showToast({ type: "error", title: "Reset failed" });
     }
   };
 
@@ -133,9 +154,12 @@ export const SettingsPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Settings & Vault Config</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white">
+          Settings & Vault Config
+        </h1>
         <p className="text-xs text-slate-400 mt-0.5">
-          Manage identity, category budgets, bank connections, privacy models, and telemetry data
+          Manage identity, category budgets, bank connections, privacy models,
+          and telemetry data
         </p>
       </div>
 
@@ -144,13 +168,13 @@ export const SettingsPage: React.FC = () => {
         {/* Left Vertical Tab Selector */}
         <div className="md:col-span-1 space-y-1.5">
           {[
-            { id: 'profile', label: 'User Profile', icon: User },
-            { id: 'preferences', label: 'Preferences', icon: Sliders },
-            { id: 'categories', label: 'Categories & Budgets', icon: Tag },
-            { id: 'datasources', label: 'Connected Banks', icon: Database },
-            { id: 'ai', label: 'Copilot AI Engine', icon: Bot },
-            { id: 'security', label: 'Security & Vault', icon: Shield },
-            { id: 'about', label: 'Architecture & System', icon: Info },
+            { id: "profile", label: "User Profile", icon: User },
+            { id: "preferences", label: "Preferences", icon: Sliders },
+            { id: "categories", label: "Categories & Budgets", icon: Tag },
+            { id: "datasources", label: "Connected Banks", icon: Database },
+            { id: "ai", label: "Copilot AI Engine", icon: Bot },
+            { id: "security", label: "Security & Vault", icon: Shield },
+            { id: "about", label: "Architecture & System", icon: Info },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -160,8 +184,8 @@ export const SettingsPage: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as SettingsTab)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition-all text-left cursor-pointer ${
                   isActive
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -174,7 +198,7 @@ export const SettingsPage: React.FC = () => {
         {/* Right Content Panel */}
         <div className="md:col-span-3 bg-slate-900/40 backdrop-blur-md border border-slate-800/60 rounded-[28px] p-6 md:p-8 space-y-6 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
           {/* PROFILE TAB */}
-          {activeTab === 'profile' && (
+          {activeTab === "profile" && (
             <div className="space-y-6">
               <div className="flex items-center gap-4 pb-6 border-b border-slate-800/60">
                 <img
@@ -183,7 +207,9 @@ export const SettingsPage: React.FC = () => {
                   className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
                 />
                 <div>
-                  <h2 className="text-base font-bold text-white">{profile.name}</h2>
+                  <h2 className="text-base font-bold text-white">
+                    {profile.name}
+                  </h2>
                   <p className="text-xs text-slate-400">{profile.email}</p>
                   <span className="inline-block mt-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                     Active Plan: Pro Lifetime Sandbox
@@ -193,7 +219,9 @@ export const SettingsPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     value={profile.name}
@@ -202,7 +230,9 @@ export const SettingsPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     value={profile.email}
@@ -215,16 +245,22 @@ export const SettingsPage: React.FC = () => {
           )}
 
           {/* PREFERENCES TAB */}
-          {activeTab === 'preferences' && (
+          {activeTab === "preferences" && (
             <div className="space-y-6">
-              <h2 className="text-sm font-bold text-white">Global Formatting & Display</h2>
+              <h2 className="text-sm font-bold text-white">
+                Global Formatting & Display
+              </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Base Currency</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Base Currency
+                  </label>
                   <select
                     value={profile.currency}
-                    onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+                    onChange={(e) =>
+                      setCurrency(e.target.value as CurrencyCode)
+                    }
                     className="w-full px-3.5 py-2.5 bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="USD">USD ($ - United States Dollar)</option>
@@ -235,13 +271,17 @@ export const SettingsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Theme Interface</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Theme Interface
+                  </label>
                   <button
                     onClick={toggleTheme}
                     className="w-full px-3.5 py-2.5 bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-xl text-xs text-slate-200 hover:border-slate-600 text-left flex items-center justify-between cursor-pointer"
                   >
                     <span className="capitalize">{profile.theme} Mode</span>
-                    <span className="text-[11px] text-emerald-400 font-semibold">Click to switch</span>
+                    <span className="text-[11px] text-emerald-400 font-semibold">
+                      Click to switch
+                    </span>
                   </button>
                 </div>
               </div>
@@ -249,19 +289,24 @@ export const SettingsPage: React.FC = () => {
           )}
 
           {/* CATEGORIES TAB */}
-          {activeTab === 'categories' && (
+          {activeTab === "categories" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-white">Custom Spending Categories</h2>
-                  <p className="text-xs text-slate-400">Manage tags and default baseline budgets for machine categorization</p>
+                  <h2 className="text-sm font-bold text-white">
+                    Custom Spending Categories
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Manage tags and default baseline budgets for machine
+                    categorization
+                  </p>
                 </div>
                 <button
                   onClick={() => {
                     setEditingCategoryId(null);
-                    setCategoryName('');
-                    setCategoryColor('#10B981');
-                    setCategoryBudget('400');
+                    setCategoryName("");
+                    setCategoryColor("#10B981");
+                    setCategoryBudget("400");
                     setIsCategoryModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
@@ -278,11 +323,18 @@ export const SettingsPage: React.FC = () => {
                     className="p-3.5 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="flex items-center gap-3">
-                      <CategoryIcon name={cat.icon} color={cat.color} size="sm" />
+                      <CategoryIcon
+                        name={cat.icon}
+                        color={cat.color}
+                        size="sm"
+                      />
                       <div>
-                        <span className="font-semibold text-slate-200">{cat.name}</span>
+                        <span className="font-semibold text-slate-200">
+                          {cat.name}
+                        </span>
                         <div className="text-[11px] text-slate-400 font-mono">
-                          Default Monthly: {formatCurrency(cat.defaultMonthlyBudget)}
+                          Default Monthly:{" "}
+                          {formatCurrency(cat.defaultMonthlyBudget)}
                         </div>
                       </div>
                     </div>
@@ -316,12 +368,16 @@ export const SettingsPage: React.FC = () => {
           )}
 
           {/* DATA SOURCES TAB */}
-          {activeTab === 'datasources' && (
+          {activeTab === "datasources" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-white">Linked Accounts & Plaid Feeds</h2>
-                  <p className="text-xs text-slate-400">Encrypted token connections with hourly refresh cycles</p>
+                  <h2 className="text-sm font-bold text-white">
+                    Linked Accounts & Plaid Feeds
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Encrypted token connections with hourly refresh cycles
+                  </p>
                 </div>
                 <button
                   onClick={openPlaidModal}
@@ -340,20 +396,28 @@ export const SettingsPage: React.FC = () => {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-100">{acc.institutionName}</span>
+                        <span className="font-bold text-slate-100">
+                          {acc.institutionName}
+                        </span>
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                           •••• {acc.mask}
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        {acc.name} • Last synchronized <span className="font-mono text-slate-300">{formatDate(acc.lastSynced, 'MMM d, p')}</span>
+                        {acc.name} • Last synchronized{" "}
+                        <span className="font-mono text-slate-300">
+                          {formatDate(acc.lastSynced, "MMM d, p")}
+                        </span>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="font-bold font-mono text-white">{formatCurrency(acc.balance)}</div>
+                      <div className="font-bold font-mono text-white">
+                        {formatCurrency(acc.balance)}
+                      </div>
                       <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1 justify-end">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Active
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{" "}
+                        Active
                       </span>
                     </div>
                   </div>
@@ -363,26 +427,43 @@ export const SettingsPage: React.FC = () => {
           )}
 
           {/* AI ENGINE TAB */}
-          {activeTab === 'ai' && (
+          {activeTab === "ai" && (
             <div className="space-y-4">
-              <h2 className="text-sm font-bold text-white">Copilot Reasoning Configuration</h2>
+              <h2 className="text-sm font-bold text-white">
+                Copilot Reasoning Configuration
+              </h2>
               <p className="text-xs text-slate-400">
-                Control the tone, grounding constraints, and telemetry exposure for AI answers.
+                Control the tone, grounding constraints, and telemetry exposure
+                for AI answers.
               </p>
 
               <div className="p-4 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 space-y-3 text-xs">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-slate-200">Grounded Citation Enforcer</div>
-                    <div className="text-slate-400 text-[11px]">Strictly forbid speculative answers without verifiable transaction citations.</div>
+                    <div className="font-semibold text-slate-200">
+                      Grounded Citation Enforcer
+                    </div>
+                    <div className="text-slate-400 text-[11px]">
+                      Strictly forbid speculative answers without verifiable
+                      transaction citations.
+                    </div>
                   </div>
-                  <input type="checkbox" defaultChecked className="accent-emerald-500 w-4 h-4 cursor-pointer" />
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    className="accent-emerald-500 w-4 h-4 cursor-pointer"
+                  />
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
                   <div>
-                    <div className="font-semibold text-slate-200">Zero-Retention Data Policy</div>
-                    <div className="text-slate-400 text-[11px]">No financial balances are transmitted to external cloud training corpora.</div>
+                    <div className="font-semibold text-slate-200">
+                      Zero-Retention Data Policy
+                    </div>
+                    <div className="text-slate-400 text-[11px]">
+                      No financial balances are transmitted to external cloud
+                      training corpora.
+                    </div>
                   </div>
                   <span className="font-mono text-[10px] text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold">
                     Enforced
@@ -393,15 +474,22 @@ export const SettingsPage: React.FC = () => {
           )}
 
           {/* SECURITY TAB */}
-          {activeTab === 'security' && (
+          {activeTab === "security" && (
             <div className="space-y-6">
-              <h2 className="text-sm font-bold text-white">Data Vault & Encryption</h2>
+              <h2 className="text-sm font-bold text-white">
+                Data Vault & Encryption
+              </h2>
 
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 flex items-center justify-between gap-4 text-xs">
                   <div>
-                    <div className="font-semibold text-slate-200">Export Complete Financial Vault</div>
-                    <div className="text-slate-400 text-[11px]">Download all transactions, goals, and forecast models as JSON.</div>
+                    <div className="font-semibold text-slate-200">
+                      Export Complete Financial Vault
+                    </div>
+                    <div className="text-slate-400 text-[11px]">
+                      Download all transactions, goals, and forecast models as
+                      JSON.
+                    </div>
                   </div>
                   <button
                     onClick={handleExportFullJSON}
@@ -414,8 +502,13 @@ export const SettingsPage: React.FC = () => {
 
                 <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/30 flex items-center justify-between gap-4 text-xs">
                   <div>
-                    <div className="font-semibold text-rose-300">Reset Local Sandbox Data</div>
-                    <div className="text-slate-400 text-[11px]">Clear current database cache and reseed 6 months of demo accounts.</div>
+                    <div className="font-semibold text-rose-300">
+                      Reset Local Sandbox Data
+                    </div>
+                    <div className="text-slate-400 text-[11px]">
+                      Clear current database cache and reseed 6 months of demo
+                      accounts.
+                    </div>
                   </div>
                   <button
                     onClick={() => setIsResetConfirmOpen(true)}
@@ -427,8 +520,13 @@ export const SettingsPage: React.FC = () => {
 
                 <div className="p-4 rounded-2xl bg-indigo-950/20 border border-indigo-500/30 flex items-center justify-between gap-4 text-xs">
                   <div>
-                    <div className="font-semibold text-indigo-300">Load Custom CSV Data</div>
-                    <div className="text-slate-400 text-[11px]">Wipe existing transactions and replace with your uploaded CSV.</div>
+                    <div className="font-semibold text-indigo-300">
+                      Load Custom CSV Data
+                    </div>
+                    <div className="text-slate-400 text-[11px]">
+                      Wipe existing transactions and replace with your uploaded
+                      CSV.
+                    </div>
                   </div>
                   <label className="px-3.5 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-semibold rounded-xl border border-indigo-500/40 cursor-pointer inline-flex items-center">
                     <span>Upload CSV</span>
@@ -444,10 +542,18 @@ export const SettingsPage: React.FC = () => {
                             try {
                               const text = event.target?.result as string;
                               await api.replaceTransactionsFromCSV(text);
-                              showToast({ type: 'success', title: 'Data Loaded', description: 'Replaced transactions with CSV data.' });
+                              showToast({
+                                type: "success",
+                                title: "Data Loaded",
+                                description:
+                                  "Replaced transactions with CSV data.",
+                              });
                               loadSettingsData();
                             } catch (err) {
-                              showToast({ type: 'error', title: 'Upload failed' });
+                              showToast({
+                                type: "error",
+                                title: "Upload failed",
+                              });
                             }
                           };
                           reader.readAsText(file);
@@ -461,21 +567,30 @@ export const SettingsPage: React.FC = () => {
           )}
 
           {/* ABOUT TAB */}
-          {activeTab === 'about' && (
+          {activeTab === "about" && (
             <div className="space-y-4 text-xs leading-relaxed text-slate-300">
-              <h2 className="text-sm font-bold text-white">Finpluse Architecture</h2>
+              <h2 className="text-sm font-bold text-white">
+                Finpluse Architecture
+              </h2>
               <p>
-                Finpluse is built with clean layer separation. All visual pages and widgets interact with the domain
-                model exclusively via the <code className="font-mono text-emerald-400">src/lib/api/</code> unified abstraction.
+                Finpluse is built with clean layer separation. All visual pages
+                and widgets interact with the domain model exclusively via the{" "}
+                <code className="font-mono text-emerald-400">src/lib/api/</code>{" "}
+                unified abstraction.
               </p>
 
               <div className="p-4 rounded-2xl bg-slate-800/30 backdrop-blur-md border border-slate-700/40 space-y-2 font-mono text-[11px]">
-                <div className="text-emerald-400 font-semibold">// How to connect your real REST/GraphQL backend:</div>
+                <div className="text-emerald-400 font-semibold">
+                  // How to connect your real REST/GraphQL backend:
+                </div>
                 <div className="text-slate-400">
-                  Open <span className="text-slate-200">src/lib/api/config.ts</span> and toggle:
+                  Open{" "}
+                  <span className="text-slate-200">src/lib/api/config.ts</span>{" "}
+                  and toggle:
                 </div>
                 <div className="text-indigo-300">
-                  export const API_CONFIG = &#123; USE_MOCK: false, BASE_URL: 'https://api.yourbank.com' &#125;;
+                  export const API_CONFIG = &#123; USE_MOCK: false, BASE_URL:
+                  'https://api.yourbank.com' &#125;;
                 </div>
               </div>
             </div>
@@ -487,13 +602,15 @@ export const SettingsPage: React.FC = () => {
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
-        title={editingCategoryId ? 'Edit Category' : 'Create New Category'}
+        title={editingCategoryId ? "Edit Category" : "Create New Category"}
         description="Define category properties for machine categorization"
         maxWidth="sm"
       >
         <form onSubmit={handleSaveCategory} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Category Name</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Category Name
+            </label>
             <input
               type="text"
               required
@@ -505,7 +622,9 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Default Monthly Budget (₹)</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Default Monthly Budget (₹)
+            </label>
             <input
               type="number"
               required
@@ -516,15 +635,25 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Color Accent</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              Color Accent
+            </label>
             <div className="flex gap-2">
-              {['#10B981', '#6366F1', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#8B5CF6'].map((color) => (
+              {[
+                "#10B981",
+                "#6366F1",
+                "#F59E0B",
+                "#EF4444",
+                "#EC4899",
+                "#06B6D4",
+                "#8B5CF6",
+              ].map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setCategoryColor(color)}
                   className={`w-7 h-7 rounded-xl transition-transform cursor-pointer ${
-                    categoryColor === color ? 'ring-2 ring-white scale-110' : ''
+                    categoryColor === color ? "ring-2 ring-white scale-110" : ""
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -561,7 +690,10 @@ export const SettingsPage: React.FC = () => {
         <div className="space-y-4">
           <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>This will reset custom categories, manual expenses, and goal boost transactions.</span>
+            <span>
+              This will reset custom categories, manual expenses, and goal boost
+              transactions.
+            </span>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2">

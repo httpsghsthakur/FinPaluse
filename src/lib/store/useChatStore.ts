@@ -1,24 +1,24 @@
-import { create } from 'zustand';
-import { ChatMessage } from '../../types';
+import { create } from "zustand";
+import { ChatMessage } from "../../types";
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {
-    id: 'welcome-msg-1',
-    role: 'assistant',
+    id: "welcome-msg-1",
+    role: "assistant",
     content: `👋 **Hi Alex! I'm Finpluse, your AI Financial Copilot.**
 
 I have real-time visibility into your accounts, cash burn, and goal trajectories. How can I help you optimize your money today?`,
     timestamp: new Date().toISOString(),
-    confidence: 'High',
+    confidence: "High",
     quickActions: [
-      { label: 'Check Affordability (₹5,000)', action: 'prompt' },
-      { label: 'Dining vs Budget', action: 'prompt' },
-      { label: 'Cash Runway Status', action: 'prompt' },
+      { label: "Check Affordability (₹5,000)", action: "prompt" },
+      { label: "Dining vs Budget", action: "prompt" },
+      { label: "Cash Runway Status", action: "prompt" },
     ],
   },
 ];
 
-const CHAT_STORAGE_KEY = 'finpluse_chat_history_v1';
+const CHAT_STORAGE_KEY = "finpluse_chat_history_v1";
 
 function loadChatHistory(): ChatMessage[] {
   try {
@@ -37,14 +37,14 @@ interface ChatState {
   messages: ChatMessage[];
   isStreaming: boolean;
   streamingDraft: string;
-  personality: 'concise' | 'balanced' | 'detailed';
+  personality: "concise" | "balanced" | "detailed";
   addMessage: (msg: ChatMessage) => void;
   updateStreamingMessage: (id: string, token: string) => void;
   finishStreaming: (id: string, metadata?: Partial<ChatMessage>) => void;
   setStreaming: (isStreaming: boolean) => void;
   setStreamingDraft: (draft: string) => void;
   appendStreamingDraft: (chunk: string) => void;
-  setPersonality: (personality: 'concise' | 'balanced' | 'detailed') => void;
+  setPersonality: (personality: "concise" | "balanced" | "detailed") => void;
   clearMessages: () => void;
   clearHistory: () => void;
 }
@@ -52,8 +52,8 @@ interface ChatState {
 export const useChatStore = create<ChatState>((set) => ({
   messages: loadChatHistory(),
   isStreaming: false,
-  streamingDraft: '',
-  personality: 'balanced',
+  streamingDraft: "",
+  personality: "balanced",
 
   addMessage: (msg) =>
     set((state) => {
@@ -70,7 +70,7 @@ export const useChatStore = create<ChatState>((set) => ({
     set((state) => {
       const updated = state.messages.map((m) => {
         if (m.id === id) {
-          const currentText = m.text || m.content || '';
+          const currentText = m.text || m.content || "";
           const newText = currentText + token;
           return { ...m, text: newText, content: newText, isStreaming: true };
         }
@@ -110,11 +110,11 @@ export const useChatStore = create<ChatState>((set) => ({
 
   clearMessages: () => {
     localStorage.removeItem(CHAT_STORAGE_KEY);
-    set({ messages: INITIAL_MESSAGES, streamingDraft: '', isStreaming: false });
+    set({ messages: INITIAL_MESSAGES, streamingDraft: "", isStreaming: false });
   },
 
   clearHistory: () => {
     localStorage.removeItem(CHAT_STORAGE_KEY);
-    set({ messages: INITIAL_MESSAGES, streamingDraft: '', isStreaming: false });
+    set({ messages: INITIAL_MESSAGES, streamingDraft: "", isStreaming: false });
   },
 }));

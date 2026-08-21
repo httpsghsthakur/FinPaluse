@@ -1,33 +1,40 @@
-import React, { useState } from 'react';
-import { Modal } from './Modal';
-import { useUIStore } from '../../lib/store/useUIStore';
-import { Account } from '../../types';
-import { api } from '../../lib/api';
-import { Sparkles, Calendar, DollarSign, Tag } from 'lucide-react';
+import React, { useState } from "react";
+import { Modal } from "./Modal";
+import { useUIStore } from "../../lib/store/useUIStore";
+import { Account } from "../../types";
+import { api } from "../../lib/api";
+import { Sparkles, Calendar, DollarSign, Tag } from "lucide-react";
 
 interface CreateGoalModalProps {
   accounts: Account[];
   onGoalCreated: () => void;
 }
 
-export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGoalCreated }) => {
-  const { isCreateGoalModalOpen, closeCreateGoalModal, showToast } = useUIStore();
-  const [name, setName] = useState('');
-  const [targetAmount, setTargetAmount] = useState('');
-  const [currentAmount, setCurrentAmount] = useState('0');
-  const [deadline, setDeadline] = useState('2026-12-31');
-  const [category, setCategory] = useState('Savings');
-  const [linkedAccountId, setLinkedAccountId] = useState(accounts[0]?.id || 'acc-savings');
-  const [monthlyContribution, setMonthlyContribution] = useState('');
-  const [color, setColor] = useState('#10B981');
-  const [icon, setIcon] = useState('ShieldCheck');
+export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
+  accounts,
+  onGoalCreated,
+}) => {
+  const { isCreateGoalModalOpen, closeCreateGoalModal, showToast } =
+    useUIStore();
+  const [name, setName] = useState("");
+  const [targetAmount, setTargetAmount] = useState("");
+  const [currentAmount, setCurrentAmount] = useState("0");
+  const [deadline, setDeadline] = useState("2026-12-31");
+  const [category, setCategory] = useState("Savings");
+  const [linkedAccountId, setLinkedAccountId] = useState(
+    accounts[0]?.id || "acc-savings",
+  );
+  const [monthlyContribution, setMonthlyContribution] = useState("");
+  const [color, setColor] = useState("#10B981");
+  const [icon, setIcon] = useState("ShieldCheck");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const target = parseFloat(targetAmount);
     const current = parseFloat(currentAmount) || 0;
-    const monthly = parseFloat(monthlyContribution) || Math.round((target - current) / 6);
+    const monthly =
+      parseFloat(monthlyContribution) || Math.round((target - current) / 6);
 
     if (isNaN(target) || target <= 0) return;
 
@@ -47,22 +54,22 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
       });
 
       showToast({
-        type: 'success',
-        title: 'Goal Created',
+        type: "success",
+        title: "Goal Created",
         description: `Tracking "${name}" with monthly target of ₹${monthly}.`,
       });
 
-      setName('');
-      setTargetAmount('');
-      setCurrentAmount('0');
-      setMonthlyContribution('');
+      setName("");
+      setTargetAmount("");
+      setCurrentAmount("0");
+      setMonthlyContribution("");
       closeCreateGoalModal();
       onGoalCreated();
     } catch (e) {
       showToast({
-        type: 'error',
-        title: 'Failed',
-        description: 'Unable to save savings goal.',
+        type: "error",
+        title: "Failed",
+        description: "Unable to save savings goal.",
       });
     } finally {
       setIsSubmitting(false);
@@ -79,7 +86,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Goal Name</label>
+          <label className="block text-xs font-medium text-slate-300 mb-1">
+            Goal Name
+          </label>
           <input
             type="text"
             required
@@ -92,7 +101,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Target Amount ($)</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Target Amount ($)
+            </label>
             <input
               type="number"
               step="10"
@@ -104,7 +115,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Starting Amount ($)</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Starting Amount ($)
+            </label>
             <input
               type="number"
               step="10"
@@ -118,7 +131,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Target Date</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Target Date
+            </label>
             <input
               type="date"
               required
@@ -128,7 +143,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Monthly Auto-Save ($)</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Monthly Auto-Save ($)
+            </label>
             <input
               type="number"
               step="10"
@@ -141,7 +158,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Linked Funding Account</label>
+          <label className="block text-xs font-medium text-slate-300 mb-1">
+            Linked Funding Account
+          </label>
           <select
             value={linkedAccountId}
             onChange={(e) => setLinkedAccountId(e.target.value)}
@@ -158,15 +177,26 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
         {/* Color / Icon Theme */}
         <div className="grid grid-cols-2 gap-3 pt-1">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Theme Accent</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Theme Accent
+            </label>
             <div className="flex items-center gap-2">
-              {['#10B981', '#6366F1', '#3B82F6', '#F59E0B', '#EC4899', '#06B6D4'].map((c) => (
+              {[
+                "#10B981",
+                "#6366F1",
+                "#3B82F6",
+                "#F59E0B",
+                "#EC4899",
+                "#06B6D4",
+              ].map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
                   className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
-                    color === c ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'
+                    color === c
+                      ? "ring-2 ring-white scale-110"
+                      : "opacity-70 hover:opacity-100"
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -175,7 +205,9 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({ accounts, onGo
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Icon Badge</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Icon Badge
+            </label>
             <select
               value={icon}
               onChange={(e) => setIcon(e.target.value)}

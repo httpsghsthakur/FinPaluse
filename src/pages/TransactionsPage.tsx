@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   Filter,
@@ -13,19 +13,20 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
-} from 'lucide-react';
-import { Transaction, Category, Account } from '../types';
-import { CategoryIcon } from '../components/ui/CategoryIcon';
-import { AmountText } from '../components/ui/AmountText';
-import { TableSkeleton } from '../components/ui/Skeletons';
-import { EmptyState } from '../components/ui/EmptyState';
-import { api, TransactionFilters } from '../lib/api';
-import { useUIStore } from '../lib/store/useUIStore';
-import { formatDate } from '../lib/utils/formatters';
+} from "lucide-react";
+import { Transaction, Category, Account } from "../types";
+import { CategoryIcon } from "../components/ui/CategoryIcon";
+import { AmountText } from "../components/ui/AmountText";
+import { TableSkeleton } from "../components/ui/Skeletons";
+import { EmptyState } from "../components/ui/EmptyState";
+import { api, TransactionFilters } from "../lib/api";
+import { useUIStore } from "../lib/store/useUIStore";
+import { formatDate } from "../lib/utils/formatters";
 
 export const TransactionsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { openTxDetail, openAddTxModal, openCsvImportModal, showToast } = useUIStore();
+  const { openTxDetail, openAddTxModal, openCsvImportModal, showToast } =
+    useUIStore();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -36,17 +37,17 @@ export const TransactionsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Filters State
-  const [search, setSearch] = useState(searchParams.get('q') || '');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedAccount, setSelectedAccount] = useState<string>('all');
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedAccount, setSelectedAccount] = useState<string>("all");
   const [anomalyOnly, setAnomalyOnly] = useState(false);
   const [recurringOnly, setRecurringOnly] = useState(false);
-  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'merchant'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState<"date" | "amount" | "merchant">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Synchronize when URL search param updates
   useEffect(() => {
-    const q = searchParams.get('q');
+    const q = searchParams.get("q");
     if (q !== null && q !== search) {
       setSearch(q);
       setPage(1);
@@ -58,8 +59,9 @@ export const TransactionsPage: React.FC = () => {
     try {
       const filters: TransactionFilters = {
         search: search || undefined,
-        categoryIds: selectedCategory !== 'all' ? [selectedCategory] : undefined,
-        accountIds: selectedAccount !== 'all' ? [selectedAccount] : undefined,
+        categoryIds:
+          selectedCategory !== "all" ? [selectedCategory] : undefined,
+        accountIds: selectedAccount !== "all" ? [selectedAccount] : undefined,
         anomalyOnly: anomalyOnly || undefined,
         recurringOnly: recurringOnly || undefined,
         sortBy,
@@ -88,48 +90,64 @@ export const TransactionsPage: React.FC = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, [search, selectedCategory, selectedAccount, anomalyOnly, recurringOnly, sortBy, sortOrder, page]);
+  }, [
+    search,
+    selectedCategory,
+    selectedAccount,
+    anomalyOnly,
+    recurringOnly,
+    sortBy,
+    sortOrder,
+    page,
+  ]);
 
   const handleExportCSV = async () => {
     try {
       const csv = await api.exportTransactionsCSV();
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `Finpluse_Transactions_${new Date().toISOString().slice(0, 10)}.csv`);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `Finpluse_Transactions_${new Date().toISOString().slice(0, 10)}.csv`,
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       showToast({
-        type: 'success',
-        title: 'Export Downloaded',
-        description: 'Downloaded full transaction log as CSV.',
+        type: "success",
+        title: "Export Downloaded",
+        description: "Downloaded full transaction log as CSV.",
       });
     } catch (e) {
       showToast({
-        type: 'error',
-        title: 'Export Failed',
+        type: "error",
+        title: "Export Failed",
       });
     }
   };
 
-  const handleQuickCategoryChange = async (e: React.MouseEvent, txId: string, newCategoryId: string) => {
+  const handleQuickCategoryChange = async (
+    e: React.MouseEvent,
+    txId: string,
+    newCategoryId: string,
+  ) => {
     e.stopPropagation();
     try {
       await api.updateTransaction(txId, { categoryId: newCategoryId });
       const catName = categories.find((c) => c.id === newCategoryId)?.name;
       showToast({
-        type: 'success',
-        title: 'Category Reassigned',
+        type: "success",
+        title: "Category Reassigned",
         description: `AI is retraining on your correction to ${catName}.`,
       });
       fetchTransactions();
     } catch (err) {
       showToast({
-        type: 'error',
-        title: 'Update Failed',
+        type: "error",
+        title: "Update Failed",
       });
     }
   };
@@ -139,10 +157,15 @@ export const TransactionsPage: React.FC = () => {
       {/* Header & Main Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Transactions</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            Transactions
+          </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Indexed <span className="text-emerald-400 font-mono font-semibold">{total}</span> total transactions with
-            continuous anomaly detection
+            Indexed{" "}
+            <span className="text-emerald-400 font-mono font-semibold">
+              {total}
+            </span>{" "}
+            total transactions with continuous anomaly detection
           </p>
         </div>
 
@@ -241,7 +264,7 @@ export const TransactionsPage: React.FC = () => {
               <option value="merchant">Sort by Merchant</option>
             </select>
             <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
               className="p-2 bg-slate-800/40 backdrop-blur-md border border-slate-700/50 hover:border-slate-600 text-slate-300 rounded-xl cursor-pointer"
               title="Toggle sort order"
             >
@@ -259,8 +282,8 @@ export const TransactionsPage: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs transition-colors cursor-pointer ${
               anomalyOnly
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold'
-                : 'bg-slate-800/30 text-slate-400 border-slate-700/40 hover:text-slate-200'
+                ? "bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold"
+                : "bg-slate-800/30 text-slate-400 border-slate-700/40 hover:text-slate-200"
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
@@ -274,8 +297,8 @@ export const TransactionsPage: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs transition-colors cursor-pointer ${
               recurringOnly
-                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 font-semibold'
-                : 'bg-slate-800/30 text-slate-400 border-slate-700/40 hover:text-slate-200'
+                ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/40 font-semibold"
+                : "bg-slate-800/30 text-slate-400 border-slate-700/40 hover:text-slate-200"
             }`}
           >
             <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
@@ -294,9 +317,9 @@ export const TransactionsPage: React.FC = () => {
             description="No records match your active filters. Try clearing search or category constraints."
             actionLabel="Clear Filters"
             onAction={() => {
-              setSearch('');
-              setSelectedCategory('all');
-              setSelectedAccount('all');
+              setSearch("");
+              setSelectedCategory("all");
+              setSelectedAccount("all");
               setAnomalyOnly(false);
               setRecurringOnly(false);
             }}
@@ -328,8 +351,8 @@ export const TransactionsPage: React.FC = () => {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <CategoryIcon
-                            name={cat?.icon || 'Tag'}
-                            color={cat?.color || '#10B981'}
+                            name={cat?.icon || "Tag"}
+                            color={cat?.color || "#10B981"}
                             size="sm"
                           />
                           <div>
@@ -357,7 +380,7 @@ export const TransactionsPage: React.FC = () => {
 
                       {/* Date */}
                       <td className="py-3 px-4 text-slate-400 font-mono whitespace-nowrap">
-                        {formatDate(tx.date, 'MMM d, yyyy')}
+                        {formatDate(tx.date, "MMM d, yyyy")}
                       </td>
 
                       {/* Editable Category Dropdown */}
@@ -365,7 +388,13 @@ export const TransactionsPage: React.FC = () => {
                         <select
                           value={tx.categoryId}
                           onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => handleQuickCategoryChange(e as any, tx.id, e.target.value)}
+                          onChange={(e) =>
+                            handleQuickCategoryChange(
+                              e as any,
+                              tx.id,
+                              e.target.value,
+                            )
+                          }
                           className="bg-slate-900 border border-slate-800 text-slate-300 text-[11px] rounded-lg px-2 py-1 focus:outline-none focus:border-emerald-500 cursor-pointer"
                         >
                           {categories.map((c) => (
@@ -378,8 +407,12 @@ export const TransactionsPage: React.FC = () => {
 
                       {/* Account */}
                       <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
-                        <span className="font-medium text-slate-300">{acc?.name.split(' ')[0]}</span>{' '}
-                        <span className="font-mono text-[10px]">••••{acc?.mask}</span>
+                        <span className="font-medium text-slate-300">
+                          {acc?.name.split(" ")[0]}
+                        </span>{" "}
+                        <span className="font-mono text-[10px]">
+                          ••••{acc?.mask}
+                        </span>
                       </td>
 
                       {/* Amount */}
@@ -397,8 +430,14 @@ export const TransactionsPage: React.FC = () => {
         {/* Pagination Bar */}
         <div className="p-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
           <div>
-            Showing Page <span className="font-mono font-semibold text-slate-200">{page}</span> of{' '}
-            <span className="font-mono font-semibold text-slate-200">{totalPages}</span>
+            Showing Page{" "}
+            <span className="font-mono font-semibold text-slate-200">
+              {page}
+            </span>{" "}
+            of{" "}
+            <span className="font-mono font-semibold text-slate-200">
+              {totalPages}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">

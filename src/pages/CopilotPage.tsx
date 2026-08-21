@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Bot,
   Send,
@@ -13,32 +13,41 @@ import {
   RotateCcw,
   CheckCircle,
   HelpCircle,
-} from 'lucide-react';
-import { useChatStore } from '../lib/store/useChatStore';
-import { useUserStore } from '../lib/store/useUserStore';
-import { CitationChip } from '../components/ui/CitationChip';
-import { ConfidenceBadge } from '../components/ui/ConfidenceBadge';
-import { api } from '../lib/api';
-import { formatCurrency, formatDate } from '../lib/utils/formatters';
+} from "lucide-react";
+import { useChatStore } from "../lib/store/useChatStore";
+import { useUserStore } from "../lib/store/useUserStore";
+import { CitationChip } from "../components/ui/CitationChip";
+import { ConfidenceBadge } from "../components/ui/ConfidenceBadge";
+import { api } from "../lib/api";
+import { formatCurrency, formatDate } from "../lib/utils/formatters";
 
 const SUGGESTED_PROMPTS = [
-  'Can I afford a ₹6,500 dinner without delaying my emergency fund goal?',
-  'What is my monthly burn rate and runway if I lose my job today?',
-  'Why did my dining spending increase by 34% this month?',
-  'How much can I safely invest into index funds this paycheck?',
-  'Forecast my cash balance for the next 90 days after rent is paid.',
+  "Can I afford a ₹6,500 dinner without delaying my emergency fund goal?",
+  "What is my monthly burn rate and runway if I lose my job today?",
+  "Why did my dining spending increase by 34% this month?",
+  "How much can I safely invest into index funds this paycheck?",
+  "Forecast my cash balance for the next 90 days after rent is paid.",
 ];
 
 export const CopilotPage: React.FC = () => {
   const navigate = useNavigate();
-  const { messages, isStreaming, personality, addMessage, updateStreamingMessage, finishStreaming, setPersonality, clearMessages } = useChatStore();
+  const {
+    messages,
+    isStreaming,
+    personality,
+    addMessage,
+    updateStreamingMessage,
+    finishStreaming,
+    setPersonality,
+    clearMessages,
+  } = useChatStore();
   const { profile } = useUserStore();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -49,13 +58,13 @@ export const CopilotPage: React.FC = () => {
     const text = queryText || input.trim();
     if (!text || isStreaming) return;
 
-    setInput('');
+    setInput("");
 
     // 1. Add User Message
     const userMsgId = `msg-u-${Date.now()}`;
     addMessage({
       id: userMsgId,
-      sender: 'user',
+      sender: "user",
       text,
       timestamp: new Date().toISOString(),
     });
@@ -64,11 +73,11 @@ export const CopilotPage: React.FC = () => {
     const aiMsgId = `msg-ai-${Date.now()}`;
     addMessage({
       id: aiMsgId,
-      sender: 'ai',
-      text: '',
+      sender: "ai",
+      text: "",
       timestamp: new Date().toISOString(),
       confidenceScore: 0.96,
-      confidenceBand: 'high',
+      confidenceBand: "high",
       isStreaming: true,
     });
 
@@ -86,11 +95,14 @@ export const CopilotPage: React.FC = () => {
             confidenceBand: complete.confidenceBand,
             quickActions: complete.quickActions,
           });
-        }
+        },
       );
     } catch (err) {
       console.error(err);
-      updateStreamingMessage(aiMsgId, 'Sorry, I encountered an issue analyzing your financial telemetry. Please try again.');
+      updateStreamingMessage(
+        aiMsgId,
+        "Sorry, I encountered an issue analyzing your financial telemetry. Please try again.",
+      );
       finishStreaming(aiMsgId);
     }
   };
@@ -110,21 +122,23 @@ export const CopilotPage: React.FC = () => {
                 LIVE AI
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">Directly connected to your accounts, budgets, and cash forecast</p>
+            <p className="text-[11px] text-slate-400">
+              Directly connected to your accounts, budgets, and cash forecast
+            </p>
           </div>
         </div>
 
         {/* Personality and History Controls */}
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-1 text-[11px]">
-            {(['concise', 'balanced', 'detailed'] as const).map((p) => (
+            {(["concise", "balanced", "detailed"] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPersonality(p)}
                 className={`px-2.5 py-1 rounded-lg capitalize transition-colors cursor-pointer ${
                   personality === p
-                    ? 'bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? "bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
+                    : "text-slate-400 hover:text-slate-200"
                 }`}
               >
                 {p}
@@ -152,10 +166,13 @@ export const CopilotPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">Ask your money anything</h2>
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                Ask your money anything
+              </h2>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Finpluse uses deterministic financial calculations paired with contextual AI to provide
-                actionable answers grounded in your real balances, runway, and goals.
+                Finpluse uses deterministic financial calculations paired with
+                contextual AI to provide actionable answers grounded in your
+                real balances, runway, and goals.
               </p>
             </div>
 
@@ -179,12 +196,12 @@ export const CopilotPage: React.FC = () => {
           </div>
         ) : (
           messages.map((msg) => {
-            const isUser = msg.sender === 'user';
+            const isUser = msg.sender === "user";
 
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} animate-fadeIn`}
               >
                 {!isUser && (
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
@@ -197,12 +214,14 @@ export const CopilotPage: React.FC = () => {
                   <div
                     className={`p-4 rounded-2xl text-xs leading-relaxed ${
                       isUser
-                        ? 'bg-emerald-500 text-slate-950 font-semibold rounded-tr-none shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                        : 'bg-slate-800/40 backdrop-blur-md border border-slate-700/50 text-slate-200 rounded-tl-none space-y-3 shadow-lg'
+                        ? "bg-emerald-500 text-slate-950 font-semibold rounded-tr-none shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                        : "bg-slate-800/40 backdrop-blur-md border border-slate-700/50 text-slate-200 rounded-tl-none space-y-3 shadow-lg"
                     }`}
                   >
                     {/* Render message body with linebreaks */}
-                    <div className="whitespace-pre-wrap">{msg.text || (msg.isStreaming && 'Thinking...')}</div>
+                    <div className="whitespace-pre-wrap">
+                      {msg.text || (msg.isStreaming && "Thinking...")}
+                    </div>
 
                     {/* Grounded Data Chip & Confidence Badge for AI Messages */}
                     {!isUser && (msg.groundedData || msg.confidenceBand) && (
@@ -221,27 +240,29 @@ export const CopilotPage: React.FC = () => {
                   </div>
 
                   {/* Quick Action Navigation Buttons */}
-                  {!isUser && msg.quickActions && msg.quickActions.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {msg.quickActions.map((action, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => navigate(action.path)}
-                          className="px-3 py-1.5 rounded-xl bg-slate-800/60 hover:bg-slate-750/70 border border-slate-700/50 text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                        >
-                          <span>{action.label}</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {!isUser &&
+                    msg.quickActions &&
+                    msg.quickActions.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {msg.quickActions.map((action, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => navigate(action.path)}
+                            className="px-3 py-1.5 rounded-xl bg-slate-800/60 hover:bg-slate-750/70 border border-slate-700/50 text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                          >
+                            <span>{action.label}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                   <div
                     className={`text-[10px] text-slate-400 font-mono ${
-                      isUser ? 'text-right' : 'text-left'
+                      isUser ? "text-right" : "text-left"
                     }`}
                   >
-                    {formatDate(msg.timestamp, 'p')}
+                    {formatDate(msg.timestamp, "p")}
                   </div>
                 </div>
 
@@ -288,7 +309,9 @@ export const CopilotPage: React.FC = () => {
           </button>
         </form>
         <div className="flex items-center justify-between text-[10px] text-slate-400 px-2 pt-1.5">
-          <span>AI answers are grounded in your actual verified banking ledger.</span>
+          <span>
+            AI answers are grounded in your actual verified banking ledger.
+          </span>
           <span className="font-mono">Privacy-safe local processing</span>
         </div>
       </div>

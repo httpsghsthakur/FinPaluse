@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Modal } from './Modal';
-import { useUIStore } from '../../lib/store/useUIStore';
-import { api } from '../../lib/api';
+import React, { useState } from "react";
+import { UploadCloud, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { Modal } from "./Modal";
+import { useUIStore } from "../../lib/store/useUIStore";
+import { api } from "../../lib/api";
 
 const SAMPLE_CSV = `Date,Merchant,Amount,Category
 2026-08-15,Whole Foods Market,92.50,cat-groceries
@@ -10,9 +10,11 @@ const SAMPLE_CSV = `Date,Merchant,Amount,Category
 2026-08-12,Chevron Fuel,48.00,cat-transport
 2026-08-10,Amazon Order,65.99,cat-shopping`;
 
-export const CsvImportModal: React.FC<{ onImported: () => void }> = ({ onImported }) => {
+export const CsvImportModal: React.FC<{ onImported: () => void }> = ({
+  onImported,
+}) => {
   const { isCsvImportModalOpen, closeCsvImportModal, showToast } = useUIStore();
-  const [csvContent, setCsvContent] = useState('');
+  const [csvContent, setCsvContent] = useState("");
   const [isImporting, setIsImporting] = useState(false);
 
   const handleImport = async () => {
@@ -22,18 +24,18 @@ export const CsvImportModal: React.FC<{ onImported: () => void }> = ({ onImporte
     try {
       const { importedCount } = await api.importTransactionsCSV(csvContent);
       showToast({
-        type: 'success',
-        title: 'CSV Import Complete',
+        type: "success",
+        title: "CSV Import Complete",
         description: `Successfully ingested ${importedCount} transactions.`,
       });
-      setCsvContent('');
+      setCsvContent("");
       closeCsvImportModal();
       onImported();
     } catch (e) {
       showToast({
-        type: 'error',
-        title: 'Import Failed',
-        description: 'Check your CSV format and column headers.',
+        type: "error",
+        title: "Import Failed",
+        description: "Check your CSV format and column headers.",
       });
     } finally {
       setIsImporting(false);
@@ -84,22 +86,35 @@ export const CsvImportModal: React.FC<{ onImported: () => void }> = ({ onImporte
         >
           <UploadCloud className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
           <div className="text-xs font-semibold text-slate-200">
-            Drag & drop your CSV file here, or{' '}
+            Drag & drop your CSV file here, or{" "}
             <label className="text-emerald-400 hover:underline cursor-pointer">
               browse
-              <input type="file" accept=".csv,.txt" onChange={handleFileInput} className="hidden" />
+              <input
+                type="file"
+                accept=".csv,.txt"
+                onChange={handleFileInput}
+                className="hidden"
+              />
             </label>
           </div>
           <div className="text-[11px] text-slate-400 mt-1">
-            Expected headers: <code className="font-mono text-slate-300">Date, Merchant, Amount, Category</code>
+            Expected headers:{" "}
+            <code className="font-mono text-slate-300">
+              Date, Merchant, Amount, Category
+            </code>
           </div>
         </div>
 
         {/* Text area or sample preview */}
         <div>
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="font-medium text-slate-300">Or paste raw CSV text:</span>
-            <button onClick={loadSample} className="text-emerald-400 hover:underline cursor-pointer text-[11px]">
+            <span className="font-medium text-slate-300">
+              Or paste raw CSV text:
+            </span>
+            <button
+              onClick={loadSample}
+              className="text-emerald-400 hover:underline cursor-pointer text-[11px]"
+            >
               Load Sample Data
             </button>
           </div>
@@ -125,7 +140,7 @@ export const CsvImportModal: React.FC<{ onImported: () => void }> = ({ onImporte
             disabled={isImporting || !csvContent.trim()}
             className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold text-xs rounded-xl shadow-md shadow-emerald-500/10 cursor-pointer"
           >
-            {isImporting ? 'Parsing...' : 'Import Transactions'}
+            {isImporting ? "Parsing..." : "Import Transactions"}
           </button>
         </div>
       </div>

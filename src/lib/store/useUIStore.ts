@@ -1,10 +1,10 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface ToastItem {
   id: string;
   title: string;
   description?: string;
-  type?: 'success' | 'error' | 'info' | 'warning';
+  type?: "success" | "error" | "info" | "warning";
   duration?: number;
 }
 
@@ -39,14 +39,15 @@ interface UIState {
 
   // Toasts
   toasts: ToastItem[];
-  showToast: (toast: Omit<ToastItem, 'id'>) => void;
+  showToast: (toast: Omit<ToastItem, "id">) => void;
   dismissToast: (id: string) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   isSidebarCollapsed: false,
   isMobileNavOpen: false,
-  toggleSidebar: () => set((s) => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
+  toggleSidebar: () =>
+    set((s) => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
   setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
   toggleMobileNav: () => set((s) => ({ isMobileNavOpen: !s.isMobileNavOpen })),
   setMobileNavOpen: (open) => set({ isMobileNavOpen: open }),
@@ -83,5 +84,6 @@ export const useUIStore = create<UIState>((set) => ({
       set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
     }, duration);
   },
-  dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+  dismissToast: (id) =>
+    set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));

@@ -17,6 +17,7 @@ docker-compose up -d
 ### Option 2: Local Development
 
 **Prerequisites:**
+
 - Python 3.12+
 - PostgreSQL 16+ running locally
 - Redis running locally
@@ -47,12 +48,13 @@ In the frontend's `src/lib/api/config.ts`, set:
 ```typescript
 export const API_CONFIG = {
   USE_MOCK: false,
-  BASE_URL: 'http://localhost:8000/api/v1',
+  BASE_URL: "http://localhost:8000/api/v1",
   // ...
 };
 ```
 
 Or set the environment variable:
+
 ```
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
@@ -67,39 +69,39 @@ The LLM NEVER invents financial numbers. Every figure originates from database q
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/accounts` | List accounts |
-| POST | `/api/v1/accounts` | Connect account |
-| POST | `/api/v1/accounts/{id}/sync` | Sync account |
-| DELETE | `/api/v1/accounts/{id}` | Disconnect account |
-| GET | `/api/v1/transactions` | List transactions (filtered, paginated) |
-| POST | `/api/v1/transactions` | Add transaction |
-| PATCH | `/api/v1/transactions/{id}` | Update transaction |
-| POST | `/api/v1/transactions/import` | Import CSV |
-| GET | `/api/v1/transactions/export` | Export CSV |
-| GET | `/api/v1/categories` | List categories |
-| POST | `/api/v1/categories` | Add category |
-| PATCH | `/api/v1/categories/{id}` | Update category |
-| DELETE | `/api/v1/categories/{id}` | Delete category |
-| GET | `/api/v1/budgets` | Get budgets for month |
-| PATCH | `/api/v1/budgets/{categoryId}` | Update budget limit |
-| GET | `/api/v1/goals` | List goals |
-| POST | `/api/v1/goals` | Create goal |
-| PATCH | `/api/v1/goals/{id}` | Update goal |
-| DELETE | `/api/v1/goals/{id}` | Delete goal |
-| POST | `/api/v1/goals/{id}/contribute` | Contribute to goal |
-| GET | `/api/v1/forecast` | Cash-flow forecast |
-| GET | `/api/v1/insights` | List insights |
-| POST | `/api/v1/insights/{id}/dismiss` | Dismiss insight |
-| POST | `/api/v1/insights/{id}/like` | Like insight |
-| GET | `/api/v1/insights/digest/weekly` | Weekly digest |
-| GET | `/api/v1/dashboard/summary` | Dashboard summary |
-| POST | `/api/v1/simulator/run` | Run what-if simulation |
-| POST | `/api/v1/copilot/stream` | AI Copilot (SSE streaming) |
-| POST | `/api/v1/copilot/chat` | AI Copilot (non-streaming) |
-| POST | `/api/v1/admin/reset` | Reset demo data |
-| GET | `/api/v1/admin/export` | Export all data |
+| Method | Endpoint                         | Description                             |
+| ------ | -------------------------------- | --------------------------------------- |
+| GET    | `/api/v1/accounts`               | List accounts                           |
+| POST   | `/api/v1/accounts`               | Connect account                         |
+| POST   | `/api/v1/accounts/{id}/sync`     | Sync account                            |
+| DELETE | `/api/v1/accounts/{id}`          | Disconnect account                      |
+| GET    | `/api/v1/transactions`           | List transactions (filtered, paginated) |
+| POST   | `/api/v1/transactions`           | Add transaction                         |
+| PATCH  | `/api/v1/transactions/{id}`      | Update transaction                      |
+| POST   | `/api/v1/transactions/import`    | Import CSV                              |
+| GET    | `/api/v1/transactions/export`    | Export CSV                              |
+| GET    | `/api/v1/categories`             | List categories                         |
+| POST   | `/api/v1/categories`             | Add category                            |
+| PATCH  | `/api/v1/categories/{id}`        | Update category                         |
+| DELETE | `/api/v1/categories/{id}`        | Delete category                         |
+| GET    | `/api/v1/budgets`                | Get budgets for month                   |
+| PATCH  | `/api/v1/budgets/{categoryId}`   | Update budget limit                     |
+| GET    | `/api/v1/goals`                  | List goals                              |
+| POST   | `/api/v1/goals`                  | Create goal                             |
+| PATCH  | `/api/v1/goals/{id}`             | Update goal                             |
+| DELETE | `/api/v1/goals/{id}`             | Delete goal                             |
+| POST   | `/api/v1/goals/{id}/contribute`  | Contribute to goal                      |
+| GET    | `/api/v1/forecast`               | Cash-flow forecast                      |
+| GET    | `/api/v1/insights`               | List insights                           |
+| POST   | `/api/v1/insights/{id}/dismiss`  | Dismiss insight                         |
+| POST   | `/api/v1/insights/{id}/like`     | Like insight                            |
+| GET    | `/api/v1/insights/digest/weekly` | Weekly digest                           |
+| GET    | `/api/v1/dashboard/summary`      | Dashboard summary                       |
+| POST   | `/api/v1/simulator/run`          | Run what-if simulation                  |
+| POST   | `/api/v1/copilot/stream`         | AI Copilot (SSE streaming)              |
+| POST   | `/api/v1/copilot/chat`           | AI Copilot (non-streaming)              |
+| POST   | `/api/v1/admin/reset`            | Reset demo data                         |
+| GET    | `/api/v1/admin/export`           | Export all data                         |
 
 ## Project Structure
 

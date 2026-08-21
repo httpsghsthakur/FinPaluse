@@ -1,4 +1,4 @@
-import { API_CONFIG } from './api/config';
+import { API_CONFIG } from "./api/config";
 
 /**
  * Lightweight Supabase Auth & Client Adapter
@@ -18,8 +18,8 @@ export interface SupabaseSession {
   user: SupabaseUser;
 }
 
-const SUPABASE_AUTH_STORAGE_KEY = 'sb-access-token';
-const SUPABASE_USER_STORAGE_KEY = 'sb-user-session';
+const SUPABASE_AUTH_STORAGE_KEY = "sb-access-token";
+const SUPABASE_USER_STORAGE_KEY = "sb-user-session";
 
 export const supabaseAuth = {
   /**
@@ -27,14 +27,20 @@ export const supabaseAuth = {
    */
   setSession(session: SupabaseSession): void {
     localStorage.setItem(SUPABASE_AUTH_STORAGE_KEY, session.access_token);
-    localStorage.setItem(SUPABASE_USER_STORAGE_KEY, JSON.stringify(session.user));
+    localStorage.setItem(
+      SUPABASE_USER_STORAGE_KEY,
+      JSON.stringify(session.user),
+    );
   },
 
   /**
    * Get active access token
    */
   getAccessToken(): string | null {
-    return localStorage.getItem(SUPABASE_AUTH_STORAGE_KEY) || localStorage.getItem('supabase_access_token');
+    return (
+      localStorage.getItem(SUPABASE_AUTH_STORAGE_KEY) ||
+      localStorage.getItem("supabase_access_token")
+    );
   },
 
   /**
@@ -56,7 +62,7 @@ export const supabaseAuth = {
   signOut(): void {
     localStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);
     localStorage.removeItem(SUPABASE_USER_STORAGE_KEY);
-    localStorage.removeItem('supabase_access_token');
+    localStorage.removeItem("supabase_access_token");
   },
 
   /**
@@ -65,10 +71,10 @@ export const supabaseAuth = {
   getHeaders(): Record<string, string> {
     const token = this.getAccessToken();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
     return headers;
   },

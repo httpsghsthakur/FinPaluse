@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Search,
   RefreshCw,
@@ -12,12 +12,12 @@ import {
   Bot,
   ExternalLink,
   ShieldCheck,
-} from 'lucide-react';
-import { useUserStore } from '../../lib/store/useUserStore';
-import { useUIStore } from '../../lib/store/useUIStore';
-import { CurrencyCode } from '../../types';
-import { CURRENCY_SYMBOLS } from '../../lib/utils/formatters';
-import { cn } from '../../lib/utils/cn';
+} from "lucide-react";
+import { useUserStore } from "../../lib/store/useUserStore";
+import { useUIStore } from "../../lib/store/useUIStore";
+import { CurrencyCode } from "../../types";
+import { CURRENCY_SYMBOLS } from "../../lib/utils/formatters";
+import { cn } from "../../lib/utils/cn";
 
 export const Topbar: React.FC = () => {
   const navigate = useNavigate();
@@ -27,18 +27,25 @@ export const Topbar: React.FC = () => {
   const theme = useUserStore((s) => s.profile.theme);
   const toggleTheme = useUserStore((s) => s.toggleTheme);
 
-  const { isMobileNavOpen, toggleMobileNav, openAddTxModal, openPlaidModal, showToast } = useUIStore();
+  const {
+    isMobileNavOpen,
+    toggleMobileNav,
+    openAddTxModal,
+    openPlaidModal,
+    showToast,
+  } = useUIStore();
   const [isSyncing, setIsSyncing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSyncAll = () => {
     setIsSyncing(true);
     setTimeout(() => {
       setIsSyncing(false);
       showToast({
-        type: 'success',
-        title: 'All Accounts Synced',
-        description: 'Updated 3 bank connections and recomputed forecast bands.',
+        type: "success",
+        title: "All Accounts Synced",
+        description:
+          "Updated 3 bank connections and recomputed forecast bands.",
       });
     }, 800);
   };
@@ -59,16 +66,28 @@ export const Topbar: React.FC = () => {
           className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors cursor-pointer"
           aria-label="Toggle menu"
         >
-          {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {isMobileNavOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
         </button>
-        <NavLink to="/app" className="font-extrabold text-sm text-white flex items-center gap-1">
+        <NavLink
+          to="/app"
+          className="font-extrabold text-sm text-white flex items-center gap-1"
+        >
           <span>Finpluse</span>
-          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-1 rounded border border-emerald-500/30">AI</span>
+          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-1 rounded border border-emerald-500/30">
+            AI
+          </span>
         </NavLink>
       </div>
 
       {/* Search form */}
-      <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center flex-1 max-w-md relative">
+      <form
+        onSubmit={handleSearchSubmit}
+        className="hidden sm:flex items-center flex-1 max-w-md relative"
+      >
         <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
         <input
           type="text"
@@ -102,7 +121,9 @@ export const Topbar: React.FC = () => {
             <option value="USD">$ USD</option>
             <option value="GBP">£ GBP</option>
           </select>
-          <span className="absolute right-2 top-2 pointer-events-none text-[10px] text-slate-400">▾</span>
+          <span className="absolute right-2 top-2 pointer-events-none text-[10px] text-slate-400">
+            ▾
+          </span>
         </div>
 
         {/* Sync Button */}
@@ -113,7 +134,12 @@ export const Topbar: React.FC = () => {
           title="Sync Bank Feeds"
           aria-label="Sync all accounts"
         >
-          <RefreshCw className={cn('w-4 h-4', isSyncing && 'animate-spin text-emerald-400')} />
+          <RefreshCw
+            className={cn(
+              "w-4 h-4",
+              isSyncing && "animate-spin text-emerald-400",
+            )}
+          />
         </button>
 
         {/* Theme Toggle */}
@@ -123,7 +149,11 @@ export const Topbar: React.FC = () => {
           title="Toggle Light / Dark Mode"
           aria-label="Toggle theme"
         >
-          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
         </button>
 
         {/* Ask AI quick pill */}
@@ -136,7 +166,10 @@ export const Topbar: React.FC = () => {
         </NavLink>
 
         {/* User avatar menu */}
-        <NavLink to="/app/settings" className="flex items-center gap-2 pl-1 group">
+        <NavLink
+          to="/app/settings"
+          className="flex items-center gap-2 pl-1 group"
+        >
           <img
             src={profile.avatarUrl}
             alt={profile.name}

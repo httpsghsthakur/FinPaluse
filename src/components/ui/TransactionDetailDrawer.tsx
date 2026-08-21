@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
-import { X, Sparkles, AlertCircle, Building2, Calendar, Tag, FileText, Check } from 'lucide-react';
-import { Transaction, Category, Account } from '../../types';
-import { CategoryIcon } from './CategoryIcon';
-import { AmountText } from './AmountText';
-import { formatDate } from '../../lib/utils/formatters';
-import { api } from '../../lib/api';
-import { useUIStore } from '../../lib/store/useUIStore';
+import React, { useState } from "react";
+import {
+  X,
+  Sparkles,
+  AlertCircle,
+  Building2,
+  Calendar,
+  Tag,
+  FileText,
+  Check,
+} from "lucide-react";
+import { Transaction, Category, Account } from "../../types";
+import { CategoryIcon } from "./CategoryIcon";
+import { AmountText } from "./AmountText";
+import { formatDate } from "../../lib/utils/formatters";
+import { api } from "../../lib/api";
+import { useUIStore } from "../../lib/store/useUIStore";
 
 interface TransactionDetailDrawerProps {
   transaction: Transaction | null;
@@ -15,39 +24,39 @@ interface TransactionDetailDrawerProps {
   onUpdated: (updated: Transaction) => void;
 }
 
-export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = ({
-  transaction,
-  categories,
-  accounts,
-  onClose,
-  onUpdated,
-}) => {
+export const TransactionDetailDrawer: React.FC<
+  TransactionDetailDrawerProps
+> = ({ transaction, categories, accounts, onClose, onUpdated }) => {
   const { showToast } = useUIStore();
   const [isEditingCategory, setIsEditingCategory] = useState(false);
-  const [notes, setNotes] = useState(transaction?.notes || '');
+  const [notes, setNotes] = useState(transaction?.notes || "");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   if (!transaction) return null;
 
-  const currentCategory = categories.find((c) => c.id === transaction.categoryId);
+  const currentCategory = categories.find(
+    (c) => c.id === transaction.categoryId,
+  );
   const currentAccount = accounts.find((a) => a.id === transaction.accountId);
 
   const handleCategoryChange = async (newCategoryId: string) => {
     try {
-      const updated = await api.updateTransaction(transaction.id, { categoryId: newCategoryId });
+      const updated = await api.updateTransaction(transaction.id, {
+        categoryId: newCategoryId,
+      });
       onUpdated(updated);
       setIsEditingCategory(false);
       const newCatName = categories.find((c) => c.id === newCategoryId)?.name;
       showToast({
-        type: 'success',
-        title: 'Category Updated',
+        type: "success",
+        title: "Category Updated",
         description: `AI is retraining on your correction to ${newCatName}.`,
       });
     } catch (err) {
       showToast({
-        type: 'error',
-        title: 'Update Failed',
-        description: 'Could not update transaction category.',
+        type: "error",
+        title: "Update Failed",
+        description: "Could not update transaction category.",
       });
     }
   };
@@ -58,13 +67,13 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
       const updated = await api.updateTransaction(transaction.id, { notes });
       onUpdated(updated);
       showToast({
-        type: 'success',
-        title: 'Notes Saved',
+        type: "success",
+        title: "Notes Saved",
       });
     } catch (e) {
       showToast({
-        type: 'error',
-        title: 'Save Failed',
+        type: "error",
+        title: "Save Failed",
       });
     } finally {
       setIsSavingNotes(false);
@@ -73,7 +82,10 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      <div onClick={onClose} className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity" />
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity"
+      />
 
       <div className="fixed inset-y-0 right-0 max-w-md w-full bg-[#0B0F19]/90 backdrop-blur-2xl border-l border-slate-800/80 p-6 shadow-2xl flex flex-col justify-between overflow-y-auto z-10">
         <div>
@@ -94,22 +106,30 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
           <div className="py-6 space-y-4">
             <div className="flex items-start gap-4">
               <CategoryIcon
-                name={currentCategory?.icon || 'Tag'}
-                color={currentCategory?.color || '#10B981'}
+                name={currentCategory?.icon || "Tag"}
+                color={currentCategory?.color || "#10B981"}
                 size="lg"
               />
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-100">{transaction.merchant}</h3>
+                <h3 className="text-lg font-bold text-slate-100">
+                  {transaction.merchant}
+                </h3>
                 <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>{formatDate(transaction.date, 'MMMM d, yyyy')}</span>
+                  <span>{formatDate(transaction.date, "MMMM d, yyyy")}</span>
                 </div>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400">Total Amount</span>
-              <AmountText amount={transaction.amount} colored className="text-xl font-bold font-mono" />
+              <span className="text-xs font-medium text-slate-400">
+                Total Amount
+              </span>
+              <AmountText
+                amount={transaction.amount}
+                colored
+                className="text-xl font-bold font-mono"
+              />
             </div>
 
             {/* Anomaly banner if flagged */}
@@ -120,7 +140,8 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
                   <span>AI Anomaly Flagged</span>
                 </div>
                 <p className="text-[11px] text-slate-300 leading-relaxed">
-                  {transaction.anomalyReason || 'This transaction deviates from your typical spending pattern.'}
+                  {transaction.anomalyReason ||
+                    "This transaction deviates from your typical spending pattern."}
                 </p>
               </div>
             )}
@@ -135,7 +156,7 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
                   onClick={() => setIsEditingCategory(!isEditingCategory)}
                   className="text-emerald-400 hover:underline cursor-pointer text-[11px]"
                 >
-                  {isEditingCategory ? 'Done' : 'Change'}
+                  {isEditingCategory ? "Done" : "Change"}
                 </button>
               </div>
 
@@ -147,8 +168,8 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
                       onClick={() => handleCategoryChange(c.id)}
                       className={`flex items-center gap-2 p-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
                         c.id === transaction.categoryId
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                          : 'hover:bg-slate-800 text-slate-300'
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                          : "hover:bg-slate-800 text-slate-300"
                       }`}
                     >
                       <CategoryIcon name={c.icon} color={c.color} size="sm" />
@@ -159,11 +180,13 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
               ) : (
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
                   <CategoryIcon
-                    name={currentCategory?.icon || 'Tag'}
+                    name={currentCategory?.icon || "Tag"}
                     color={currentCategory?.color}
                     size="sm"
                   />
-                  <span className="font-semibold text-slate-200">{currentCategory?.name || 'Uncategorized'}</span>
+                  <span className="font-semibold text-slate-200">
+                    {currentCategory?.name || "Uncategorized"}
+                  </span>
                 </div>
               )}
             </div>
@@ -174,8 +197,12 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
                 <Building2 className="w-3.5 h-3.5" /> Account
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs flex items-center justify-between">
-                <span className="text-slate-200 font-medium">{currentAccount?.name || 'Primary Account'}</span>
-                <span className="text-slate-400 font-mono text-[11px]">•••• {currentAccount?.mask || '0000'}</span>
+                <span className="text-slate-200 font-medium">
+                  {currentAccount?.name || "Primary Account"}
+                </span>
+                <span className="text-slate-400 font-mono text-[11px]">
+                  •••• {currentAccount?.mask || "0000"}
+                </span>
               </div>
             </div>
 
@@ -187,8 +214,11 @@ export const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = (
               </div>
               <p className="text-[11px] text-slate-300 leading-relaxed">
                 Categorized based on merchant keyword fingerprint (
-                <span className="font-mono text-indigo-300">{transaction.merchant}</span>) and matched against the
-                standard merchant classification register.
+                <span className="font-mono text-indigo-300">
+                  {transaction.merchant}
+                </span>
+                ) and matched against the standard merchant classification
+                register.
               </p>
             </div>
 

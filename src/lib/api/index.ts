@@ -12,9 +12,9 @@ import {
   ScenarioResult,
   Transaction,
   WeeklyDigest,
-} from '../../types';
-import { API_CONFIG } from './config';
-import { generateAICopilotResponse } from './mock/aiEngine';
+} from "../../types";
+import { API_CONFIG } from "./config";
+import { generateAICopilotResponse } from "./mock/aiEngine";
 import {
   generateSeedTransactions,
   INITIAL_ACCOUNTS,
@@ -24,14 +24,28 @@ import {
   loadStoredData,
   saveStoredData,
   StorageData,
-} from './mock/seed';
-import { runWhatIfSimulation } from './mock/simulator';
-import { addDays, addMonths, format, getDaysInMonth, isAfter, isBefore, parseISO, startOfMonth, subDays, subMonths } from 'date-fns';
+} from "./mock/seed";
+import { runWhatIfSimulation } from "./mock/simulator";
+import {
+  addDays,
+  addMonths,
+  format,
+  getDaysInMonth,
+  isAfter,
+  isBefore,
+  parseISO,
+  startOfMonth,
+  subDays,
+  subMonths,
+} from "date-fns";
 
-import { supabaseAuth } from '../supabase';
+import { supabaseAuth } from "../supabase";
 
 // Helper to execute authenticated backend requests
-async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+async function apiFetch(
+  path: string,
+  options: RequestInit = {},
+): Promise<Response> {
   const url = `${API_CONFIG.BASE_URL}${path}`;
   const authHeaders = supabaseAuth.getHeaders();
   const headers = {
@@ -47,7 +61,9 @@ async function delay(ms?: number): Promise<void> {
     ms ??
     Math.floor(
       API_CONFIG.SIMULATED_LATENCY_MIN_MS +
-        Math.random() * (API_CONFIG.SIMULATED_LATENCY_MAX_MS - API_CONFIG.SIMULATED_LATENCY_MIN_MS)
+        Math.random() *
+          (API_CONFIG.SIMULATED_LATENCY_MAX_MS -
+            API_CONFIG.SIMULATED_LATENCY_MIN_MS),
     );
   return new Promise((resolve) => setTimeout(resolve, duration));
 }
@@ -62,8 +78,8 @@ export interface TransactionFilters {
   maxAmount?: number;
   anomalyOnly?: boolean;
   recurringOnly?: boolean;
-  sortBy?: 'date' | 'amount' | 'merchant';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "date" | "amount" | "merchant";
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
 }
@@ -80,7 +96,8 @@ class ApiClient {
   async getAccounts(): Promise<Account[]> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/accounts`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch accounts`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch accounts`);
       return res.json();
     }
     await delay();
@@ -90,27 +107,33 @@ class ApiClient {
 
   async syncAccount(accountId: string): Promise<Account> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await apiFetch(`/accounts/${accountId}/sync`, { method: 'POST' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to sync account`);
+      const res = await apiFetch(`/accounts/${accountId}/sync`, {
+        method: "POST",
+      });
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to sync account`);
       return res.json();
     }
     await delay(600);
     const data = loadStoredData();
     const accIndex = data.accounts.findIndex((a) => a.id === accountId);
-    if (accIndex === -1) throw new Error('Account not found');
+    if (accIndex === -1) throw new Error("Account not found");
     data.accounts[accIndex].lastSynced = new Date().toISOString();
     saveStoredData(data);
     return data.accounts[accIndex];
   }
 
-  async connectAccount(newAccount: Omit<Account, 'id' | 'lastSynced' | 'isActive'>): Promise<Account> {
+  async connectAccount(
+    newAccount: Omit<Account, "id" | "lastSynced" | "isActive">,
+  ): Promise<Account> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/accounts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAccount),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to connect account`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to connect account`);
       return res.json();
     }
     await delay(800);
@@ -128,8 +151,11 @@ class ApiClient {
 
   async disconnectAccount(accountId: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await apiFetch(`/accounts/${accountId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to disconnect account`);
+      const res = await apiFetch(`/accounts/${accountId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to disconnect account`);
       return;
     }
     await delay();
@@ -139,25 +165,32 @@ class ApiClient {
   }
 
   // ── Transactions ──────────────────────────────────────────────
-  async getTransactions(filters?: TransactionFilters): Promise<PaginatedTransactions> {
+  async getTransactions(
+    filters?: TransactionFilters,
+  ): Promise<PaginatedTransactions> {
     if (!API_CONFIG.USE_MOCK) {
       const params = new URLSearchParams();
-      if (filters?.search) params.append('search', filters.search);
-      if (filters?.categoryIds && filters.categoryIds.length > 0) params.append('categoryIds', filters.categoryIds.join(','));
-      if (filters?.accountIds && filters.accountIds.length > 0) params.append('accountIds', filters.accountIds.join(','));
-      if (filters?.startDate) params.append('startDate', filters.startDate);
-      if (filters?.endDate) params.append('endDate', filters.endDate);
-      if (filters?.minAmount !== undefined) params.append('minAmount', String(filters.minAmount));
-      if (filters?.maxAmount !== undefined) params.append('maxAmount', String(filters.maxAmount));
-      if (filters?.anomalyOnly) params.append('anomalyOnly', 'true');
-      if (filters?.recurringOnly) params.append('recurringOnly', 'true');
-      if (filters?.sortBy) params.append('sortBy', filters.sortBy);
-      if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
-      if (filters?.page) params.append('page', String(filters.page));
-      if (filters?.limit) params.append('limit', String(filters.limit));
+      if (filters?.search) params.append("search", filters.search);
+      if (filters?.categoryIds && filters.categoryIds.length > 0)
+        params.append("categoryIds", filters.categoryIds.join(","));
+      if (filters?.accountIds && filters.accountIds.length > 0)
+        params.append("accountIds", filters.accountIds.join(","));
+      if (filters?.startDate) params.append("startDate", filters.startDate);
+      if (filters?.endDate) params.append("endDate", filters.endDate);
+      if (filters?.minAmount !== undefined)
+        params.append("minAmount", String(filters.minAmount));
+      if (filters?.maxAmount !== undefined)
+        params.append("maxAmount", String(filters.maxAmount));
+      if (filters?.anomalyOnly) params.append("anomalyOnly", "true");
+      if (filters?.recurringOnly) params.append("recurringOnly", "true");
+      if (filters?.sortBy) params.append("sortBy", filters.sortBy);
+      if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
+      if (filters?.page) params.append("page", String(filters.page));
+      if (filters?.limit) params.append("limit", String(filters.limit));
 
       const res = await apiFetch(`/transactions?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch transactions`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch transactions`);
       return res.json();
     }
 
@@ -171,7 +204,7 @@ class ApiClient {
         (t) =>
           t.merchant.toLowerCase().includes(term) ||
           t.notes?.toLowerCase().includes(term) ||
-          t.amount.toString().includes(term)
+          t.amount.toString().includes(term),
       );
     }
 
@@ -184,11 +217,19 @@ class ApiClient {
     }
 
     if (filters?.startDate) {
-      list = list.filter((t) => isAfter(parseISO(t.date), parseISO(filters.startDate!)) || t.date === filters.startDate);
+      list = list.filter(
+        (t) =>
+          isAfter(parseISO(t.date), parseISO(filters.startDate!)) ||
+          t.date === filters.startDate,
+      );
     }
 
     if (filters?.endDate) {
-      list = list.filter((t) => isBefore(parseISO(t.date), parseISO(filters.endDate!)) || t.date === filters.endDate);
+      list = list.filter(
+        (t) =>
+          isBefore(parseISO(t.date), parseISO(filters.endDate!)) ||
+          t.date === filters.endDate,
+      );
     }
 
     if (filters?.anomalyOnly) {
@@ -208,15 +249,18 @@ class ApiClient {
     }
 
     // Sort
-    const sortBy = filters?.sortBy || 'date';
-    const sortOrder = filters?.sortOrder || 'desc';
+    const sortBy = filters?.sortBy || "date";
+    const sortOrder = filters?.sortOrder || "desc";
 
     list.sort((a, b) => {
       let comp = 0;
-      if (sortBy === 'date') comp = new Date(b.date).getTime() - new Date(a.date).getTime();
-      else if (sortBy === 'amount') comp = Math.abs(b.amount) - Math.abs(a.amount);
-      else if (sortBy === 'merchant') comp = a.merchant.localeCompare(b.merchant);
-      return sortOrder === 'asc' ? -comp : comp;
+      if (sortBy === "date")
+        comp = new Date(b.date).getTime() - new Date(a.date).getTime();
+      else if (sortBy === "amount")
+        comp = Math.abs(b.amount) - Math.abs(a.amount);
+      else if (sortBy === "merchant")
+        comp = a.merchant.localeCompare(b.merchant);
+      return sortOrder === "asc" ? -comp : comp;
     });
 
     const page = filters?.page || 1;
@@ -233,34 +277,39 @@ class ApiClient {
     };
   }
 
-  async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction> {
+  async updateTransaction(
+    id: string,
+    updates: Partial<Transaction>,
+  ): Promise<Transaction> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/transactions/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update transaction`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to update transaction`);
       return res.json();
     }
 
     await delay();
     const data = loadStoredData();
     const idx = data.transactions.findIndex((t) => t.id === id);
-    if (idx === -1) throw new Error('Transaction not found');
+    if (idx === -1) throw new Error("Transaction not found");
     data.transactions[idx] = { ...data.transactions[idx], ...updates };
     saveStoredData(data);
     return data.transactions[idx];
   }
 
-  async addTransaction(tx: Omit<Transaction, 'id'>): Promise<Transaction> {
+  async addTransaction(tx: Omit<Transaction, "id">): Promise<Transaction> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/transactions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(tx),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to add transaction`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to add transaction`);
       return res.json();
     }
 
@@ -275,11 +324,13 @@ class ApiClient {
     return newTx;
   }
 
-  async importTransactionsCSV(csvText: string): Promise<{ importedCount: number }> {
+  async importTransactionsCSV(
+    csvText: string,
+  ): Promise<{ importedCount: number }> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/transactions/import`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ csvText }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to import CSV`);
@@ -288,23 +339,25 @@ class ApiClient {
 
     await delay(700);
     const data = loadStoredData();
-    const lines = csvText.trim().split('\n');
+    const lines = csvText.trim().split("\n");
     let importedCount = 0;
 
     for (let i = 1; i < lines.length; i++) {
-      const parts = lines[i].split(',').map((p) => p.trim().replace(/^["']|["']$/g, ''));
+      const parts = lines[i]
+        .split(",")
+        .map((p) => p.trim().replace(/^["']|["']$/g, ""));
       if (parts.length >= 3) {
         const [dateStr, merchantStr, amountStr, catStr] = parts;
         const amount = parseFloat(amountStr);
         if (!isNaN(amount)) {
           data.transactions.unshift({
             id: `tx-import-${Date.now()}-${i}`,
-            date: dateStr || format(new Date(), 'yyyy-MM-dd'),
-            merchant: merchantStr || 'Imported Merchant',
+            date: dateStr || format(new Date(), "yyyy-MM-dd"),
+            merchant: merchantStr || "Imported Merchant",
             amount: amount < 0 ? amount : -amount,
-            categoryId: catStr || 'cat-other',
-            accountId: 'acc-checking',
-            status: 'settled',
+            categoryId: catStr || "cat-other",
+            accountId: "acc-checking",
+            status: "settled",
             isRecurring: false,
           });
           importedCount++;
@@ -316,37 +369,44 @@ class ApiClient {
     return { importedCount };
   }
 
-  async replaceTransactionsFromCSV(csvText: string): Promise<{ importedCount: number }> {
+  async replaceTransactionsFromCSV(
+    csvText: string,
+  ): Promise<{ importedCount: number }> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/admin/replace_transactions_from_csv`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ csvText }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to replace transactions from CSV`);
+      if (!res.ok)
+        throw new Error(
+          `HTTP ${res.status}: Failed to replace transactions from CSV`,
+        );
       return res.json();
     }
 
     await delay(700);
     const data = loadStoredData();
     data.transactions = []; // wipe existing transactions
-    const lines = csvText.trim().split('\n');
+    const lines = csvText.trim().split("\n");
     let importedCount = 0;
 
     for (let i = 1; i < lines.length; i++) {
-      const parts = lines[i].split(',').map((p) => p.trim().replace(/^["']|["']$/g, ''));
+      const parts = lines[i]
+        .split(",")
+        .map((p) => p.trim().replace(/^["']|["']$/g, ""));
       if (parts.length >= 3) {
         const [dateStr, merchantStr, amountStr, catStr] = parts;
         const amount = parseFloat(amountStr);
         if (!isNaN(amount)) {
           data.transactions.unshift({
             id: `tx-import-${Date.now()}-${i}`,
-            date: dateStr || format(new Date(), 'yyyy-MM-dd'),
-            merchant: merchantStr || 'Imported Merchant',
+            date: dateStr || format(new Date(), "yyyy-MM-dd"),
+            merchant: merchantStr || "Imported Merchant",
             amount: amount,
-            categoryId: catStr || 'cat-other',
-            accountId: 'acc-checking',
-            status: 'settled',
+            categoryId: catStr || "cat-other",
+            accountId: "acc-checking",
+            status: "settled",
             isRecurring: false,
           });
           importedCount++;
@@ -366,7 +426,15 @@ class ApiClient {
     }
 
     const data = loadStoredData();
-    const headers = ['Date', 'Merchant', 'Amount', 'Category', 'Account', 'Status', 'Recurring'];
+    const headers = [
+      "Date",
+      "Merchant",
+      "Amount",
+      "Category",
+      "Account",
+      "Status",
+      "Recurring",
+    ];
     const rows = data.transactions.map((t) => [
       t.date,
       `"${t.merchant.replace(/"/g, '""')}"`,
@@ -374,16 +442,17 @@ class ApiClient {
       t.categoryId,
       t.accountId,
       t.status,
-      t.isRecurring ? 'Yes' : 'No',
+      t.isRecurring ? "Yes" : "No",
     ]);
-    return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    return [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
   }
 
   // ── Categories ────────────────────────────────────────────────
   async getCategories(): Promise<Category[]> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/categories`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch categories`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch categories`);
       return res.json();
     }
     await delay();
@@ -391,14 +460,15 @@ class ApiClient {
     return data.categories;
   }
 
-  async addCategory(cat: Omit<Category, 'id'>): Promise<Category> {
+  async addCategory(cat: Omit<Category, "id">): Promise<Category> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/categories`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cat),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to add category`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to add category`);
       return res.json();
     }
     await delay();
@@ -412,20 +482,24 @@ class ApiClient {
     return created;
   }
 
-  async updateCategory(id: string, updates: Partial<Category>): Promise<Category> {
+  async updateCategory(
+    id: string,
+    updates: Partial<Category>,
+  ): Promise<Category> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/categories/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update category`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to update category`);
       return res.json();
     }
     await delay();
     const data = loadStoredData();
     const idx = data.categories.findIndex((c) => c.id === id);
-    if (idx === -1) throw new Error('Category not found');
+    if (idx === -1) throw new Error("Category not found");
     data.categories[idx] = { ...data.categories[idx], ...updates };
     saveStoredData(data);
     return data.categories[idx];
@@ -433,8 +507,9 @@ class ApiClient {
 
   async deleteCategory(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await apiFetch(`/categories/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to delete category`);
+      const res = await apiFetch(`/categories/${id}`, { method: "DELETE" });
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to delete category`);
       return;
     }
     await delay();
@@ -446,32 +521,42 @@ class ApiClient {
   // ── Budgets ───────────────────────────────────────────────────
   async getBudgets(month?: string): Promise<Budget[]> {
     if (!API_CONFIG.USE_MOCK) {
-      const url = month ? `${API_CONFIG.BASE_URL}/budgets?month=${month}` : `${API_CONFIG.BASE_URL}/budgets`;
+      const url = month
+        ? `${API_CONFIG.BASE_URL}/budgets?month=${month}`
+        : `${API_CONFIG.BASE_URL}/budgets`;
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch budgets`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch budgets`);
       return res.json();
     }
 
     await delay();
-    const targetMonth = month || format(new Date(), 'yyyy-MM');
+    const targetMonth = month || format(new Date(), "yyyy-MM");
     const data = loadStoredData();
 
-    const monthTx = data.transactions.filter((t) => t.date.startsWith(targetMonth) && t.amount < 0);
-    const expenseCategories = data.categories.filter((c) => c.type === 'expense');
+    const monthTx = data.transactions.filter(
+      (t) => t.date.startsWith(targetMonth) && t.amount < 0,
+    );
+    const expenseCategories = data.categories.filter(
+      (c) => c.type === "expense",
+    );
 
     // Use real days in month instead of hardcoded 30
     const targetDate = parseISO(`${targetMonth}-01`);
     const actualDaysInMonth = getDaysInMonth(targetDate);
     const today = new Date();
-    const isCurrentMonth = format(today, 'yyyy-MM') === targetMonth;
+    const isCurrentMonth = format(today, "yyyy-MM") === targetMonth;
     const elapsedDays = isCurrentMonth ? today.getDate() : actualDaysInMonth;
 
     return expenseCategories.map((cat) => {
       const spent = Math.abs(
-        monthTx.filter((t) => t.categoryId === cat.id).reduce((sum, t) => sum + t.amount, 0)
+        monthTx
+          .filter((t) => t.categoryId === cat.id)
+          .reduce((sum, t) => sum + t.amount, 0),
       );
       // Predict month-end spend based on daily pacing and actual days in month
-      const pacing = elapsedDays > 0 ? (spent / elapsedDays) * actualDaysInMonth : spent;
+      const pacing =
+        elapsedDays > 0 ? (spent / elapsedDays) * actualDaysInMonth : spent;
       const predictedSpend = Math.round(pacing * 100) / 100;
 
       return {
@@ -485,14 +570,18 @@ class ApiClient {
     });
   }
 
-  async updateBudget(categoryId: string, monthlyLimit: number): Promise<Category> {
+  async updateBudget(
+    categoryId: string,
+    monthlyLimit: number,
+  ): Promise<Category> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/budgets/${categoryId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ monthlyLimit }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update budget`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to update budget`);
       return res.json();
     }
     await delay();
@@ -511,11 +600,11 @@ class ApiClient {
     return data.goals;
   }
 
-  async addGoal(goal: Omit<Goal, 'id' | 'isCompleted'>): Promise<Goal> {
+  async addGoal(goal: Omit<Goal, "id" | "isCompleted">): Promise<Goal> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/goals`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(goal),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to add goal`);
@@ -536,8 +625,8 @@ class ApiClient {
   async updateGoal(id: string, updates: Partial<Goal>): Promise<Goal> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/goals/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update goal`);
@@ -546,7 +635,7 @@ class ApiClient {
     await delay();
     const data = loadStoredData();
     const idx = data.goals.findIndex((g) => g.id === id);
-    if (idx === -1) throw new Error('Goal not found');
+    if (idx === -1) throw new Error("Goal not found");
     data.goals[idx] = { ...data.goals[idx], ...updates };
     if (data.goals[idx].currentAmount >= data.goals[idx].targetAmount) {
       data.goals[idx].isCompleted = true;
@@ -557,7 +646,7 @@ class ApiClient {
 
   async deleteGoal(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      const res = await apiFetch(`/goals/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/goals/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to delete goal`);
       return;
     }
@@ -570,17 +659,18 @@ class ApiClient {
   async contributeToGoal(id: string, amount: number): Promise<Goal> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/goals/${id}/contribute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to contribute to goal`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to contribute to goal`);
       return res.json();
     }
     await delay();
     const data = loadStoredData();
     const goal = data.goals.find((g) => g.id === id);
-    if (!goal) throw new Error('Goal not found');
+    if (!goal) throw new Error("Goal not found");
 
     goal.currentAmount += amount;
     if (goal.currentAmount >= goal.targetAmount) {
@@ -589,12 +679,12 @@ class ApiClient {
 
     data.transactions.unshift({
       id: `tx-goal-contrib-${Date.now()}`,
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: format(new Date(), "yyyy-MM-dd"),
       merchant: `Goal Deposit: ${goal.name}`,
-      categoryId: 'cat-transfers',
+      categoryId: "cat-transfers",
       accountId: goal.linkedAccountId,
       amount: -amount,
-      status: 'settled',
+      status: "settled",
       isRecurring: false,
       notes: `Automated boost to ${goal.name}`,
     });
@@ -604,45 +694,69 @@ class ApiClient {
   }
 
   // ── Forecast ──────────────────────────────────────────────────
-  async getForecast(days: 30 | 60 | 90 = 90): Promise<{ points: ForecastPoint[]; events: ForecastEvent[] }> {
+  async getForecast(
+    days: 30 | 60 | 90 = 90,
+  ): Promise<{ points: ForecastPoint[]; events: ForecastEvent[] }> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/forecast?days=${days}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch forecast`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch forecast`);
       return res.json();
     }
 
     await delay();
     const data = loadStoredData();
-    const totalChecking = data.accounts.find((a) => a.type === 'checking')?.balance || 0;
-    const totalSavings = data.accounts.find((a) => a.type === 'savings')?.balance || 0;
+    const totalChecking =
+      data.accounts.find((a) => a.type === "checking")?.balance || 0;
+    const totalSavings =
+      data.accounts.find((a) => a.type === "savings")?.balance || 0;
     const currentLiquid = totalChecking + totalSavings;
 
     // ── Derive daily burn from real transactions (last 90 days) ──
     const today = new Date();
     const ninetyDaysAgo = subDays(today, 90);
     const recentExpenses = data.transactions.filter(
-      (t) => t.amount < 0 && t.categoryId !== 'cat-transfers' && !isBefore(parseISO(t.date), ninetyDaysAgo)
+      (t) =>
+        t.amount < 0 &&
+        t.categoryId !== "cat-transfers" &&
+        !isBefore(parseISO(t.date), ninetyDaysAgo),
     );
-    const totalRecentExpense = Math.abs(recentExpenses.reduce((sum, t) => sum + t.amount, 0));
-    const dailyBurnAverage = totalRecentExpense > 0 ? totalRecentExpense / 90 : 1000;
+    const totalRecentExpense = Math.abs(
+      recentExpenses.reduce((sum, t) => sum + t.amount, 0),
+    );
+    const dailyBurnAverage =
+      totalRecentExpense > 0 ? totalRecentExpense / 90 : 1000;
 
     // ── Derive recurring income (salary) from actual recurring income transactions ──
-    const recurringIncome = data.transactions.filter((t) => t.isRecurring && t.amount > 0);
+    const recurringIncome = data.transactions.filter(
+      (t) => t.isRecurring && t.amount > 0,
+    );
     // Get unique merchants and their typical amounts
-    const incomeByMerchant = new Map<string, { amount: number; dayOfMonth: number[] }>();
+    const incomeByMerchant = new Map<
+      string,
+      { amount: number; dayOfMonth: number[] }
+    >();
     recurringIncome.forEach((t) => {
       const existing = incomeByMerchant.get(t.merchant);
       const dom = parseISO(t.date).getDate();
       if (existing) {
         existing.dayOfMonth.push(dom);
       } else {
-        incomeByMerchant.set(t.merchant, { amount: t.amount, dayOfMonth: [dom] });
+        incomeByMerchant.set(t.merchant, {
+          amount: t.amount,
+          dayOfMonth: [dom],
+        });
       }
     });
 
     // ── Derive recurring bills from actual recurring expense transactions ──
-    const recurringBills = data.transactions.filter((t) => t.isRecurring && t.amount < 0);
-    const billsByMerchant = new Map<string, { amount: number; dayOfMonth: number; categoryId: string }>();
+    const recurringBills = data.transactions.filter(
+      (t) => t.isRecurring && t.amount < 0,
+    );
+    const billsByMerchant = new Map<
+      string,
+      { amount: number; dayOfMonth: number; categoryId: string }
+    >();
     recurringBills.forEach((t) => {
       if (!billsByMerchant.has(t.merchant)) {
         billsByMerchant.set(t.merchant, {
@@ -662,7 +776,7 @@ class ApiClient {
 
     for (let d = 1; d <= 30; d++) {
       const pastDate = subDays(today, d);
-      const dateStr = format(pastDate, 'yyyy-MM-dd');
+      const dateStr = format(pastDate, "yyyy-MM-dd");
 
       // Find transactions on this date and reverse their effect
       const dayTx = data.transactions.filter((t) => t.date === dateStr);
@@ -686,21 +800,23 @@ class ApiClient {
 
     for (let day = 0; day <= days; day++) {
       const futureDate = addDays(today, day);
-      const dateStr = format(futureDate, 'yyyy-MM-dd');
+      const dateStr = format(futureDate, "yyyy-MM-dd");
       const dayEvents: ForecastEvent[] = [];
       const dayOfMonth = futureDate.getDate();
 
       // Apply recurring income on detected pay days
       incomeByMerchant.forEach((info, merchant) => {
-        const avgDay = Math.round(info.dayOfMonth.reduce((a, b) => a + b, 0) / info.dayOfMonth.length);
+        const avgDay = Math.round(
+          info.dayOfMonth.reduce((a, b) => a + b, 0) / info.dayOfMonth.length,
+        );
         if (dayOfMonth === avgDay) {
           const ev: ForecastEvent = {
             id: `ev-income-${merchant.substring(0, 10)}-${day}`,
             date: dateStr,
-            type: 'payday',
+            type: "payday",
             title: merchant,
             amount: info.amount,
-            accountId: 'acc-checking',
+            accountId: "acc-checking",
           };
           dayEvents.push(ev);
           events.push(ev);
@@ -714,10 +830,10 @@ class ApiClient {
           const ev: ForecastEvent = {
             id: `ev-bill-${merchant.substring(0, 10)}-${day}`,
             date: dateStr,
-            type: 'recurring_bill',
+            type: "recurring_bill",
             title: merchant,
             amount: -info.amount,
-            accountId: 'acc-checking',
+            accountId: "acc-checking",
           };
           dayEvents.push(ev);
           events.push(ev);
@@ -747,7 +863,8 @@ class ApiClient {
   async getInsights(): Promise<Insight[]> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/insights`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch insights`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch insights`);
       return res.json();
     }
     await delay();
@@ -757,7 +874,7 @@ class ApiClient {
 
   async dismissInsight(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      await apiFetch(`/insights/${id}/dismiss`, { method: 'POST' });
+      await apiFetch(`/insights/${id}/dismiss`, { method: "POST" });
       return;
     }
     await delay(150);
@@ -771,7 +888,7 @@ class ApiClient {
 
   async likeInsight(id: string): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      await apiFetch(`/insights/${id}/like`, { method: 'POST' });
+      await apiFetch(`/insights/${id}/like`, { method: "POST" });
       return;
     }
     await delay(150);
@@ -786,7 +903,8 @@ class ApiClient {
   async getWeeklyDigest(): Promise<WeeklyDigest> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/insights/digest/weekly`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch weekly digest`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to fetch weekly digest`);
       return res.json();
     }
     await delay();
@@ -801,9 +919,13 @@ class ApiClient {
       return !isBefore(d, weekStart) && !isAfter(d, today);
     });
 
-    const totalIncome = weekTx.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+    const totalIncome = weekTx
+      .filter((t) => t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = Math.abs(
-      weekTx.filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers').reduce((sum, t) => sum + t.amount, 0)
+      weekTx
+        .filter((t) => t.amount < 0 && t.categoryId !== "cat-transfers")
+        .reduce((sum, t) => sum + t.amount, 0),
     );
     const netSavings = totalIncome - totalExpenses;
 
@@ -813,21 +935,29 @@ class ApiClient {
       return !isBefore(d, prevWeekStart) && isBefore(d, weekStart);
     });
     const prevWeekExpenses = Math.abs(
-      prevWeekTx.filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers').reduce((sum, t) => sum + t.amount, 0)
+      prevWeekTx
+        .filter((t) => t.amount < 0 && t.categoryId !== "cat-transfers")
+        .reduce((sum, t) => sum + t.amount, 0),
     );
-    const vsLastWeekPct = prevWeekExpenses > 0
-      ? Math.round(((totalExpenses - prevWeekExpenses) / prevWeekExpenses) * 100 * 10) / 10
-      : 0;
+    const vsLastWeekPct =
+      prevWeekExpenses > 0
+        ? Math.round(
+            ((totalExpenses - prevWeekExpenses) / prevWeekExpenses) * 100 * 10,
+          ) / 10
+        : 0;
 
     // ── Top spending category this week ──
     const catSpendMap = new Map<string, number>();
     weekTx
-      .filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers')
+      .filter((t) => t.amount < 0 && t.categoryId !== "cat-transfers")
       .forEach((t) => {
-        catSpendMap.set(t.categoryId, (catSpendMap.get(t.categoryId) || 0) + Math.abs(t.amount));
+        catSpendMap.set(
+          t.categoryId,
+          (catSpendMap.get(t.categoryId) || 0) + Math.abs(t.amount),
+        );
       });
 
-    let topCategoryId = '';
+    let topCategoryId = "";
     let topCategorySpend = 0;
     catSpendMap.forEach((amount, catId) => {
       if (amount > topCategorySpend) {
@@ -835,51 +965,66 @@ class ApiClient {
         topCategoryId = catId;
       }
     });
-    const topCategoryName = data.categories.find((c) => c.id === topCategoryId)?.name || 'General';
+    const topCategoryName =
+      data.categories.find((c) => c.id === topCategoryId)?.name || "General";
 
     // ── Anomalies this week ──
     const anomaliesDetectedCount = weekTx.filter((t) => t.isAnomaly).length;
 
     // ── Dynamic week range label ──
-    const weekRange = `${format(weekStart, 'MMM d')} – ${format(today, 'MMM d, yyyy')}`;
+    const weekRange = `${format(weekStart, "MMM d")} – ${format(today, "MMM d, yyyy")}`;
 
     // ── Generate contextual bullets from real data ──
     const bullets: string[] = [];
 
     if (vsLastWeekPct !== 0) {
-      const direction = vsLastWeekPct < 0 ? 'lower' : 'higher';
-      bullets.push(`Total spending was ${Math.abs(vsLastWeekPct)}% ${direction} than last week.`);
+      const direction = vsLastWeekPct < 0 ? "lower" : "higher";
+      bullets.push(
+        `Total spending was ${Math.abs(vsLastWeekPct)}% ${direction} than last week.`,
+      );
     }
 
-    const interestTx = weekTx.filter((t) => t.amount > 0 && t.merchant.toLowerCase().includes('interest'));
+    const interestTx = weekTx.filter(
+      (t) => t.amount > 0 && t.merchant.toLowerCase().includes("interest"),
+    );
     if (interestTx.length > 0) {
       const interestTotal = interestTx.reduce((sum, t) => sum + t.amount, 0);
-      bullets.push(`Earned ₹${interestTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })} in interest/yield income this week.`);
+      bullets.push(
+        `Earned ₹${interestTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })} in interest/yield income this week.`,
+      );
     }
 
     if (anomaliesDetectedCount > 0) {
       const topAnomaly = weekTx.find((t) => t.isAnomaly);
       if (topAnomaly) {
-        bullets.push(`${anomaliesDetectedCount} unusual transaction${anomaliesDetectedCount > 1 ? 's' : ''} flagged: ${topAnomaly.merchant} (₹${Math.abs(topAnomaly.amount).toLocaleString('en-IN')}).`);
+        bullets.push(
+          `${anomaliesDetectedCount} unusual transaction${anomaliesDetectedCount > 1 ? "s" : ""} flagged: ${topAnomaly.merchant} (₹${Math.abs(topAnomaly.amount).toLocaleString("en-IN")}).`,
+        );
       }
     }
 
     if (bullets.length === 0) {
-      bullets.push(`Processed ${weekTx.length} transactions this week across your connected accounts.`);
+      bullets.push(
+        `Processed ${weekTx.length} transactions this week across your connected accounts.`,
+      );
     }
 
     // ── Actionable tip from real data ──
-    const goalsWithRoom = data.goals.filter((g) => !g.isCompleted && g.currentAmount < g.targetAmount);
-    const actionableTip = netSavings > 0 && goalsWithRoom.length > 0
-      ? `Moving ₹${Math.min(Math.round(netSavings * 0.1), 5000).toLocaleString('en-IN')} from this week's surplus to your ${goalsWithRoom[0].name} goal can accelerate completion.`
-      : `Review your spending patterns to identify potential savings opportunities.`;
+    const goalsWithRoom = data.goals.filter(
+      (g) => !g.isCompleted && g.currentAmount < g.targetAmount,
+    );
+    const actionableTip =
+      netSavings > 0 && goalsWithRoom.length > 0
+        ? `Moving ₹${Math.min(Math.round(netSavings * 0.1), 5000).toLocaleString("en-IN")} from this week's surplus to your ${goalsWithRoom[0].name} goal can accelerate completion.`
+        : `Review your spending patterns to identify potential savings opportunities.`;
 
     return {
       weekRange,
       weekLabel: weekRange,
-      summaryTitle: netSavings > 0
-        ? `Positive cash flow week — ₹${Math.round(netSavings).toLocaleString('en-IN')} net saved`
-        : `Net outflow week — review spending patterns`,
+      summaryTitle:
+        netSavings > 0
+          ? `Positive cash flow week — ₹${Math.round(netSavings).toLocaleString("en-IN")} net saved`
+          : `Net outflow week — review spending patterns`,
       totalIncome: Math.round(totalIncome * 100) / 100,
       totalExpenses: Math.round(totalExpenses * 100) / 100,
       netSavings: Math.round(netSavings * 100) / 100,
@@ -896,16 +1041,21 @@ class ApiClient {
   async getDashboardSummary(): Promise<DashboardSummary> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/dashboard/summary`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch dashboard summary`);
+      if (!res.ok)
+        throw new Error(
+          `HTTP ${res.status}: Failed to fetch dashboard summary`,
+        );
       return res.json();
     }
 
     await delay();
     const data = loadStoredData();
 
-    const checking = data.accounts.find((a) => a.type === 'checking')?.balance || 0;
-    const savings = data.accounts.find((a) => a.type === 'savings')?.balance || 0;
-    const credit = data.accounts.find((a) => a.type === 'credit')?.balance || 0;
+    const checking =
+      data.accounts.find((a) => a.type === "checking")?.balance || 0;
+    const savings =
+      data.accounts.find((a) => a.type === "savings")?.balance || 0;
+    const credit = data.accounts.find((a) => a.type === "credit")?.balance || 0;
 
     const liquidCash = checking + savings;
     const totalDebt = Math.abs(credit);
@@ -913,14 +1063,21 @@ class ApiClient {
 
     // ── Compute cashFlowHistory from REAL transactions (last 6 months) ──
     const today = new Date();
-    const cashFlowHistory: { month: string; income: number; expenses: number; savings: number }[] = [];
+    const cashFlowHistory: {
+      month: string;
+      income: number;
+      expenses: number;
+      savings: number;
+    }[] = [];
 
     for (let i = 5; i >= 0; i--) {
       const monthDate = subMonths(today, i);
-      const monthPrefix = format(monthDate, 'yyyy-MM');
-      const monthLabel = format(monthDate, 'MMM');
+      const monthPrefix = format(monthDate, "yyyy-MM");
+      const monthLabel = format(monthDate, "MMM");
 
-      const monthTransactions = data.transactions.filter((t) => t.date.startsWith(monthPrefix));
+      const monthTransactions = data.transactions.filter((t) =>
+        t.date.startsWith(monthPrefix),
+      );
 
       const income = monthTransactions
         .filter((t) => t.amount > 0)
@@ -928,8 +1085,8 @@ class ApiClient {
 
       const expenses = Math.abs(
         monthTransactions
-          .filter((t) => t.amount < 0 && t.categoryId !== 'cat-transfers')
-          .reduce((sum, t) => sum + t.amount, 0)
+          .filter((t) => t.amount < 0 && t.categoryId !== "cat-transfers")
+          .reduce((sum, t) => sum + t.amount, 0),
       );
 
       cashFlowHistory.push({
@@ -945,29 +1102,48 @@ class ApiClient {
     const prevMonthCF = cashFlowHistory[cashFlowHistory.length - 2];
     let netWorthMomPct = 0;
     if (prevMonthCF && prevMonthCF.savings !== 0) {
-      netWorthMomPct = Math.round(((currentMonthCF.savings - prevMonthCF.savings) / Math.abs(prevMonthCF.savings)) * 100 * 10) / 10;
+      netWorthMomPct =
+        Math.round(
+          ((currentMonthCF.savings - prevMonthCF.savings) /
+            Math.abs(prevMonthCF.savings)) *
+            100 *
+            10,
+        ) / 10;
     }
 
     // ── Compute current month spending from REAL transactions ──
-    const currentMonthPrefix = format(today, 'yyyy-MM');
+    const currentMonthPrefix = format(today, "yyyy-MM");
     const monthTx = data.transactions.filter(
-      (t) => t.date.startsWith(currentMonthPrefix) && t.amount < 0 && t.categoryId !== 'cat-transfers'
+      (t) =>
+        t.date.startsWith(currentMonthPrefix) &&
+        t.amount < 0 &&
+        t.categoryId !== "cat-transfers",
     );
 
-    const totalMonthlySpend = Math.abs(monthTx.reduce((sum, t) => sum + t.amount, 0));
-    const totalBudget = data.categories.reduce((sum, c) => sum + (c.monthlyBudget || 0), 0);
+    const totalMonthlySpend = Math.abs(
+      monthTx.reduce((sum, t) => sum + t.amount, 0),
+    );
+    const totalBudget = data.categories.reduce(
+      (sum, c) => sum + (c.monthlyBudget || 0),
+      0,
+    );
 
     // ── Compute monthlySpendVsBudgetPct ──
-    const monthlySpendVsBudgetPct = totalBudget > 0
-      ? Math.round(((totalMonthlySpend - totalBudget) / totalBudget) * 100 * 10) / 10
-      : 0;
+    const monthlySpendVsBudgetPct =
+      totalBudget > 0
+        ? Math.round(
+            ((totalMonthlySpend - totalBudget) / totalBudget) * 100 * 10,
+          ) / 10
+        : 0;
 
     // ── Category spend from REAL transactions (no fake fallbacks) ──
     const categorySpend = data.categories
-      .filter((c) => c.type === 'expense')
+      .filter((c) => c.type === "expense")
       .map((cat) => {
         const spent = Math.abs(
-          monthTx.filter((t) => t.categoryId === cat.id).reduce((sum, t) => sum + t.amount, 0)
+          monthTx
+            .filter((t) => t.categoryId === cat.id)
+            .reduce((sum, t) => sum + t.amount, 0),
         );
         return {
           categoryId: cat.id,
@@ -981,36 +1157,54 @@ class ApiClient {
       .sort((a, b) => b.amount - a.amount);
 
     // ── Cash runway from REAL monthly burn ──
-    const monthlyBurn = totalMonthlySpend > 0 ? totalMonthlySpend : (cashFlowHistory.length > 0
-      ? cashFlowHistory.reduce((sum, m) => sum + m.expenses, 0) / cashFlowHistory.filter(m => m.expenses > 0).length
-      : 1);
+    const monthlyBurn =
+      totalMonthlySpend > 0
+        ? totalMonthlySpend
+        : cashFlowHistory.length > 0
+          ? cashFlowHistory.reduce((sum, m) => sum + m.expenses, 0) /
+            cashFlowHistory.filter((m) => m.expenses > 0).length
+          : 1;
     const cashRunwayMonths = Number((liquidCash / monthlyBurn).toFixed(1));
 
     // ── Savings rate from REAL income/expenses ──
     const currentMonthIncome = data.transactions
       .filter((t) => t.date.startsWith(currentMonthPrefix) && t.amount > 0)
       .reduce((sum, t) => sum + t.amount, 0);
-    const savingsRatePct = currentMonthIncome > 0
-      ? Math.round(((currentMonthIncome - totalMonthlySpend) / currentMonthIncome) * 100 * 10) / 10
-      : 0;
+    const savingsRatePct =
+      currentMonthIncome > 0
+        ? Math.round(
+            ((currentMonthIncome - totalMonthlySpend) / currentMonthIncome) *
+              100 *
+              10,
+          ) / 10
+        : 0;
 
     // ── Savings rate MoM delta ──
-    const prevMonthPrefix = format(subMonths(today, 1), 'yyyy-MM');
+    const prevMonthPrefix = format(subMonths(today, 1), "yyyy-MM");
     const prevMonthIncome = data.transactions
       .filter((t) => t.date.startsWith(prevMonthPrefix) && t.amount > 0)
       .reduce((sum, t) => sum + t.amount, 0);
     const prevMonthExpenses = Math.abs(
       data.transactions
-        .filter((t) => t.date.startsWith(prevMonthPrefix) && t.amount < 0 && t.categoryId !== 'cat-transfers')
-        .reduce((sum, t) => sum + t.amount, 0)
+        .filter(
+          (t) =>
+            t.date.startsWith(prevMonthPrefix) &&
+            t.amount < 0 &&
+            t.categoryId !== "cat-transfers",
+        )
+        .reduce((sum, t) => sum + t.amount, 0),
     );
-    const prevSavingsRate = prevMonthIncome > 0
-      ? ((prevMonthIncome - prevMonthExpenses) / prevMonthIncome) * 100
-      : 0;
-    const savingsRateMomDelta = Math.round((savingsRatePct - prevSavingsRate) * 10) / 10;
+    const prevSavingsRate =
+      prevMonthIncome > 0
+        ? ((prevMonthIncome - prevMonthExpenses) / prevMonthIncome) * 100
+        : 0;
+    const savingsRateMomDelta =
+      Math.round((savingsRatePct - prevSavingsRate) * 10) / 10;
 
     // ── Upcoming bills from REAL recurring transactions ──
-    const recurringExpenses = data.transactions.filter((t) => t.isRecurring && t.amount < 0);
+    const recurringExpenses = data.transactions.filter(
+      (t) => t.isRecurring && t.amount < 0,
+    );
     // Deduplicate by merchant to get unique recurring bills
     const merchantMap = new Map<string, Transaction>();
     recurringExpenses.forEach((t) => {
@@ -1029,16 +1223,18 @@ class ApiClient {
         while (isBefore(nextDue, today)) {
           nextDue = addDays(nextDue, 30);
         }
-        const daysAway = Math.ceil((nextDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const daysAway = Math.ceil(
+          (nextDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+        );
         const acc = data.accounts.find((a) => a.id === t.accountId);
 
         return {
           id: `bill-${t.id}`,
           merchant: t.merchant,
           amount: Math.abs(t.amount),
-          dueDate: format(nextDue, 'yyyy-MM-dd'),
+          dueDate: format(nextDue, "yyyy-MM-dd"),
           categoryId: t.categoryId,
-          accountName: acc ? `${acc.name} (${acc.mask})` : 'Unknown',
+          accountName: acc ? `${acc.name} (${acc.mask})` : "Unknown",
           daysAway,
         };
       })
@@ -1047,7 +1243,7 @@ class ApiClient {
       .slice(0, 5);
 
     // ── Low balance alert from forecast ──
-    const projectedMinBalance = liquidCash - (monthlyBurn * 2);
+    const projectedMinBalance = liquidCash - monthlyBurn * 2;
     const lowBalanceThreshold = monthlyBurn; // 1 month of expenses as threshold
 
     return {
@@ -1068,10 +1264,12 @@ class ApiClient {
       lowBalanceAlert: {
         hasLowBalance: projectedMinBalance < lowBalanceThreshold,
         threshold: Math.round(lowBalanceThreshold),
-        ...(projectedMinBalance < lowBalanceThreshold ? {
-          date: format(addDays(today, 60), 'yyyy-MM-dd'),
-          predictedBalance: Math.round(projectedMinBalance),
-        } : {}),
+        ...(projectedMinBalance < lowBalanceThreshold
+          ? {
+              date: format(addDays(today, 60), "yyyy-MM-dd"),
+              predictedBalance: Math.round(projectedMinBalance),
+            }
+          : {}),
       },
     };
   }
@@ -1080,11 +1278,12 @@ class ApiClient {
   async runSimulation(scenario: Scenario): Promise<ScenarioResult> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/simulator/run`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(scenario),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to run simulation`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to run simulation`);
       return res.json();
     }
 
@@ -1093,31 +1292,32 @@ class ApiClient {
     return runWhatIfSimulation(scenario, data);
   }
 
-  createCategory(cat: Omit<Category, 'id'>): Promise<Category> {
+  createCategory(cat: Omit<Category, "id">): Promise<Category> {
     return this.addCategory(cat);
   }
 
   // ── AI Copilot ────────────────────────────────────────────────
   async askCopilotStream(
     userMessage: string,
-    personality: 'concise' | 'balanced' | 'detailed' = 'balanced',
+    personality: "concise" | "balanced" | "detailed" = "balanced",
     onTokenChunk?: (chunk: string) => void,
-    onComplete?: (message: ChatMessage) => void
+    onComplete?: (message: ChatMessage) => void,
   ): Promise<ChatMessage> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/copilot/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage, personality }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to get copilot response`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to get copilot response`);
       const finalMsg: ChatMessage = await res.json();
 
       if (onTokenChunk) {
-        const words = (finalMsg.content || '').split(' ');
+        const words = (finalMsg.content || "").split(" ");
         for (let i = 0; i < words.length; i++) {
           await new Promise((r) => setTimeout(r, 20));
-          onTokenChunk(words[i] + (i === words.length - 1 ? '' : ' '));
+          onTokenChunk(words[i] + (i === words.length - 1 ? "" : " "));
         }
       }
 
@@ -1129,10 +1329,10 @@ class ApiClient {
     const response = generateAICopilotResponse(userMessage, data, personality);
 
     if (onTokenChunk) {
-      const words = response.content.split(' ');
+      const words = response.content.split(" ");
       for (let i = 0; i < words.length; i++) {
         await new Promise((r) => setTimeout(r, 20 + Math.random() * 25));
-        onTokenChunk(words[i] + (i === words.length - 1 ? '' : ' '));
+        onTokenChunk(words[i] + (i === words.length - 1 ? "" : " "));
       }
     } else {
       await delay(600);
@@ -1140,15 +1340,20 @@ class ApiClient {
 
     const finalMsg: ChatMessage = {
       id: `ai-msg-${Date.now()}`,
-      role: 'assistant',
-      sender: 'ai',
+      role: "assistant",
+      sender: "ai",
       content: response.content,
       text: response.content,
       timestamp: new Date().toISOString(),
       groundedData: response.groundedData,
       confidence: response.confidence,
       confidenceBand: response.confidence?.toLowerCase() as any,
-      confidenceScore: response.confidence === 'High' ? 0.96 : response.confidence === 'Medium' ? 0.82 : 0.65,
+      confidenceScore:
+        response.confidence === "High"
+          ? 0.96
+          : response.confidence === "Medium"
+            ? 0.82
+            : 0.65,
       quickActions: response.quickActions,
     };
 
@@ -1161,8 +1366,8 @@ class ApiClient {
 
   async sendAIChatMessage(
     userMessage: string,
-    personality: 'concise' | 'balanced' | 'detailed' = 'balanced',
-    onTokenChunk?: (chunk: string) => void
+    personality: "concise" | "balanced" | "detailed" = "balanced",
+    onTokenChunk?: (chunk: string) => void,
   ): Promise<ChatMessage> {
     return this.askCopilotStream(userMessage, personality, onTokenChunk);
   }
@@ -1170,7 +1375,7 @@ class ApiClient {
   // ── Admin & Data Management ───────────────────────────────────
   async resetAllData(): Promise<void> {
     if (!API_CONFIG.USE_MOCK) {
-      await apiFetch(`/admin/reset`, { method: 'POST' });
+      await apiFetch(`/admin/reset`, { method: "POST" });
       return;
     }
     await delay(300);
@@ -1187,7 +1392,8 @@ class ApiClient {
   async exportAllData(): Promise<StorageData> {
     if (!API_CONFIG.USE_MOCK) {
       const res = await apiFetch(`/admin/export`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to export all data`);
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}: Failed to export all data`);
       return res.json();
     }
     return loadStoredData();

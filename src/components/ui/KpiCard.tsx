@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { cn } from '../../lib/utils/cn';
-import { useUserStore } from '../../lib/store/useUserStore';
-import { formatCurrency } from '../../lib/utils/formatters';
+import React, { useEffect, useState } from "react";
+import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { cn } from "../../lib/utils/cn";
+import { useUserStore } from "../../lib/store/useUserStore";
+import { formatCurrency } from "../../lib/utils/formatters";
 
 interface KpiCardProps {
   title: string;
@@ -16,7 +16,7 @@ interface KpiCardProps {
   subtext?: string;
   badge?: {
     text: string;
-    variant?: 'emerald' | 'indigo' | 'amber' | 'rose' | 'slate';
+    variant?: "emerald" | "indigo" | "amber" | "rose" | "slate";
   };
   onClick?: () => void;
 }
@@ -24,11 +24,11 @@ interface KpiCardProps {
 export const KpiCard: React.FC<KpiCardProps> = ({
   title,
   value,
-  prefix = '',
-  suffix = '',
+  prefix = "",
+  suffix = "",
   isCurrency = true,
   changePct,
-  changePeriodText = 'vs last month',
+  changePeriodText = "vs last month",
   icon: Icon,
   subtext,
   badge,
@@ -62,7 +62,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 
   const formattedDisplay = isCurrency
     ? formatCurrency(displayValue, currency, { showDecimals: true })
-    : `${prefix}${displayValue.toLocaleString('en-US', { maximumFractionDigits: 1 })}${suffix}`;
+    : `${prefix}${displayValue.toLocaleString("en-US", { maximumFractionDigits: 1 })}${suffix}`;
 
   const isPositive = (changePct ?? 0) > 0;
   const isNegative = (changePct ?? 0) < 0;
@@ -71,8 +71,8 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     <div
       onClick={onClick}
       className={cn(
-        'group relative bg-slate-900/40 backdrop-blur-md border border-slate-800/60 hover:border-slate-700/80 rounded-[24px] p-5.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)]',
-        onClick ? 'cursor-pointer' : ''
+        "group relative bg-slate-900/40 backdrop-blur-md border border-slate-800/60 hover:border-slate-700/80 rounded-[24px] p-5.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)]",
+        onClick ? "cursor-pointer" : "",
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -102,12 +102,12 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           <div className="flex items-center gap-1.5">
             <span
               className={cn(
-                'inline-flex items-center font-bold font-mono px-1.5 py-0.5 rounded-lg text-xs',
+                "inline-flex items-center font-bold font-mono px-1.5 py-0.5 rounded-lg text-xs",
                 isPositive
-                  ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                  ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                   : isNegative
-                  ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20'
-                  : 'text-slate-400 bg-slate-800/50 border border-slate-700/50'
+                    ? "text-rose-400 bg-rose-500/10 border border-rose-500/20"
+                    : "text-slate-400 bg-slate-800/50 border border-slate-700/50",
               )}
             >
               {isPositive ? (
@@ -117,10 +117,12 @@ export const KpiCard: React.FC<KpiCardProps> = ({
               ) : (
                 <Minus className="w-3 h-3 mr-1" />
               )}
-              {isPositive ? '+' : ''}
+              {isPositive ? "+" : ""}
               {changePct.toFixed(1)}%
             </span>
-            <span className="text-slate-400 text-xs truncate">{changePeriodText}</span>
+            <span className="text-slate-400 text-xs truncate">
+              {changePeriodText}
+            </span>
           </div>
         ) : subtext ? (
           <span className="text-slate-400 text-xs truncate">{subtext}</span>

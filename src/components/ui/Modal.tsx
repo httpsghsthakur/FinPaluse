@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
-import { cn } from '../../lib/utils/cn';
+import React, { useEffect } from "react";
+import { X } from "lucide-react";
+import { cn } from "../../lib/utils/cn";
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,7 +8,7 @@ interface ModalProps {
   title: string;
   description?: string;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: "sm" | "md" | "lg" | "xl";
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -17,23 +17,23 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   description,
   children,
-  maxWidth = 'md',
+  maxWidth = "md",
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose();
+      if (e.key === "Escape" && isOpen) onClose();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   const maxWidthClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
   };
 
   return (
@@ -47,14 +47,18 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Dialog container */}
       <div
         className={cn(
-          'relative w-full bg-[#0B0F19]/90 backdrop-blur-2xl border border-slate-800/80 rounded-[28px] p-6 shadow-2xl z-10 overflow-hidden transform transition-all',
-          maxWidthClasses[maxWidth]
+          "relative w-full bg-[#0B0F19]/90 backdrop-blur-2xl border border-slate-800/80 rounded-[28px] p-6 shadow-2xl z-10 overflow-hidden transform transition-all",
+          maxWidthClasses[maxWidth],
         )}
       >
         <div className="flex items-start justify-between gap-4 mb-5">
           <div>
-            <h2 className="text-lg font-bold text-slate-100 tracking-tight">{title}</h2>
-            {description && <p className="text-xs text-slate-400 mt-1">{description}</p>}
+            <h2 className="text-lg font-bold text-slate-100 tracking-tight">
+              {title}
+            </h2>
+            {description && (
+              <p className="text-xs text-slate-400 mt-1">{description}</p>
+            )}
           </div>
           <button
             onClick={onClose}

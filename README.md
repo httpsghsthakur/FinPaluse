@@ -72,25 +72,31 @@
 ## Key Features
 
 ### 1. Financial Command Center
+
 - **Liquid Net Worth & Runway Tracking**: Real-time aggregation of checking, high-yield savings, investments, and credit liabilities.
 - **Budget Health & Pacing**: Daily spending run-rate forecasting to prevent month-end budget blowouts.
 
 ### 2. Supervised Transaction Categorization
+
 - **Personalized Ensemble Classifier**: Prioritizes user manual corrections, historical merchant category mappings, and calibrated LightGBM predictions with fallback confidence scores.
 - **Explainability Factors**: Generates human-readable explanations (e.g., `Confidence: 98.4% — matched recurring merchant profile`).
 
 ### 3. Anomaly & Subscription Detection
+
 - **Isolation Forest Anomaly Detection**: Flags unusual spikes or deviations with multiplier factors (e.g., `"$850 dining is 10.6x higher than 30-day baseline"`).
 - **Recurring Payment Clustering**: Automatically detects monthly subscriptions, rent, utility bills, and payroll schedules.
 
 ### 4. Multi-Horizon Cash-Flow Forecasting
+
 - **30 / 60 / 90-Day Forecasts**: Projected balance trajectories with statistical confidence intervals and low-balance warnings before liquidity crunches occur.
 
 ### 5. Stochastic What-If Simulator & Goal Engine
+
 - **Monte Carlo Simulations**: Runs 1,000 stochastic trials across career moves, rent changes, or major expenses displaying 10th (pessimistic), 50th (median), and 90th (optimistic) percentiles.
 - **Goal Completion Engines**: Calculates exact monthly savings required and intelligent boost suggestions.
 
 ### 6. Grounded AI Copilot & Hybrid RAG
+
 - **Zero-Hallucination Tool Calling**: The Copilot fetches verified database values before formulating answers.
 - **SEC EDGAR Integration**: Retrieves official public company 10-K and 10-Q filings with citations.
 - **Real-Time Streaming**: Server-Sent Events (SSE) streaming with rich structured UI payloads.
@@ -115,13 +121,13 @@ Classifier       Anomaly Detector     Engine
 
 ### Evaluation Benchmarks
 
-| Model | Algorithm | Metric | Benchmark Score |
-| :--- | :--- | :--- | :--- |
-| **Transaction Classifier** | LightGBM (Calibrated) | Macro F1-Score | **1.0000** |
-| **Transaction Classifier** | LightGBM | Top-3 Accuracy | **1.0000** |
-| **Anomaly Detector** | Isolation Forest | Precision / Recall | Calibrated for Low False-Alarms |
-| **Cash-Flow Forecaster** | Multi-Horizon Regression | 30-Day MAE | **$142.50** |
-| **Goal Engine** | Deterministic Formula | Calculation Accuracy | **100.0%** |
+| Model                      | Algorithm                | Metric               | Benchmark Score                 |
+| :------------------------- | :----------------------- | :------------------- | :------------------------------ |
+| **Transaction Classifier** | LightGBM (Calibrated)    | Macro F1-Score       | **1.0000**                      |
+| **Transaction Classifier** | LightGBM                 | Top-3 Accuracy       | **1.0000**                      |
+| **Anomaly Detector**       | Isolation Forest         | Precision / Recall   | Calibrated for Low False-Alarms |
+| **Cash-Flow Forecaster**   | Multi-Horizon Regression | 30-Day MAE           | **$142.50**                     |
+| **Goal Engine**            | Deterministic Formula    | Calculation Accuracy | **100.0%**                      |
 
 ### Master Training Pipeline
 
@@ -132,16 +138,17 @@ cd backend
 python -m training.pipeline
 ```
 
-*This generates clean train/val/test splits, fits models, generates calibration plots, registers artifacts in `backend/models/`, and generates an HTML evaluation report in `backend/reports/classifier_report.html`.*
+_This generates clean train/val/test splits, fits models, generates calibration plots, registers artifacts in `backend/models/`, and generates an HTML evaluation report in `backend/reports/classifier_report.html`._
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
+
 - **Node.js** v18+ and **npm** / **bun**
 - **Python** 3.11+
-- *(Optional)* **Docker** and **Docker Compose**
+- _(Optional)_ **Docker** and **Docker Compose**
 
 ---
 
@@ -171,6 +178,7 @@ Visit **http://localhost:3000** to explore the application!
 ### Option B: Local Development Setup
 
 #### 1. Start the Backend API
+
 ```bash
 cd backend
 
@@ -184,16 +192,20 @@ pip install -r requirements.txt
 # Run database migrations and seed demo data
 uvicorn app.main:app --reload --port 8000
 ```
-*Backend runs at `http://localhost:8000` with interactive Swagger docs at `http://localhost:8000/docs`.*
+
+_Backend runs at `http://localhost:8000` with interactive Swagger docs at `http://localhost:8000/docs`._
 
 #### 2. Start the Frontend App
+
 In another terminal:
+
 ```bash
 # From project root
 npm install
 npm run dev
 ```
-*Frontend runs at `http://localhost:3000`.*
+
+_Frontend runs at `http://localhost:3000`._
 
 ---
 
@@ -201,24 +213,24 @@ npm run dev
 
 All endpoints conform to OpenAPI 3.1 specifications.
 
-| Category | Method | Endpoint | Description |
-| :--- | :--- | :--- | :--- |
-| **Health** | `GET` | `/health` | System health check |
-| **Dashboard** | `GET` | `/api/v1/dashboard/summary` | Liquid net worth, spending pacing, and KPI aggregation |
-| **Accounts** | `GET` | `/api/v1/accounts` | Fetch all linked financial accounts and balances |
-| **Transactions** | `GET` | `/api/v1/transactions` | Paginated transactions with multi-filter search |
-| **Transactions** | `POST` | `/api/v1/transactions` | Create manual transaction with auto-categorization |
-| **Transactions** | `POST` | `/api/v1/transactions/import` | Bulk CSV transaction import |
-| **Transactions** | `GET` | `/api/v1/transactions/export` | Export transaction history as CSV |
-| **Budgets** | `GET` | `/api/v1/budgets` | Current month category budgets and spending pacing |
-| **Goals** | `GET` | `/api/v1/goals` | Financial goals with completion trajectory projections |
-| **Goals** | `POST` | `/api/v1/goals/{id}/contribute`| Contribute funds to savings goal |
-| **Forecast** | `GET` | `/api/v1/forecast?days=30` | 30/60/90-day balance forecast with confidence bands |
-| **Simulator** | `POST` | `/api/v1/simulator/run` | Execute stochastic Monte Carlo financial scenario |
-| **Insights** | `GET` | `/api/v1/insights` | Active ML-generated financial alerts and anomalies |
-| **AI Copilot** | `POST` | `/api/v1/copilot/chat` | Grounded financial reasoning conversational endpoint |
-| **AI Copilot** | `POST` | `/api/v1/copilot/stream` | Server-Sent Events (SSE) token streaming |
-| **Admin** | `POST` | `/api/v1/admin/reset` | Reset demo data to initial baseline |
+| Category         | Method | Endpoint                        | Description                                            |
+| :--------------- | :----- | :------------------------------ | :----------------------------------------------------- |
+| **Health**       | `GET`  | `/health`                       | System health check                                    |
+| **Dashboard**    | `GET`  | `/api/v1/dashboard/summary`     | Liquid net worth, spending pacing, and KPI aggregation |
+| **Accounts**     | `GET`  | `/api/v1/accounts`              | Fetch all linked financial accounts and balances       |
+| **Transactions** | `GET`  | `/api/v1/transactions`          | Paginated transactions with multi-filter search        |
+| **Transactions** | `POST` | `/api/v1/transactions`          | Create manual transaction with auto-categorization     |
+| **Transactions** | `POST` | `/api/v1/transactions/import`   | Bulk CSV transaction import                            |
+| **Transactions** | `GET`  | `/api/v1/transactions/export`   | Export transaction history as CSV                      |
+| **Budgets**      | `GET`  | `/api/v1/budgets`               | Current month category budgets and spending pacing     |
+| **Goals**        | `GET`  | `/api/v1/goals`                 | Financial goals with completion trajectory projections |
+| **Goals**        | `POST` | `/api/v1/goals/{id}/contribute` | Contribute funds to savings goal                       |
+| **Forecast**     | `GET`  | `/api/v1/forecast?days=30`      | 30/60/90-day balance forecast with confidence bands    |
+| **Simulator**    | `POST` | `/api/v1/simulator/run`         | Execute stochastic Monte Carlo financial scenario      |
+| **Insights**     | `GET`  | `/api/v1/insights`              | Active ML-generated financial alerts and anomalies     |
+| **AI Copilot**   | `POST` | `/api/v1/copilot/chat`          | Grounded financial reasoning conversational endpoint   |
+| **AI Copilot**   | `POST` | `/api/v1/copilot/stream`        | Server-Sent Events (SSE) token streaming               |
+| **Admin**        | `POST` | `/api/v1/admin/reset`           | Reset demo data to initial baseline                    |
 
 ---
 
@@ -232,6 +244,7 @@ python -m pytest tests/ -v
 ```
 
 **Results:**
+
 ```text
 tests/test_api/test_api_endpoints.py::test_health_endpoints PASSED
 tests/test_api/test_api_endpoints.py::test_get_accounts PASSED
@@ -262,6 +275,7 @@ tests/test_ml/test_ml_models.py::test_rag_chunking_and_retrieval PASSED
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: React 19 + TypeScript
 - **Styling**: Tailwind CSS + Custom Dark Theme Glassmorphism
 - **State Management**: Zustand
@@ -269,6 +283,7 @@ tests/test_ml/test_ml_models.py::test_rag_chunking_and_retrieval PASSED
 - **Icons**: Lucide React
 
 ### Backend & ML
+
 - **Web Framework**: FastAPI (Async ASGI)
 - **Database**: PostgreSQL / SQLite with SQLAlchemy 2.0 Async ORM + Alembic
 - **Machine Learning**: LightGBM, Scikit-Learn (Isolation Forest, Platt Scaling), Joblib
@@ -289,4 +304,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 Made with care for intelligent personal finance.
 
 </div>
-

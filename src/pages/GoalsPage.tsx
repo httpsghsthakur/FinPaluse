@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Target,
   Plus,
@@ -10,16 +10,16 @@ import {
   AlertCircle,
   ArrowRight,
   ShieldCheck,
-} from 'lucide-react';
-import confetti from 'canvas-confetti';
-import { Goal, Account } from '../types';
-import { CategoryIcon } from '../components/ui/CategoryIcon';
-import { ProgressBar } from '../components/ui/ProgressBar';
-import { EmptyState } from '../components/ui/EmptyState';
-import { Modal } from '../components/ui/Modal';
-import { api } from '../lib/api';
-import { useUIStore } from '../lib/store/useUIStore';
-import { formatCurrency, formatDate } from '../lib/utils/formatters';
+} from "lucide-react";
+import confetti from "canvas-confetti";
+import { Goal, Account } from "../types";
+import { CategoryIcon } from "../components/ui/CategoryIcon";
+import { ProgressBar } from "../components/ui/ProgressBar";
+import { EmptyState } from "../components/ui/EmptyState";
+import { Modal } from "../components/ui/Modal";
+import { api } from "../lib/api";
+import { useUIStore } from "../lib/store/useUIStore";
+import { formatCurrency, formatDate } from "../lib/utils/formatters";
 
 export const GoalsPage: React.FC = () => {
   const { openCreateGoalModal, showToast } = useUIStore();
@@ -29,13 +29,16 @@ export const GoalsPage: React.FC = () => {
 
   // Contribute Modal State
   const [contributeGoal, setContributeGoal] = useState<Goal | null>(null);
-  const [depositAmount, setDepositAmount] = useState('100');
+  const [depositAmount, setDepositAmount] = useState("100");
   const [isContributing, setIsContributing] = useState(false);
 
   const loadGoals = async () => {
     setIsLoading(true);
     try {
-      const [goalList, accList] = await Promise.all([api.getGoals(), api.getAccounts()]);
+      const [goalList, accList] = await Promise.all([
+        api.getGoals(),
+        api.getAccounts(),
+      ]);
       setGoals(goalList);
       setAccounts(accList);
     } catch (e) {
@@ -65,14 +68,14 @@ export const GoalsPage: React.FC = () => {
           origin: { y: 0.6 },
         });
         showToast({
-          type: 'success',
-          title: 'Goal Achieved! 🎉',
+          type: "success",
+          title: "Goal Achieved! 🎉",
           description: `Congratulations! You hit your target for ${updated.name}!`,
         });
       } else {
         showToast({
-          type: 'success',
-          title: 'Contribution Recorded',
+          type: "success",
+          title: "Contribution Recorded",
           description: `Added ${formatCurrency(amount)} to ${updated.name}.`,
         });
       }
@@ -80,24 +83,34 @@ export const GoalsPage: React.FC = () => {
       loadGoals();
     } catch (err) {
       showToast({
-        type: 'error',
-        title: 'Contribution Failed',
+        type: "error",
+        title: "Contribution Failed",
       });
     } finally {
       setIsContributing(false);
     }
   };
 
-  const totalSavedAcrossGoals = goals.reduce((acc, g) => acc + g.currentAmount, 0);
-  const totalTargetAcrossGoals = goals.reduce((acc, g) => acc + g.targetAmount, 0);
-  const overallProgressPct = Math.round((totalSavedAcrossGoals / (totalTargetAcrossGoals || 1)) * 100);
+  const totalSavedAcrossGoals = goals.reduce(
+    (acc, g) => acc + g.currentAmount,
+    0,
+  );
+  const totalTargetAcrossGoals = goals.reduce(
+    (acc, g) => acc + g.targetAmount,
+    0,
+  );
+  const overallProgressPct = Math.round(
+    (totalSavedAcrossGoals / (totalTargetAcrossGoals || 1)) * 100,
+  );
 
   return (
     <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Savings Goals</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            Savings Goals
+          </h1>
           <p className="text-xs text-slate-400 mt-0.5">
             Active milestone trajectories with dynamic completion forecasting
           </p>
@@ -119,22 +132,34 @@ export const GoalsPage: React.FC = () => {
             Total Milestone Reserve
           </span>
           <div className="text-3xl font-extrabold font-mono text-white">
-            {formatCurrency(totalSavedAcrossGoals)}{' '}
+            {formatCurrency(totalSavedAcrossGoals)}{" "}
             <span className="text-sm text-slate-400 font-sans font-normal">
-              of {formatCurrency(totalTargetAcrossGoals)} ({overallProgressPct}%)
+              of {formatCurrency(totalTargetAcrossGoals)} ({overallProgressPct}
+              %)
             </span>
           </div>
           <p className="text-xs text-slate-400">
-            Automating ~{formatCurrency(goals.reduce((a, b) => a + b.monthlyContribution, 0))}/month across {goals.length} target pots.
+            Automating ~
+            {formatCurrency(
+              goals.reduce((a, b) => a + b.monthlyContribution, 0),
+            )}
+            /month across {goals.length} target pots.
           </p>
         </div>
 
         <div className="w-full md:w-64 space-y-2">
           <div className="flex justify-between text-xs font-mono text-slate-300">
             <span>Portfolio Progress</span>
-            <span className="text-emerald-400 font-bold">{overallProgressPct}%</span>
+            <span className="text-emerald-400 font-bold">
+              {overallProgressPct}%
+            </span>
           </div>
-          <ProgressBar value={totalSavedAcrossGoals} max={totalTargetAcrossGoals} color="#10B981" size="lg" />
+          <ProgressBar
+            value={totalSavedAcrossGoals}
+            max={totalTargetAcrossGoals}
+            color="#10B981"
+            size="lg"
+          />
         </div>
       </div>
 
@@ -149,9 +174,17 @@ export const GoalsPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {goals.map((goal) => {
-            const pct = Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100));
-            const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
-            const monthsToTarget = (remaining / (goal.monthlyContribution || 100)).toFixed(1);
+            const pct = Math.min(
+              100,
+              Math.round((goal.currentAmount / goal.targetAmount) * 100),
+            );
+            const remaining = Math.max(
+              0,
+              goal.targetAmount - goal.currentAmount,
+            );
+            const monthsToTarget = (
+              remaining / (goal.monthlyContribution || 100)
+            ).toFixed(1);
             const isCompleted = goal.currentAmount >= goal.targetAmount;
 
             return (
@@ -163,11 +196,19 @@ export const GoalsPage: React.FC = () => {
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <CategoryIcon name={goal.icon || 'Target'} color={goal.color} size="lg" />
+                      <CategoryIcon
+                        name={goal.icon || "Target"}
+                        color={goal.color}
+                        size="lg"
+                      />
                       <div>
-                        <h3 className="text-base font-bold text-white">{goal.name}</h3>
+                        <h3 className="text-base font-bold text-white">
+                          {goal.name}
+                        </h3>
                         <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                          <span className="font-mono">{formatDate(goal.deadline, 'MMM yyyy')}</span>
+                          <span className="font-mono">
+                            {formatDate(goal.deadline, "MMM yyyy")}
+                          </span>
                           <span>•</span>
                           <span className="capitalize">{goal.category}</span>
                         </div>
@@ -177,11 +218,11 @@ export const GoalsPage: React.FC = () => {
                     <span
                       className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
                         isCompleted
-                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 font-bold'
-                          : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 font-bold"
+                          : "bg-indigo-500/15 text-indigo-300 border-indigo-500/30"
                       }`}
                     >
-                      {isCompleted ? 'Achieved 🎉' : 'On Track'}
+                      {isCompleted ? "Achieved 🎉" : "On Track"}
                     </span>
                   </div>
 
@@ -196,10 +237,18 @@ export const GoalsPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <ProgressBar value={goal.currentAmount} max={goal.targetAmount} color={goal.color} size="md" />
+                    <ProgressBar
+                      value={goal.currentAmount}
+                      max={goal.targetAmount}
+                      color={goal.color}
+                      size="md"
+                    />
 
                     <div className="flex justify-between text-xs text-slate-400 pt-1 font-mono">
-                      <span>{formatCurrency(goal.monthlyContribution)}/mo auto-transfer</span>
+                      <span>
+                        {formatCurrency(goal.monthlyContribution)}/mo
+                        auto-transfer
+                      </span>
                       <span>ETA ~{monthsToTarget} months</span>
                     </div>
                   </div>
@@ -210,8 +259,12 @@ export const GoalsPage: React.FC = () => {
                   <div className="p-3 rounded-2xl bg-indigo-950/30 backdrop-blur-md border border-indigo-500/30 text-xs flex items-start gap-2.5">
                     <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <span className="font-semibold text-indigo-300">AI Trajectory Boost: </span>
-                      <span className="text-slate-300 text-[11px]">{goal.boostSuggestion}</span>
+                      <span className="font-semibold text-indigo-300">
+                        AI Trajectory Boost:{" "}
+                      </span>
+                      <span className="text-slate-300 text-[11px]">
+                        {goal.boostSuggestion}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -219,13 +272,17 @@ export const GoalsPage: React.FC = () => {
                 {/* Card Action footer */}
                 <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between">
                   <span className="text-[11px] text-slate-400">
-                    Linked to <span className="text-slate-300 font-medium">{accounts.find((a) => a.id === goal.linkedAccountId)?.name || 'Savings'}</span>
+                    Linked to{" "}
+                    <span className="text-slate-300 font-medium">
+                      {accounts.find((a) => a.id === goal.linkedAccountId)
+                        ?.name || "Savings"}
+                    </span>
                   </span>
 
                   <button
                     onClick={() => {
                       setContributeGoal(goal);
-                      setDepositAmount('250');
+                      setDepositAmount("250");
                     }}
                     className="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-semibold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                   >
@@ -250,7 +307,9 @@ export const GoalsPage: React.FC = () => {
         >
           <form onSubmit={handleDeposit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Deposit Amount (₹)</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">
+                Deposit Amount (₹)
+              </label>
               <input
                 type="number"
                 step="10"
@@ -262,7 +321,7 @@ export const GoalsPage: React.FC = () => {
             </div>
 
             <div className="flex gap-2">
-              {['50', '100', '250', '500'].map((preset) => (
+              {["50", "100", "250", "500"].map((preset) => (
                 <button
                   key={preset}
                   type="button"

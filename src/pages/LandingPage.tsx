@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React from "react";
+import { NavLink } from "react-router-dom";
 import {
   Bot,
   TrendingUp,
@@ -14,18 +14,25 @@ import {
   CheckCircle2,
   Receipt,
   LineChart,
-} from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 
 const DEMO_DATA = [
-  { month: 'Jan', balance: 32400, forecast: 32400 },
-  { month: 'Feb', balance: 35100, forecast: 35100 },
-  { month: 'Mar', balance: 38200, forecast: 38200 },
-  { month: 'Apr', balance: 41800, forecast: 41800 },
-  { month: 'May', balance: 43270, forecast: 43270 },
-  { month: 'Jun', balance: null, forecast: 46800 },
-  { month: 'Jul', balance: null, forecast: 50400 },
-  { month: 'Aug', balance: null, forecast: 54100 },
+  { month: "Jan", balance: 32400, forecast: 32400 },
+  { month: "Feb", balance: 35100, forecast: 35100 },
+  { month: "Mar", balance: 38200, forecast: 38200 },
+  { month: "Apr", balance: 41800, forecast: 41800 },
+  { month: "May", balance: 43270, forecast: 43270 },
+  { month: "Jun", balance: null, forecast: 46800 },
+  { month: "Jul", balance: null, forecast: 50400 },
+  { month: "Aug", balance: null, forecast: 54100 },
 ];
 
 export const LandingPage: React.FC = () => {
@@ -68,12 +75,14 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.1]">
-          Your money, explained by <span className="text-emerald-400">Grounded AI</span>
+          Your money, explained by{" "}
+          <span className="text-emerald-400">Grounded AI</span>
         </h1>
 
         <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto mt-6 leading-relaxed">
-          Ask your finances anything. Predict 90-day cash-flow runway, test what-if scenarios, detect spend
-          anomalies, and hit savings goals with deterministic intelligence.
+          Ask your finances anything. Predict 90-day cash-flow runway, test
+          what-if scenarios, detect spend anomalies, and hit savings goals with
+          deterministic intelligence.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
@@ -98,11 +107,18 @@ export const LandingPage: React.FC = () => {
         <div className="mt-16 relative mx-auto max-w-5xl rounded-[28px] border border-slate-800/60 bg-slate-900/40 p-6 md:p-8 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800/60 gap-4">
             <div className="text-left">
-              <div className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Net Worth Trajectory</div>
+              <div className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">
+                Net Worth Trajectory
+              </div>
               <div className="mt-2 mb-6">
-                <div className="text-slate-400 text-sm mb-1">Total Net Worth</div>
+                <div className="text-slate-400 text-sm mb-1">
+                  Total Net Worth
+                </div>
                 <div className="text-4xl font-mono font-medium text-white tracking-tight flex items-baseline gap-3">
-                  ₹24,43,270.75 <span className="text-xs text-emerald-500 font-sans font-medium">(+18.4% YTD)</span>
+                  ₹24,43,270.75{" "}
+                  <span className="text-xs text-emerald-500 font-sans font-medium">
+                    (+18.4% YTD)
+                  </span>
                 </div>
               </div>
             </div>
@@ -121,16 +137,33 @@ export const LandingPage: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={DEMO_DATA}>
                 <defs>
-                  <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="actualGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
                     <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
                   </linearGradient>
-                  <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="forecastGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#6366F1" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="month" stroke="#64748B" fontSize={12} tickLine={false} />
+                <XAxis
+                  dataKey="month"
+                  stroke="#64748B"
+                  fontSize={12}
+                  tickLine={false}
+                />
                 <YAxis
                   stroke="#64748B"
                   fontSize={12}
@@ -138,8 +171,16 @@ export const LandingPage: React.FC = () => {
                   tickFormatter={(v) => `₹${v / 1000}k`}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(51, 65, 85, 0.6)', borderRadius: 16, backdropFilter: 'blur(8px)' }}
-                  formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Balance']}
+                  contentStyle={{
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    borderColor: "rgba(51, 65, 85, 0.6)",
+                    borderRadius: 16,
+                    backdropFilter: "blur(8px)",
+                  }}
+                  formatter={(val: any) => [
+                    `₹${Number(val).toLocaleString()}`,
+                    "Balance",
+                  ]}
                 />
                 <Area
                   type="monotone"
@@ -165,7 +206,9 @@ export const LandingPage: React.FC = () => {
       {/* 6 Feature Pillars */}
       <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/60 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-extrabold text-white">Engineered for absolute financial clarity</h2>
+          <h2 className="text-3xl font-extrabold text-white">
+            Engineered for absolute financial clarity
+          </h2>
           <p className="text-sm text-slate-400 mt-3">
             Combining deterministic balance math with streaming AI insights.
           </p>
@@ -175,45 +218,45 @@ export const LandingPage: React.FC = () => {
           {[
             {
               icon: Bot,
-              title: 'Conversational AI Engine',
+              title: "Conversational AI Engine",
               description:
                 'Ask questions like "Can I afford a ₹6,500 purchase?" and get answers calculated directly from your real balances and bills.',
-              color: '#10B981',
+              color: "#10B981",
             },
             {
               icon: TrendingUp,
-              title: '90-Day Cash Runway Forecast',
+              title: "90-Day Cash Runway Forecast",
               description:
-                'Visualizes future balances with confidence bands, automated bill detection, and low-balance warnings.',
-              color: '#6366F1',
+                "Visualizes future balances with confidence bands, automated bill detection, and low-balance warnings.",
+              color: "#6366F1",
             },
             {
               icon: SlidersHorizontal,
-              title: 'What-If Scenario Engine',
+              title: "What-If Scenario Engine",
               description:
-                'Simulate salary changes, job sabbaticals, major purchases, or subscription cuts on your 12-month net worth.',
-              color: '#F59E0B',
+                "Simulate salary changes, job sabbaticals, major purchases, or subscription cuts on your 12-month net worth.",
+              color: "#F59E0B",
             },
             {
               icon: ShieldCheck,
-              title: 'Anomaly & Overspend Guard',
+              title: "Anomaly & Overspend Guard",
               description:
-                'Detects 3x+ statistical spikes in merchant categories and warns you before monthly budgets overrun.',
-              color: '#EF4444',
+                "Detects 3x+ statistical spikes in merchant categories and warns you before monthly budgets overrun.",
+              color: "#EF4444",
             },
             {
               icon: PieChart,
-              title: 'Predictive Category Budgets',
+              title: "Predictive Category Budgets",
               description:
-                'Calculates month-end projected spending rather than just static spent totals.',
-              color: '#06B6D4',
+                "Calculates month-end projected spending rather than just static spent totals.",
+              color: "#06B6D4",
             },
             {
               icon: Lock,
-              title: 'Pluggable Architecture',
+              title: "Pluggable Architecture",
               description:
-                '100% standalone seed engine with zero vendor lock-in. Switch to real REST/WebSocket backends in one config line.',
-              color: '#8B5CF6',
+                "100% standalone seed engine with zero vendor lock-in. Switch to real REST/WebSocket backends in one config line.",
+              color: "#8B5CF6",
             },
           ].map((f, i) => {
             const Icon = f.icon;
@@ -228,8 +271,12 @@ export const LandingPage: React.FC = () => {
                 >
                   <Icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{f.description}</p>
+                <h3 className="text-base font-bold text-white mb-2">
+                  {f.title}
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  {f.description}
+                </p>
               </div>
             );
           })}
@@ -239,30 +286,39 @@ export const LandingPage: React.FC = () => {
       {/* 3-Step "How it Works" */}
       <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/60 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-extrabold text-white">How Finpluse Works</h2>
-          <p className="text-sm text-slate-400 mt-3">From raw transactions to intelligent financial decisions.</p>
+          <h2 className="text-3xl font-extrabold text-white">
+            How Finpluse Works
+          </h2>
+          <p className="text-sm text-slate-400 mt-3">
+            From raw transactions to intelligent financial decisions.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              step: '01',
-              title: 'Aggregate & Index Accounts',
-              desc: 'Seamlessly link checking, high-yield savings, and credit cards with read-only encryption.',
+              step: "01",
+              title: "Aggregate & Index Accounts",
+              desc: "Seamlessly link checking, high-yield savings, and credit cards with read-only encryption.",
             },
             {
-              step: '02',
-              title: 'Continuous Pattern Analysis',
-              desc: 'Deterministic models calculate burn rates, recurring cash outflows, and net savings pacing.',
+              step: "02",
+              title: "Continuous Pattern Analysis",
+              desc: "Deterministic models calculate burn rates, recurring cash outflows, and net savings pacing.",
             },
             {
-              step: '03',
-              title: 'Conversational Optimization',
-              desc: 'Ask your copilot anything or simulate scenarios to reach major financial milestones faster.',
+              step: "03",
+              title: "Conversational Optimization",
+              desc: "Ask your copilot anything or simulate scenarios to reach major financial milestones faster.",
             },
           ].map((s, i) => (
-            <div key={i} className="relative p-6 rounded-[28px] bg-slate-900/40 backdrop-blur-md border border-slate-800/60 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-              <div className="text-3xl font-extrabold font-mono text-emerald-400/40 mb-3">{s.step}</div>
+            <div
+              key={i}
+              className="relative p-6 rounded-[28px] bg-slate-900/40 backdrop-blur-md border border-slate-800/60 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+            >
+              <div className="text-3xl font-extrabold font-mono text-emerald-400/40 mb-3">
+                {s.step}
+              </div>
               <h3 className="text-base font-bold text-white mb-2">{s.title}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">{s.desc}</p>
             </div>
@@ -274,20 +330,34 @@ export const LandingPage: React.FC = () => {
       <footer className="max-w-7xl mx-auto px-6 py-10 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 relative z-10">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-emerald-400" />
-          <span className="font-semibold text-slate-300">Finpluse AI Systems</span>
+          <span className="font-semibold text-slate-300">
+            Finpluse AI Systems
+          </span>
           <span>© 2026. All rights reserved.</span>
         </div>
         <div className="flex items-center gap-6">
-          <NavLink to="/app" className="hover:text-emerald-400 transition-colors">
+          <NavLink
+            to="/app"
+            className="hover:text-emerald-400 transition-colors"
+          >
             Dashboard
           </NavLink>
-          <NavLink to="/app/copilot" className="hover:text-emerald-400 transition-colors">
+          <NavLink
+            to="/app/copilot"
+            className="hover:text-emerald-400 transition-colors"
+          >
             AI Copilot
           </NavLink>
-          <NavLink to="/app/simulator" className="hover:text-emerald-400 transition-colors">
+          <NavLink
+            to="/app/simulator"
+            className="hover:text-emerald-400 transition-colors"
+          >
             Simulator
           </NavLink>
-          <NavLink to="/app/settings" className="hover:text-emerald-400 transition-colors">
+          <NavLink
+            to="/app/settings"
+            className="hover:text-emerald-400 transition-colors"
+          >
             Settings
           </NavLink>
         </div>

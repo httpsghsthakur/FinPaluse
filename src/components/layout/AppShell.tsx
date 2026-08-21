@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
-import { Topbar } from './Topbar';
-import { BottomNav } from './BottomNav';
-import { ToastContainer } from '../ui/ToastContainer';
-import { PlaidModal } from '../ui/PlaidModal';
-import { AddTransactionModal } from '../ui/AddTransactionModal';
-import { CsvImportModal } from '../ui/CsvImportModal';
-import { CreateGoalModal } from '../ui/CreateGoalModal';
-import { TransactionDetailDrawer } from '../ui/TransactionDetailDrawer';
-import { useUIStore } from '../../lib/store/useUIStore';
-import { api } from '../../lib/api';
-import { Category, Account, Transaction } from '../../types';
+import React, { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
+import { Sidebar } from "./Sidebar";
+import { Topbar } from "./Topbar";
+import { BottomNav } from "./BottomNav";
+import { ToastContainer } from "../ui/ToastContainer";
+import { PlaidModal } from "../ui/PlaidModal";
+import { AddTransactionModal } from "../ui/AddTransactionModal";
+import { CsvImportModal } from "../ui/CsvImportModal";
+import { CreateGoalModal } from "../ui/CreateGoalModal";
+import { TransactionDetailDrawer } from "../ui/TransactionDetailDrawer";
+import { useUIStore } from "../../lib/store/useUIStore";
+import { api } from "../../lib/api";
+import { Category, Account, Transaction } from "../../types";
 
 export const AppShell: React.FC = () => {
   const { selectedTxIdForDetail, closeTxDetail } = useUIStore();
@@ -21,7 +21,10 @@ export const AppShell: React.FC = () => {
 
   const loadBaseData = async () => {
     try {
-      const [catList, accList] = await Promise.all([api.getCategories(), api.getAccounts()]);
+      const [catList, accList] = await Promise.all([
+        api.getCategories(),
+        api.getAccounts(),
+      ]);
       setCategories(catList);
       setAccounts(accList);
     } catch (e) {
@@ -37,7 +40,9 @@ export const AppShell: React.FC = () => {
   useEffect(() => {
     if (selectedTxIdForDetail) {
       api.getTransactions().then((res) => {
-        const found = res.transactions.find((t) => t.id === selectedTxIdForDetail);
+        const found = res.transactions.find(
+          (t) => t.id === selectedTxIdForDetail,
+        );
         if (found) setSelectedTx(found);
       });
     } else {
@@ -74,7 +79,11 @@ export const AppShell: React.FC = () => {
       {/* Global Modals & Notifications */}
       <ToastContainer />
       <PlaidModal onAccountAdded={loadBaseData} />
-      <AddTransactionModal categories={categories} accounts={accounts} onAdded={loadBaseData} />
+      <AddTransactionModal
+        categories={categories}
+        accounts={accounts}
+        onAdded={loadBaseData}
+      />
       <CsvImportModal onImported={loadBaseData} />
       <CreateGoalModal accounts={accounts} onGoalCreated={loadBaseData} />
       <TransactionDetailDrawer

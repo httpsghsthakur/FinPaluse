@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Modal } from './Modal';
-import { Category, Budget } from '../../types';
-import { api } from '../../lib/api';
-import { useUIStore } from '../../lib/store/useUIStore';
-import { Sparkles } from 'lucide-react';
-import { formatCurrency } from '../../lib/utils/formatters';
+import React, { useState } from "react";
+import { Modal } from "./Modal";
+import { Category, Budget } from "../../types";
+import { api } from "../../lib/api";
+import { useUIStore } from "../../lib/store/useUIStore";
+import { Sparkles } from "lucide-react";
+import { formatCurrency } from "../../lib/utils/formatters";
 
 interface EditBudgetModalProps {
   isOpen: boolean;
@@ -22,13 +22,16 @@ export const EditBudgetModal: React.FC<EditBudgetModalProps> = ({
   onSaved,
 }) => {
   const { showToast } = useUIStore();
-  const [limit, setLimit] = useState(category?.monthlyBudget.toString() || '400');
+  const [limit, setLimit] = useState(
+    category?.monthlyBudget.toString() || "400",
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   if (!category) return null;
 
   // AI 3-month suggestion: historical average + buffer
-  const aiSuggestedLimit = Math.round((budget?.spent || category.monthlyBudget) * 1.08 / 10) * 10;
+  const aiSuggestedLimit =
+    Math.round(((budget?.spent || category.monthlyBudget) * 1.08) / 10) * 10;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,16 +42,16 @@ export const EditBudgetModal: React.FC<EditBudgetModalProps> = ({
     try {
       await api.updateBudget(category.id, val);
       showToast({
-        type: 'success',
-        title: 'Budget Updated',
+        type: "success",
+        title: "Budget Updated",
         description: `Set ${category.name} monthly limit to ${formatCurrency(val)}.`,
       });
       onSaved();
       onClose();
     } catch (err) {
       showToast({
-        type: 'error',
-        title: 'Save Failed',
+        type: "error",
+        title: "Save Failed",
       });
     } finally {
       setIsSaving(false);
@@ -65,7 +68,9 @@ export const EditBudgetModal: React.FC<EditBudgetModalProps> = ({
     >
       <form onSubmit={handleSave} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Monthly Target ($)</label>
+          <label className="block text-xs font-medium text-slate-300 mb-1">
+            Monthly Target ($)
+          </label>
           <input
             type="number"
             step="10"
@@ -83,8 +88,11 @@ export const EditBudgetModal: React.FC<EditBudgetModalProps> = ({
             <span>AI Suggested Allocation</span>
           </div>
           <p className="text-[11px] text-slate-300">
-            Based on your 90-day average spending of{' '}
-            <span className="font-mono text-emerald-300 font-semibold">{formatCurrency(aiSuggestedLimit)}</span>.
+            Based on your 90-day average spending of{" "}
+            <span className="font-mono text-emerald-300 font-semibold">
+              {formatCurrency(aiSuggestedLimit)}
+            </span>
+            .
           </p>
           <button
             type="button"

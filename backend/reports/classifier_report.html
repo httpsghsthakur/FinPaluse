@@ -1,23 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head><title>FinPilot ML Evaluation Report</title><style>body { font-family: sans-serif; padding: 2rem; background: #0f172a; color: #f8fafc; } .card { background: #1e293b; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #334155; } h1, h2 { color: #38bdf8; } .metric { font-size: 1.5rem; font-weight: bold; color: #4ade80; }</style></head>
-<body>
-<h1>FinPilot AI — Model Evaluation Summary</h1>
-<div class="card">
-  <h2>Transaction Classifier (LightGBM)</h2>
-  <p>Macro F1: <span class="metric">1.0</span></p>
-  <p>Top-3 Accuracy: <span class="metric">1.0</span></p>
-  <p>Accuracy: <span class="metric">1.0</span></p>
-</div>
-<div class="card">
-  <h2>Anomaly Detector (Isolation Forest)</h2>
-  <p>Precision: <span class="metric">0.0364</span></p>
-  <p>Recall: <span class="metric">0.2857</span></p>
-</div>
-<div class="card">
-  <h2>Cash-Flow Forecasting</h2>
-  <p>30-Day MAE: <span class="metric">$142.5</span></p>
-  <p>90-Day Coverage: <span class="metric">94%</span></p>
-</div>
-</body>
+  <head>
+    <title>FinPilot ML Evaluation Report</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        background: #0f172a;
+        color: #f8fafc;
+      }
+      .card {
+        background: #1e293b;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid #334155;
+      }
+      h1,
+      h2 {
+        color: #38bdf8;
+      }
+      .metric {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #4ade80;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>FinPilot AI — Model Evaluation Summary</h1>
+    <div class="card">
+      <h2>Transaction Classifier (LightGBM)</h2>
+      <p>Macro F1: <span class="metric">1.0</span></p>
+      <p>Top-3 Accuracy: <span class="metric">1.0</span></p>
+      <p>Accuracy: <span class="metric">1.0</span></p>
+    </div>
+    <div class="card">
+      <h2>Anomaly Detector (Isolation Forest)</h2>
+      <p>Precision: <span class="metric">0.0364</span></p>
+      <p>Recall: <span class="metric">0.2857</span></p>
+    </div>
+    <div class="card">
+      <h2>Cash-Flow Forecasting</h2>
+      <p>30-Day MAE: <span class="metric">$142.5</span></p>
+      <p>90-Day Coverage: <span class="metric">94%</span></p>
+    </div>
+  </body>
 </html>

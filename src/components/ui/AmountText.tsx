@@ -1,7 +1,7 @@
-import React from 'react';
-import { useUserStore } from '../../lib/store/useUserStore';
-import { formatCurrency } from '../../lib/utils/formatters';
-import { cn } from '../../lib/utils/cn';
+import React from "react";
+import { useUserStore } from "../../lib/store/useUserStore";
+import { formatCurrency } from "../../lib/utils/formatters";
+import { cn } from "../../lib/utils/cn";
 
 interface AmountTextProps {
   amount: number;
@@ -10,7 +10,7 @@ interface AmountTextProps {
   className?: string;
   compact?: boolean;
   showDecimals?: boolean;
-  currencyOverride?: 'USD' | 'EUR' | 'GBP' | 'INR';
+  currencyOverride?: "USD" | "EUR" | "GBP" | "INR";
 }
 
 export const AmountText: React.FC<AmountTextProps> = ({
@@ -30,14 +30,20 @@ export const AmountText: React.FC<AmountTextProps> = ({
 
   const colorClass = colored
     ? isPositive
-      ? 'text-emerald-400 dark:text-emerald-400'
+      ? "text-emerald-400 dark:text-emerald-400"
       : isNegative
-      ? 'text-slate-200 dark:text-slate-100'
-      : 'text-slate-400'
-    : '';
+        ? "text-slate-200 dark:text-slate-100"
+        : "text-slate-400"
+    : "";
 
   return (
-    <span className={cn('tabular-nums font-mono font-medium', colorClass, className)}>
+    <span
+      className={cn(
+        "tabular-nums font-mono font-medium",
+        colorClass,
+        className,
+      )}
+    >
       {formatCurrency(amount, currency, {
         showSign,
         compact,

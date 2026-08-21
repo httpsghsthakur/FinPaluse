@@ -1,12 +1,12 @@
-import { ChatMessage, GroundedMetric } from '../../../types';
-import { StorageData } from './seed';
-import { formatCurrency, formatPercent } from '../../utils/formatters';
-import { subDays, parseISO, isBefore } from 'date-fns';
+import { ChatMessage, GroundedMetric } from "../../../types";
+import { StorageData } from "./seed";
+import { formatCurrency, formatPercent } from "../../utils/formatters";
+import { subDays, parseISO, isBefore } from "date-fns";
 
 interface AIResponseResult {
   content: string;
   groundedData?: GroundedMetric[];
-  confidence?: 'High' | 'Medium' | 'Low';
+  confidence?: "High" | "Medium" | "Low";
   quickActions?: {
     label: string;
     action: string;
@@ -17,14 +17,17 @@ interface AIResponseResult {
 export function generateAICopilotResponse(
   query: string,
   data: StorageData,
-  personality: 'concise' | 'balanced' | 'detailed' = 'balanced'
+  personality: "concise" | "balanced" | "detailed" = "balanced",
 ): AIResponseResult {
   const q = query.toLowerCase();
 
   // Compute live financial figures from data
-  const totalChecking = data.accounts.find(a => a.type === 'checking')?.balance || 0;
-  const totalSavings = data.accounts.find(a => a.type === 'savings')?.balance || 0;
-  const totalCredit = data.accounts.find(a => a.type === 'credit')?.balance || 0;
+  const totalChecking =
+    data.accounts.find((a) => a.type === "checking")?.balance || 0;
+  const totalSavings =
+    data.accounts.find((a) => a.type === "savings")?.balance || 0;
+  const totalCredit =
+    data.accounts.find((a) => a.type === "credit")?.balance || 0;
   const liquidCash = totalChecking + totalSavings;
   const netWorth = liquidCash + totalCredit; // totalCredit is negative
 
@@ -38,47 +41,75 @@ export function generateAICopilotResponse(
   });
 
   const totalExpense30d = Math.abs(
-    recent30DaysTx.filter(t => t.amount < 0 && t.categoryId !== 'cat-transfers').reduce((acc, t) => acc + t.amount, 0)
+    recent30DaysTx
+      .filter((t) => t.amount < 0 && t.categoryId !== "cat-transfers")
+      .reduce((acc, t) => acc + t.amount, 0),
   );
-  const totalIncome30d = recent30DaysTx.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
+  const totalIncome30d = recent30DaysTx
+    .filter((t) => t.amount > 0)
+    .reduce((acc, t) => acc + t.amount, 0);
   const monthlyBurn = totalExpense30d > 0 ? totalExpense30d : 0;
-  const runwayMonths = monthlyBurn > 0 ? (liquidCash / monthlyBurn).toFixed(1) : 'N/A';
-  const savingsRate = totalIncome30d > 0 ? Math.max(0, ((totalIncome30d - totalExpense30d) / totalIncome30d) * 100) : 0;
+  const runwayMonths =
+    monthlyBurn > 0 ? (liquidCash / monthlyBurn).toFixed(1) : "N/A";
+  const savingsRate =
+    totalIncome30d > 0
+      ? Math.max(0, ((totalIncome30d - totalExpense30d) / totalIncome30d) * 100)
+      : 0;
 
   // Category breakdown from REAL filtered transactions
-  const diningTx = recent30DaysTx.filter(t => t.categoryId === 'cat-dining');
+  const diningTx = recent30DaysTx.filter((t) => t.categoryId === "cat-dining");
   const diningSpend = Math.abs(diningTx.reduce((acc, t) => acc + t.amount, 0));
-  const diningBudget = data.categories.find(c => c.id === 'cat-dining')?.monthlyBudget || 8000;
+  const diningBudget =
+    data.categories.find((c) => c.id === "cat-dining")?.monthlyBudget || 8000;
 
-  const groceryTx = recent30DaysTx.filter(t => t.categoryId === 'cat-groceries');
-  const grocerySpend = Math.abs(groceryTx.reduce((acc, t) => acc + t.amount, 0));
+  const groceryTx = recent30DaysTx.filter(
+    (t) => t.categoryId === "cat-groceries",
+  );
+  const grocerySpend = Math.abs(
+    groceryTx.reduce((acc, t) => acc + t.amount, 0),
+  );
 
-  const shoppingTx = recent30DaysTx.filter(t => t.categoryId === 'cat-shopping');
-  const shoppingSpend = Math.abs(shoppingTx.reduce((acc, t) => acc + t.amount, 0));
+  const shoppingTx = recent30DaysTx.filter(
+    (t) => t.categoryId === "cat-shopping",
+  );
+  const shoppingSpend = Math.abs(
+    shoppingTx.reduce((acc, t) => acc + t.amount, 0),
+  );
 
   // 1. "Can I afford" / "afford" query
-  if (q.includes('afford') || q.includes('buy') || q.includes('purchase')) {
+  if (q.includes("afford") || q.includes("buy") || q.includes("purchase")) {
     // Extract any number from query
     const match = q.match(/\$?(\d+[\d,]*)/);
-    const amountToTest = match ? parseFloat(match[1].replace(/,/g, '')) : 6500;
+    const amountToTest = match ? parseFloat(match[1].replace(/,/g, "")) : 6500;
     const postPurchaseChecking = totalChecking - amountToTest;
     const isSafe = postPurchaseChecking > 25000;
 
-    if (personality === 'concise') {
+    if (personality === "concise") {
       return {
         content: isSafe
           ? `**Yes, you can afford ${formatCurrency(amountToTest)}.** Your checking account will retain **${formatCurrency(postPurchaseChecking)}**, and your overall cash runway remains strong at **${runwayMonths} months**.`
           : `**Caution on spending ${formatCurrency(amountToTest)}.** While you have sufficient funds, this would reduce your checking cushion to **${formatCurrency(postPurchaseChecking)}**, dropping below your ideal 1-month liquid reserve (₹25,000).`,
         groundedData: [
-          { label: 'Proposed Purchase', value: formatCurrency(amountToTest) },
-          { label: 'Current Checking', value: formatCurrency(totalChecking) },
-          { label: 'Post-Purchase Buffer', value: formatCurrency(postPurchaseChecking) },
-          { label: 'Liquid Runway', value: `${runwayMonths} Mo` },
+          { label: "Proposed Purchase", value: formatCurrency(amountToTest) },
+          { label: "Current Checking", value: formatCurrency(totalChecking) },
+          {
+            label: "Post-Purchase Buffer",
+            value: formatCurrency(postPurchaseChecking),
+          },
+          { label: "Liquid Runway", value: `${runwayMonths} Mo` },
         ],
-        confidence: 'High',
+        confidence: "High",
         quickActions: [
-          { label: 'Simulate in What-If', action: 'navigate', path: '/app/simulator' },
-          { label: 'View Checking Balance', action: 'navigate', path: '/app/forecast' },
+          {
+            label: "Simulate in What-If",
+            action: "navigate",
+            path: "/app/simulator",
+          },
+          {
+            label: "View Checking Balance",
+            action: "navigate",
+            path: "/app/forecast",
+          },
         ],
       };
     }
@@ -96,30 +127,40 @@ Based on your real-time liquidity and automated cash-flow obligations:
           : `**Exercise caution.** Consider delaying until your next paycheck, or transferring from your discretionary allocation.`
       }`,
       groundedData: [
-        { label: 'Proposed Item', value: formatCurrency(amountToTest) },
-        { label: 'Checking Balance', value: formatCurrency(totalChecking) },
-        { label: 'Savings Backup', value: formatCurrency(totalSavings) },
-        { label: 'Monthly Burn Rate', value: formatCurrency(monthlyBurn) },
+        { label: "Proposed Item", value: formatCurrency(amountToTest) },
+        { label: "Checking Balance", value: formatCurrency(totalChecking) },
+        { label: "Savings Backup", value: formatCurrency(totalSavings) },
+        { label: "Monthly Burn Rate", value: formatCurrency(monthlyBurn) },
       ],
-      confidence: 'High',
+      confidence: "High",
       quickActions: [
-        { label: 'Simulate Purchase Impact', action: 'navigate', path: '/app/simulator' },
-        { label: 'Check Upcoming Bills', action: 'navigate', path: '/app' },
+        {
+          label: "Simulate Purchase Impact",
+          action: "navigate",
+          path: "/app/simulator",
+        },
+        { label: "Check Upcoming Bills", action: "navigate", path: "/app" },
       ],
     };
   }
 
   // 2. Spending comparison / "how is my spending"
-  if (q.includes('spending') || q.includes('spent') || q.includes('dining') || q.includes('groceries') || q.includes('breakdown')) {
+  if (
+    q.includes("spending") ||
+    q.includes("spent") ||
+    q.includes("dining") ||
+    q.includes("groceries") ||
+    q.includes("breakdown")
+  ) {
     const isDiningOver = diningSpend > diningBudget;
     return {
       content: `### Monthly Spending & Category Health
 
 Here is your verified 30-day outflow breakdown across top active categories:
 
-- **Dining & Drinks**: **${formatCurrency(diningSpend)}** (${isDiningOver ? 'Over budget by ' + formatCurrency(diningSpend - diningBudget) : 'Within limit of ' + formatCurrency(diningBudget)})
-- **Groceries**: **${formatCurrency(grocerySpend)}** (Target: ${formatCurrency(data.categories.find(c => c.id === 'cat-groceries')?.monthlyBudget || 0)})
-- **Shopping & Gear**: **${formatCurrency(shoppingSpend)}** (Target: ${formatCurrency(data.categories.find(c => c.id === 'cat-shopping')?.monthlyBudget || 0)})
+- **Dining & Drinks**: **${formatCurrency(diningSpend)}** (${isDiningOver ? "Over budget by " + formatCurrency(diningSpend - diningBudget) : "Within limit of " + formatCurrency(diningBudget)})
+- **Groceries**: **${formatCurrency(grocerySpend)}** (Target: ${formatCurrency(data.categories.find((c) => c.id === "cat-groceries")?.monthlyBudget || 0)})
+- **Shopping & Gear**: **${formatCurrency(shoppingSpend)}** (Target: ${formatCurrency(data.categories.find((c) => c.id === "cat-shopping")?.monthlyBudget || 0)})
 - **Total Discretionary Burn**: **${formatCurrency(totalExpense30d)}**
 
 ${
@@ -128,21 +169,30 @@ ${
     : `> **On Track**: Your overall spending pace is well within your calculated income baseline.`
 }`,
       groundedData: [
-        { label: '30-Day Outflows', value: formatCurrency(totalExpense30d) },
-        { label: 'Dining Spend', value: formatCurrency(diningSpend) },
-        { label: 'Dining Budget', value: formatCurrency(diningBudget) },
-        { label: 'Savings Rate', value: formatPercent(savingsRate, false) },
+        { label: "30-Day Outflows", value: formatCurrency(totalExpense30d) },
+        { label: "Dining Spend", value: formatCurrency(diningSpend) },
+        { label: "Dining Budget", value: formatCurrency(diningBudget) },
+        { label: "Savings Rate", value: formatPercent(savingsRate, false) },
       ],
-      confidence: 'High',
+      confidence: "High",
       quickActions: [
-        { label: 'Open Budgets', action: 'navigate', path: '/app/budgets' },
-        { label: 'View Dining Transactions', action: 'navigate', path: '/app/transactions' },
+        { label: "Open Budgets", action: "navigate", path: "/app/budgets" },
+        {
+          label: "View Dining Transactions",
+          action: "navigate",
+          path: "/app/transactions",
+        },
       ],
     };
   }
 
   // 3. Runway / Net Worth / Cash Flow query
-  if (q.includes('runway') || q.includes('net worth') || q.includes('cash flow') || q.includes('balance')) {
+  if (
+    q.includes("runway") ||
+    q.includes("net worth") ||
+    q.includes("cash flow") ||
+    q.includes("balance")
+  ) {
     return {
       content: `### Net Worth & Runway Diagnostics
 
@@ -152,29 +202,43 @@ ${
 - **Calculated Cash Runway**: **${runwayMonths} months** without any new income.
 - **Current Savings Rate**: **${savingsRate.toFixed(1)}%** based on last 30 days of real transactions.
 
-Your financial cushion is ${Number(runwayMonths) >= 6 ? 'in the **top tier (6+ months threshold)**' : `at **${runwayMonths} months** — consider building reserves`}.`,
+Your financial cushion is ${Number(runwayMonths) >= 6 ? "in the **top tier (6+ months threshold)**" : `at **${runwayMonths} months** — consider building reserves`}.`,
       groundedData: [
-        { label: 'Net Worth', value: formatCurrency(netWorth) },
-        { label: 'Liquid Cash', value: formatCurrency(liquidCash) },
-        { label: 'Monthly Burn', value: formatCurrency(monthlyBurn) },
-        { label: 'Runway', value: `${runwayMonths} Months` },
+        { label: "Net Worth", value: formatCurrency(netWorth) },
+        { label: "Liquid Cash", value: formatCurrency(liquidCash) },
+        { label: "Monthly Burn", value: formatCurrency(monthlyBurn) },
+        { label: "Runway", value: `${runwayMonths} Months` },
       ],
-      confidence: 'High',
+      confidence: "High",
       quickActions: [
-        { label: 'Open Cash Flow Forecast', action: 'navigate', path: '/app/forecast' },
-        { label: 'Review Accounts', action: 'navigate', path: '/app/settings' },
+        {
+          label: "Open Cash Flow Forecast",
+          action: "navigate",
+          path: "/app/forecast",
+        },
+        { label: "Review Accounts", action: "navigate", path: "/app/settings" },
       ],
     };
   }
 
   // 4. Goals / Savings query
-  if (q.includes('goal') || q.includes('emergency fund') || q.includes('save') || q.includes('trip') || q.includes('house')) {
-    const goalsList = data.goals.map(g => {
-      const pct = ((g.currentAmount / g.targetAmount) * 100).toFixed(0);
-      const remaining = g.targetAmount - g.currentAmount;
-      const monthsLeft = (remaining / (g.monthlyContribution || 100)).toFixed(1);
-      return `- **${g.name}**: **${formatCurrency(g.currentAmount)}** of ${formatCurrency(g.targetAmount)} (${pct}%) — ETA **~${monthsLeft} months** at ${formatCurrency(g.monthlyContribution)}/mo`;
-    }).join('\n');
+  if (
+    q.includes("goal") ||
+    q.includes("emergency fund") ||
+    q.includes("save") ||
+    q.includes("trip") ||
+    q.includes("house")
+  ) {
+    const goalsList = data.goals
+      .map((g) => {
+        const pct = ((g.currentAmount / g.targetAmount) * 100).toFixed(0);
+        const remaining = g.targetAmount - g.currentAmount;
+        const monthsLeft = (remaining / (g.monthlyContribution || 100)).toFixed(
+          1,
+        );
+        return `- **${g.name}**: **${formatCurrency(g.currentAmount)}** of ${formatCurrency(g.targetAmount)} (${pct}%) — ETA **~${monthsLeft} months** at ${formatCurrency(g.monthlyContribution)}/mo`;
+      })
+      .join("\n");
 
     return {
       content: `### Savings Goals Trajectory
@@ -185,14 +249,28 @@ ${goalsList}
 
 **Optimization Tip**: Review your spending categories to identify potential reallocation toward your highest-priority goal.`,
       groundedData: [
-        { label: 'Active Goals', value: `${data.goals.length}` },
-        { label: 'Total Saved for Goals', value: formatCurrency(data.goals.reduce((a, b) => a + b.currentAmount, 0)) },
-        { label: 'Monthly Goal Outflows', value: formatCurrency(data.goals.reduce((a, b) => a + b.monthlyContribution, 0)) },
+        { label: "Active Goals", value: `${data.goals.length}` },
+        {
+          label: "Total Saved for Goals",
+          value: formatCurrency(
+            data.goals.reduce((a, b) => a + b.currentAmount, 0),
+          ),
+        },
+        {
+          label: "Monthly Goal Outflows",
+          value: formatCurrency(
+            data.goals.reduce((a, b) => a + b.monthlyContribution, 0),
+          ),
+        },
       ],
-      confidence: 'High',
+      confidence: "High",
       quickActions: [
-        { label: 'Manage Goals', action: 'navigate', path: '/app/goals' },
-        { label: 'Adjust Contributions', action: 'navigate', path: '/app/budgets' },
+        { label: "Manage Goals", action: "navigate", path: "/app/goals" },
+        {
+          label: "Adjust Contributions",
+          action: "navigate",
+          path: "/app/budgets",
+        },
       ],
     };
   }
@@ -206,19 +284,27 @@ Here is a live snapshot grounded in your connected accounts:
 - **Net Worth**: **${formatCurrency(netWorth)}** across ${data.accounts.length} linked accounts.
 - **Available Liquidity**: **${formatCurrency(liquidCash)}** (${runwayMonths} months cash runway).
 - **Current Savings Rate**: **${savingsRate.toFixed(1)}%** of monthly income.
-- **30-Day Spending**: **${formatCurrency(totalExpense30d)}** across ${recent30DaysTx.filter(t => t.amount < 0).length} expense transactions.
+- **30-Day Spending**: **${formatCurrency(totalExpense30d)}** across ${recent30DaysTx.filter((t) => t.amount < 0).length} expense transactions.
 
 Feel free to ask me to analyze specific transactions, test a what-if scenario, or compute your goal achievement dates!`,
     groundedData: [
-      { label: 'Net Worth', value: formatCurrency(netWorth) },
-      { label: 'Liquid Runway', value: `${runwayMonths} Mo` },
-      { label: 'Transactions (30d)', value: `${recent30DaysTx.length}` },
-      { label: 'Connected Accounts', value: `${data.accounts.length}` },
+      { label: "Net Worth", value: formatCurrency(netWorth) },
+      { label: "Liquid Runway", value: `${runwayMonths} Mo` },
+      { label: "Transactions (30d)", value: `${recent30DaysTx.length}` },
+      { label: "Connected Accounts", value: `${data.accounts.length}` },
     ],
-    confidence: 'High',
+    confidence: "High",
     quickActions: [
-      { label: 'Explore What-If Simulator', action: 'navigate', path: '/app/simulator' },
-      { label: 'View Insights Feed', action: 'navigate', path: '/app/insights' },
+      {
+        label: "Explore What-If Simulator",
+        action: "navigate",
+        path: "/app/simulator",
+      },
+      {
+        label: "View Insights Feed",
+        action: "navigate",
+        path: "/app/insights",
+      },
     ],
   };
 }

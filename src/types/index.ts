@@ -1,4 +1,4 @@
-export type AccountType = 'checking' | 'savings' | 'credit' | 'investment';
+export type AccountType = "checking" | "savings" | "credit" | "investment";
 
 export interface Account {
   id: string;
@@ -13,7 +13,7 @@ export interface Account {
   isActive: boolean;
 }
 
-export type TransactionStatus = 'settled' | 'pending';
+export type TransactionStatus = "settled" | "pending";
 
 export interface Transaction {
   id: string;
@@ -30,7 +30,7 @@ export interface Transaction {
   tags?: string[];
 }
 
-export type CategoryType = 'expense' | 'income' | 'transfer';
+export type CategoryType = "expense" | "income" | "transfer";
 
 export interface Category {
   id: string;
@@ -71,7 +71,7 @@ export interface Goal {
 export interface ForecastEvent {
   id: string;
   date: string;
-  type: 'payday' | 'recurring_bill' | 'goal_contrib' | 'custom';
+  type: "payday" | "recurring_bill" | "goal_contrib" | "custom";
   title: string;
   amount: number;
   accountId: string;
@@ -87,8 +87,8 @@ export interface ForecastPoint {
   events: ForecastEvent[];
 }
 
-export type InsightSeverity = 'info' | 'warning' | 'alert' | 'success';
-export type InsightType = 'alert' | 'trend' | 'win' | 'tip';
+export type InsightSeverity = "info" | "warning" | "alert" | "success";
+export type InsightType = "alert" | "trend" | "win" | "tip";
 
 export interface GroundedMetric {
   label: string;
@@ -127,14 +127,14 @@ export interface WeeklyDigest {
 
 export interface ChatMessage {
   id: string;
-  role?: 'user' | 'assistant';
-  sender?: 'user' | 'ai';
+  role?: "user" | "assistant";
+  sender?: "user" | "ai";
   content?: string;
   text?: string;
   timestamp: string;
   groundedData?: GroundedMetric[];
-  confidence?: 'High' | 'Medium' | 'Low';
-  confidenceBand?: 'high' | 'medium' | 'low' | 'High' | 'Medium' | 'Low';
+  confidence?: "High" | "Medium" | "Low";
+  confidenceBand?: "high" | "medium" | "low" | "High" | "Medium" | "Low";
   confidenceScore?: number;
   isStreaming?: boolean;
   quickActions?: {
@@ -188,17 +188,17 @@ export interface ScenarioResult {
 
 export type SimulationResult = ScenarioResult;
 
-export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'INR';
+export type CurrencyCode = "USD" | "EUR" | "GBP" | "INR";
 
 export interface UserProfile {
   name: string;
   email: string;
   avatarUrl: string;
   currency: CurrencyCode;
-  theme: 'dark' | 'light';
+  theme: "dark" | "light";
   firstDayOfMonth: number;
   notificationsEnabled: boolean;
-  chatPersonality: 'concise' | 'balanced' | 'detailed';
+  chatPersonality: "concise" | "balanced" | "detailed";
   shareDataForAnalytics: boolean;
   is2FAEnabled: boolean;
   pinCode: string;

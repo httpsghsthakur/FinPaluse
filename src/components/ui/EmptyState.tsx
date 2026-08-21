@@ -1,6 +1,6 @@
-import React from 'react';
-import { LucideIcon, FolderSearch } from 'lucide-react';
-import { cn } from '../../lib/utils/cn';
+import React from "react";
+import { LucideIcon, FolderSearch } from "lucide-react";
+import { cn } from "../../lib/utils/cn";
 
 interface EmptyStateProps {
   title: string;
@@ -22,8 +22,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/30',
-        className
+        "flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/30",
+        className,
       )}
     >
       <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-slate-400 mb-4 shadow-inner">
